@@ -1,4 +1,4 @@
-import { Route } from "relaxjs/routing";
+import { Route } from "@relax.js/core/routing";
 export class MenuItem {
     constructor(
         public title: string,

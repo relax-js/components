@@ -1,6 +1,6 @@
-import { TableRenderer, TableSorter, SortColumn } from 'relaxjs/html';
-import { Pager, PageSelectedEvent } from 'relaxjs/collections';
-import type { DataLoader } from 'relaxjs';
+import { TableRenderer, TableSorter, SortColumn } from '@relax.js/core/html';
+import { Pager, PageSelectedEvent } from '@relax.js/core/collections';
+import type { DataLoader } from '@relax.js/core';
 
 export class RelaxedTable extends HTMLElement {
   private renderer!: TableRenderer;

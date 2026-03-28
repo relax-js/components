@@ -14,7 +14,7 @@
     "author": "",
     "license": "ISC",
     "dependencies": {
-        "@relax.js/core": "^1.0.0"
+        "@relax.js/core": "^1.0.3"
     },
     "devDependencies": {
         "@types/jsdom": "^21.1.7",
