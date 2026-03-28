@@ -1,0 +1,39 @@
+{
+    "name": "@relax.js/components",
+    "version": "1.0.0",
+    "description": "Pre-built Web Components for Relaxjs. Table, TreeView, Tabs, Menu, and Spinner ready to use.",
+    "main": "./dist/index.js",
+    "module": "./dist/index.mjs",
+    "types": "./dist/index.d.ts",
+    "scripts": {
+        "build": "tsc --emitDeclarationOnly && node build.js",
+        "test": "vitest --config ./vitest.config.ts",
+        "publish:npm": "npm run build && npm publish --access public"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "@relax.js/core": "^1.0.0"
+    },
+    "devDependencies": {
+        "@types/jsdom": "^21.1.7",
+        "@vitest/coverage-v8": "^3.0.5",
+        "esbuild": "^0.25.0",
+        "jsdom": "^26.1.0",
+        "typescript": "^5.7.3",
+        "vite": "^6.0.7",
+        "vitest": "^3.0.5"
+    },
+    "exports": {
+        ".": {
+            "types": "./dist/index.d.ts",
+            "import": "./dist/index.mjs",
+            "require": "./dist/index.js"
+        }
+    },
+    "files": [
+        "dist",
+        "docs"
+    ]
+}
