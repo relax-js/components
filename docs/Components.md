@@ -16,8 +16,8 @@ Pre-built Web Components for common UI patterns.
 
 | Component | Tag | Description |
 |-----------|-----|-------------|
-| [RouteTarget](../lib/routing/RoutingTarget.md) | `<r-route-target>` | Renders routed components |
-| [RouteLink](../lib/routing/RouteLink.md) | `<r-link>` | Client-side navigation link |
+| [RouteTarget](https://github.com/relax-js/core/blob/main/lib/routing/RoutingTarget.md) | `<r-route-target>` | Renders routed components |
+| [RouteLink](https://github.com/relax-js/core/blob/main/lib/routing/RouteLink.md) | `<r-link>` | Client-side navigation link |
 
 ## Patterns
 
@@ -47,7 +47,7 @@ class MyCustomList extends HTMLElement {
 customElements.define('r-custom-list', MyCustomList);
 ```
 
-For form components, see [Creating Form Components](../lib/forms/creating-form-components.md).
+For form components, see [Creating Form Components](https://github.com/relax-js/core/blob/main/lib/forms/creating-form-components.md).
 
 ## Theming
 

@@ -7,7 +7,7 @@ A horizontal navigation menu bar with animated submenu navigation.
 ### Programmatic Setup
 
 ```typescript
-import { TopMenu, MenuItem, SubMenuItem } from 'relaxjs/components';
+import { TopMenu, MenuItem, SubMenuItem } from '@relax.js/components';
 
 const menu = document.querySelector('r-top-menu') as TopMenu;
 

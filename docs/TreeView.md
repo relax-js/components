@@ -11,7 +11,7 @@ A hierarchical tree display component with expand/collapse, selection, and searc
 ### Rendering Data
 
 ```typescript
-import { TreeView, TreeNode } from 'relaxjs/components';
+import { TreeView, TreeNode } from '@relax.js/components';
 
 const tree = document.getElementById('fileTree') as TreeView;
 

@@ -97,4 +97,4 @@ notification.togglePopover(); // Toggle
 | Backdrop | Optional | Yes (modal) |
 | Use case | Menus, tooltips, dropdowns | Confirmations, forms, modals |
 
-Use `popover` for transient UI (menus, tooltips). Use `<dialog>` for modal interactions that require user attention (see [RouteTarget dialog](../lib/routing/RoutingTarget.md#dialog-targets)).
+Use `popover` for transient UI (menus, tooltips). Use `<dialog>` for modal interactions that require user attention (see [RouteTarget dialog](https://github.com/relax-js/core/blob/main/lib/routing/RoutingTarget.md#dialog-targets)).

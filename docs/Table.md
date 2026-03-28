@@ -41,7 +41,7 @@ table.setData([
 ### Programmatic Setup
 
 ```typescript
-import { Table, ColumnDefinition } from 'relaxjs/components';
+import { Table, ColumnDefinition } from '@relax.js/components';
 
 const columns: ColumnDefinition[] = [
     { property: 'id', title: 'ID', width: '50px' },
