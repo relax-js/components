@@ -21,7 +21,7 @@ A reader picks up a short status or a count beside something, such as "Draft" on
   - **Bad count**: a count that is negative, fractional or not a number literal reports an error and the badge renders empty (specs/dashboard/dashboard-foundations.spec.md#Putting a component on a page)
   - **Language changed**: after `setLocale()`, the count is written in the new locale
   - **Count changed**: changing `count` shows the new number
-- **Zero count**: a count of 0 hides the badge
+- **Zero count**: a count of 0 hides the badge, unless `show-zero` is set, where none is information rather than absence (docs/manual/dashboard/Badge.md#Attributes)
 - **Large counts**: with a `max` attribute, a count above it shows as that maximum followed by a plus, worded from the `r-components` namespace, and without `max` the full number is shown
   - **Bad max**: a `max` that is not a whole positive number literal reports an error and the badge renders empty
 - **Toned count icon**: a count badge with a tone other than `muted` shows that tone's default icon before the number (specs/dashboard/dashboard-foundations.spec.md#Putting a component on a page)

@@ -15,7 +15,7 @@ A reader sees a set of items side by side, such as periods, and where each one s
   - **Unknown tone**: a state whose tone is not one of the five tones reports an error and is shown as `muted` (docs/authoring/CustomComponents.md#Tones)
   - **Duplicate state id**: two states with the same id report an error and the grid renders empty
 - **One tile per item**: the page sets the items as a property, each with a label and a state id, and the grid shows one tile per item in the given order, with the item's label shown next to its tile
-  - **Unknown state**: an item whose state id is not among the states reports an error and the grid renders empty (docs/manual/PeriodGrid.md#Properties)
+  - **Unknown state**: an item whose state id is not among the states reports an error and the grid renders empty (docs/manual/dashboard/PeriodGrid.md#Properties)
   - **No items**: an empty list of items shows no tiles and reports no error
 - **State icon on tile**: each tile shows its state's icon
   - **State without icon**: a state with no icon shows its tone's default icon (docs/authoring/DesignLanguage.md#Tones)

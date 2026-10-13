@@ -33,12 +33,13 @@ const styles = /* css */ `
  * ```
  *
  * @attr {string} tone - ok, info, warn, danger or muted (default)
- * @attr {number} count - A whole number shown in place of the text; 0 hides the badge
+ * @attr {number} count - A whole number shown in place of the text; 0 hides the badge unless `show-zero` is set
  * @attr {number} max - A count above it shows as this number followed by a plus
+ * @attr {boolean} show-zero - Shows a count of 0, for where none is information rather than absence
  */
 export class Badge extends HTMLElement {
     static get observedAttributes(): string[] {
-        return ['tone', 'count', 'max'];
+        return ['tone', 'count', 'max', 'show-zero'];
     }
 
     private readonly observer = new MutationObserver(() => this.update());
@@ -91,7 +92,7 @@ export class Badge extends HTMLElement {
                 throw new Error(`max "${max}" must be a whole number above zero`);
             }
             const value = Number(count);
-            if (value === 0) {
+            if (value === 0 && !this.hasAttribute('show-zero')) {
                 return;
             }
             const { locale } = formatting();

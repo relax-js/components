@@ -1,0 +1,69 @@
+# Bar Chart
+
+Amounts across categories as bars, side by side or stacked, upright or sideways, with a legend, a hover read-out and the same figures as a table for screen reader users. For amounts over time, use a [line chart](LineChart.md) or an [area chart](AreaChart.md).
+
+## Screenshots
+
+<!-- screenshots: r-bar-chart -->
+<!-- /screenshots -->
+
+## Usage
+
+```html
+<r-bar-chart id="costs" stacked show-values></r-bar-chart>
+```
+
+```typescript
+const chart = document.querySelector('#costs')!;
+chart.data = {
+    labels: ['Q1', 'Q2', 'Q3'],
+    series: [
+        { name: 'Rent', values: [30000, 30000, 31000] },
+        { name: 'Staff', values: [82000, 85000, 91000] },
+        { name: 'Budget', values: [120000, 120000, 120000], threshold: true },
+    ],
+    summary: 'Costs stayed within budget until Q3.',
+};
+```
+
+- Each label gets a band of equal width with its bars centred in it. With several series, a band holds one bar per series side by side, in series order; with `stacked`, one bar with the series stacked in series order. In a stack, positive values stack outward from zero on one side and negative values on the other.
+- A `threshold` series is a dashed level across the plot, never a bar and never stacked. The `area` flag is ignored.
+- The value axis starts at zero and ends on a round figure above the highest bar, the same way the [line chart](LineChart.md#drawing) does; negative values extend it below zero.
+- Pointing anywhere in a label's band selects it and shows the read-out, even when its bars are zero.
+- The chart draws at its own width and redraws when it changes, sizing its margins to its labels, thinning crowded labels, and shortening labels beside sideways bars to the room they have.
+
+## Attributes
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `orientation` | `vertical \| horizontal` | `vertical` | Upright bars over their labels, or sideways bars with the labels down the side. Any other value reports an error and draws nothing. |
+| `stacked` | `boolean` | | Stacks the series in one bar per label |
+| `show-values` | `boolean` | | Writes each value just past its bar's end, or inside its segment when stacked, where it fits |
+
+Changing an attribute redraws the chart.
+
+## Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `data` | `ChartData` | What to draw, in the shape the [line chart](LineChart.md#properties) takes; values may be `null` for a missing bar |
+| `axisFormat` | `(value: number) => string` | Formats the axis labels; whole amounts without the unit by default |
+| `valueFormat` | `(value: number) => string` | Formats the read-out, the written values and the table; whole amounts with the unit by default |
+
+A series whose number of values differs from the number of labels reports an error naming that series and nothing is drawn. Data with no labels shows the empty state. The default formats follow the [formatting configuration](../Formatting.md).
+
+## Parts
+
+| Selector | What it is |
+|----------|------------|
+| `.bar` | One bar or stacked segment, inside its `.series-{n}` |
+| `.threshold` | A threshold series' dashed level |
+| `.value` | A written value |
+| `.band` | A label's band, the hover target; `.selected` while pointed at |
+| `ul.legend` | The legend, one `li.series-{n}` per series, with `.threshold` on threshold series |
+| `.readout` | The hover read-out, a floating surface |
+| `.visually-hidden` | The figures for screen readers |
+
+## Accessibility
+
+The chart is a `role="figure"` named by the summary, with the drawing hidden from screen readers and a visually hidden table holding one row per label and one column per series.

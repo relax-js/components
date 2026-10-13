@@ -1,9 +1,24 @@
+import { toneRules } from './tone/tone';
+
 /**
  * Installs a light-DOM component's stylesheet once in the root the element lives in: the
  * document head, or the shadow root of the component that contains it. Wrapped in a cascade
  * layer so any style the app writes wins without needing higher specificity.
  */
 export function installStyles(element: Element, id: string, css: string): void {
+    installToneRules(element);
+    install(element, id, css);
+}
+
+/**
+ * Installs the `data-tone` rules in the root the element lives in. The theme's own copy sits on
+ * the page, and page rules never reach into a shadow root.
+ */
+export function installToneRules(element: Element): void {
+    install(element, 'r-tones', toneRules);
+}
+
+function install(element: Element, id: string, css: string): void {
     const root = element.getRootNode();
     const container = root instanceof ShadowRoot ? root : document.head;
     if (container.querySelector(`style[data-r-styles="${id}"]`)) {

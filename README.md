@@ -36,7 +36,9 @@ import '@relax.js/components';
 @import "@relax.js/components/theme.css";
 ```
 
-Importing the package registers every tag. ES modules only.
+Importing the package registers every tag. To pay only for the elements you use, import them one by one instead, such as `import '@relax.js/components/card'`; the [manual](https://github.com/relax-js/components/blob/main/docs/manual/Components.md) names each import. ES modules only.
+
+An app with its own palette loads `@relax.js/components/theme-sizes.css` alone and sets the colour variables itself; see [Customizing](https://github.com/relax-js/components/blob/main/docs/manual/Customizing.md).
 
 ```html
 <r-tabs>

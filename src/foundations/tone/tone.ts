@@ -19,6 +19,15 @@ export const toneIcon: Record<Tone, string> = {
     muted: 'info',
 };
 
+/** Gives an element with `data-tone` the `--tone` and `--tone-soft` of its status pair, as the theme does. */
+export const toneRules = /* css */ `
+    [data-tone="ok"]     { --tone: var(--status-ok);      --tone-soft: var(--status-ok-soft); }
+    [data-tone="info"]   { --tone: var(--status-info);    --tone-soft: var(--status-info-soft); }
+    [data-tone="warn"]   { --tone: var(--status-warning); --tone-soft: var(--status-warning-soft); }
+    [data-tone="danger"] { --tone: var(--status-danger);  --tone-soft: var(--status-danger-soft); }
+    [data-tone="muted"]  { --tone: var(--status-muted);   --tone-soft: var(--status-muted-soft); }
+`;
+
 /**
  * Reads the `tone` attribute of `element`. Returns `fallback` when the attribute is missing,
  * and also when its value is not a tone, after reporting an error naming the tag.

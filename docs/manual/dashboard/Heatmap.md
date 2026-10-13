@@ -1,0 +1,72 @@
+# Heatmap
+
+A grid of coloured cells, one per row and column, coloured by the cell's value on a sequential or diverging scale, such as orders by weekday and hour.
+
+## Screenshots
+
+<!-- screenshots: r-heatmap -->
+<!-- /screenshots -->
+
+## Usage
+
+```html
+<r-heatmap id="load" show-values></r-heatmap>
+```
+
+```typescript
+const map = document.querySelector('#load')!;
+map.rows = ['Mon', 'Tue'];
+map.columns = ['09', '10', '11'];
+map.values = [[1, 4, 9], [2, null, 6]];
+map.summary = 'Orders peak late morning';
+```
+
+- **Sequential scale (default):** the lowest value takes `--scale-low`, the highest `--scale-high`, and values between take a colour in proportion. When every value is the same, every cell takes one colour.
+- **Diverging scale:** values above and below `midpoint` take `--scale-diverging-high` and `--scale-diverging-low`, growing stronger with distance from it, and the midpoint itself takes `--scale-diverging-mid`. The scale reaches as far below the midpoint as above it.
+- The scale runs from the data's lowest to highest value unless `min` and `max` fix it, so several heatmaps can share one scale. A value beyond a fixed end takes that end's colour while its read-out and table show the value itself.
+- A `null` or `undefined` value marks a missing cell, drawn with no fill and a dashed edge so it never looks like the lowest value.
+- A legend shows the scale with its formatted ends (and the midpoint when diverging), plus the missing cell's look when any cell is missing.
+- Pointing at a cell shows its row, column and value. Crowded column labels are thinned to every nth.
+
+## Attributes
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `scale` | `sequential \| diverging` | `sequential` | The colour scale |
+| `midpoint` | `number` | `0` | Where a diverging scale turns |
+| `min` | `number` | | Fixes the low end of the scale |
+| `max` | `number` | | Fixes the high end of the scale; must be above `min` |
+| `show-values` | `boolean` | | Writes each cell's value in the cell where it fits |
+
+An unknown `scale`, a `midpoint`, `min` or `max` that is not a number, or a `min` not below `max` reports an error and the heatmap renders empty.
+
+## Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `rows` | `string[]` | The row labels, in the order drawn |
+| `columns` | `string[]` | The column labels, in the order drawn |
+| `values` | `HeatmapValue[][]` | One array per row, one value per column; `HeatmapValue` is `number \| null \| undefined` |
+| `summary` | `string` | What the heatmap says to a screen reader. Required: without it an error is reported and nothing is drawn. |
+| `valueFormat` | `(value: number) => string` | Formats the read-out, legend, cell and table values; plain numbers in the [configured locale](../Formatting.md) by default |
+
+A row whose number of values differs from the number of columns, or a value that is neither a number nor missing, reports an error and the heatmap renders empty. No rows or no columns shows the empty state.
+
+## Parts
+
+| Selector | What it is |
+|----------|------------|
+| `.grid` | The grid of labels and cells |
+| `.row-label`, `.column-label` | The labels; a thinned column label carries `data-thinned` |
+| `.cell` | One cell, with `data-scale`, and `data-missing` when it has no value |
+| `.scale-legend` | The legend: `.ramp` and `.ramp-labels`, and `.missing-key` with its `.swatch` |
+| `.readout` | The hover read-out, a floating surface |
+| `.data-table` | The figures for screen readers |
+
+## Variables
+
+The scales take `--scale-low`, `--scale-high`, `--scale-diverging-low`, `--scale-diverging-mid` and `--scale-diverging-high`, never the series, status or accent colours. See [Theming](../../authoring/Theming.md#variables).
+
+## Accessibility
+
+The heatmap is a figure named by the summary, with the grid hidden from screen readers and a visually hidden table holding one row per row label and one column per column label; a missing cell's table cell is empty.

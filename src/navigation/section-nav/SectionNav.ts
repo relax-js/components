@@ -32,7 +32,7 @@ export class SectionNav extends HTMLElement {
                 nav {
                     display: flex;
                     flex-direction: row;
-                    gap: var(--r-space-2, 0.5rem);
+                    gap: var(--control-gap);
                     overflow-x: auto;
                 }
                 ::slotted(a) {

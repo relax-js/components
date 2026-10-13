@@ -1,6 +1,18 @@
+import { reportProblem } from '../../foundations/problems/problems';
 import { installStyles } from '../../foundations/styles';
+import type { Tone } from '../../foundations/tone/tone';
 import { parseInlineNodes } from './inlineNodes';
-import { createItemElement, groupOf } from './treeItemDom';
+import { createItemElement, groupOf, makeLeaf } from './treeItemDom';
+import { isTypedCharacter, TypeAhead } from './typeAhead';
+
+/** A short status or count shown after a node's label. */
+export interface TreeNodeBadge {
+    /** Text shown as given; ignored when `count` is set. */
+    text?: string;
+    /** A whole number written for the configured locale; zero is shown. */
+    count?: number;
+    tone?: Tone;
+}
 
 /**
  * One node handed to `<r-treeview>`. The tree never modifies these objects; `data` is yours
@@ -11,20 +23,61 @@ export interface TreeNode<T = unknown> {
     label: string;
     /** Application data, matched by `find()` and handed back in events. */
     data: T;
+    /**
+     * Identifies the node across `nodes` sets, so expanded branches and the selection survive a
+     * refresh, and lets `select`, `expand` and `collapse` take the key in place of the node.
+     */
+    key?: string;
     children?: TreeNode<T>[];
     /** Shows the children when the node is first drawn. */
     expanded?: boolean;
+    /** A branch whose children `loadChildren` supplies when it is first expanded. */
+    hasChildren?: boolean;
+    /** An icon name shown before the label. */
+    icon?: string;
+    /** Secondary text shown after the label, such as a size or a count of lines. */
+    note?: string;
+    badge?: TreeNodeBadge;
+    /** Colours the node's icon and label; a node without its own icon shows the tone's icon. */
+    tone?: Tone;
 }
+
+/** Loads the children of a branch marked `hasChildren`; `signal` aborts when the tree is redrawn. */
+export type ChildLoader<T> = (node: TreeNode<T>, signal: AbortSignal) => Promise<TreeNode<T>[]>;
+
+/** How `select` behaves. */
+export interface SelectOptions {
+    /** Selects without dispatching `r-node-navigated`, for reflecting a selection the app made itself. */
+    silent?: boolean;
+}
+
+/** A node given by its object or by its `key`. */
+export type NodeRef<T> = TreeNode<T> | string;
 
 /**
  * Dispatched by `<r-treeview>` when a node is selected by a click, the keyboard or
- * `select()`.
+ * `select()` without `silent`.
  */
 export class NodeNavigatedEvent<T = unknown> extends Event {
     static readonly type = 'r-node-navigated';
 
     constructor(public readonly node: TreeNode<T>) {
         super(NodeNavigatedEvent.type, { bubbles: true, composed: true });
+    }
+}
+
+/**
+ * Dispatched by `<r-treeview>` when the user expands or collapses a branch with the pointer or
+ * the keyboard. `expand()`, `collapse()` and `select()` dispatch nothing.
+ */
+export class NodeToggledEvent<T = unknown> extends Event {
+    static readonly type = 'r-node-toggled';
+
+    constructor(
+        public readonly node: TreeNode<T>,
+        public readonly expanded: boolean,
+    ) {
+        super(NodeToggledEvent.type, { bubbles: true, composed: true });
     }
 }
 
@@ -74,6 +127,10 @@ const styles = /* css */ `
             background: var(--surface-selected);
         }
 
+        [aria-busy='true'] > .node-row {
+            cursor: progress;
+        }
+
         .toggle {
             flex: none;
             display: inline-grid;
@@ -87,6 +144,21 @@ const styles = /* css */ `
             transform: rotate(90deg);
         }
 
+        .icon,
+        r-badge {
+            flex: none;
+        }
+
+        .node-row[data-tone] > :is(.icon, .label) {
+            color: var(--tone);
+        }
+
+        .note {
+            color: var(--text-muted);
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+
         @media (prefers-reduced-motion: reduce) {
             .node-row,
             .toggle {
@@ -96,12 +168,20 @@ const styles = /* css */ `
     }
 `;
 
+/** Where the user was in the tree, by key, carried across a `nodes` set until the next one. */
+interface KeyedState {
+    expanded: Map<string, boolean>;
+    selected?: string;
+    focused?: string;
+}
+
 /**
  * A hierarchical list where branches expand and collapse and one node at a time is selected.
  *
- * Clicking the arrow toggles a branch; clicking the label selects the node. The keyboard
- * follows the WAI-ARIA tree pattern: arrows move and expand, Enter or Space selects.
- * Renders into the light DOM, so the page's CSS reaches it.
+ * Clicking the arrow or double-clicking the row toggles a branch; clicking the label selects the
+ * node. The keyboard follows the WAI-ARIA tree pattern: arrows move and expand, Enter or Space
+ * selects, typing jumps to the next node starting with the typed text. Renders into the light
+ * DOM, so the page's CSS reaches it.
  *
  * @example
  * ```typescript
@@ -110,14 +190,29 @@ const styles = /* css */ `
  * tree.addEventListener('r-node-navigated', (e) => console.log(e.node.label));
  * ```
  *
+ * @attr {string} label - The tree's accessible name
  * @fires r-node-navigated - {@link NodeNavigatedEvent}
+ * @fires r-node-toggled - {@link NodeToggledEvent}
  */
 export class Treeview<T = unknown> extends HTMLElement {
+    static get observedAttributes(): string[] {
+        return ['label'];
+    }
+
+    /** Loads the children of a branch marked `hasChildren` the first time it is expanded. */
+    loadChildren?: ChildLoader<T>;
+
     private readonly tree: HTMLUListElement;
     private readonly itemOf = new Map<TreeNode<T>, HTMLLIElement>();
     private readonly nodeOf = new WeakMap<Element, TreeNode<T>>();
+    private readonly nodeByKey = new Map<string, TreeNode<T>>();
+    private readonly unloaded = new Set<HTMLLIElement>();
+    private readonly loading = new Map<HTMLLIElement, Promise<void>>();
+    private readonly typeAhead = new TypeAhead();
+    private loads = new AbortController();
     private rootNodes?: TreeNode<T>[];
     private selectedNode?: TreeNode<T>;
+    private kept?: KeyedState;
 
     constructor() {
         super();
@@ -125,11 +220,13 @@ export class Treeview<T = unknown> extends HTMLElement {
         this.tree.className = 'tree';
         this.tree.setAttribute('role', 'tree');
         this.tree.addEventListener('click', (event) => this.onClick(event));
+        this.tree.addEventListener('dblclick', (event) => this.onDoubleClick(event));
         this.tree.addEventListener('keydown', (event) => this.onKeyDown(event));
     }
 
     connectedCallback(): void {
         installStyles(this, 'r-treeview', styles);
+        this.applyLabel();
         if (this.tree.parentElement === this) {
             return;
         }
@@ -141,12 +238,20 @@ export class Treeview<T = unknown> extends HTMLElement {
         }
     }
 
-    /** The top-level nodes. Setting them redraws the tree and clears the selection. */
+    attributeChangedCallback(): void {
+        this.applyLabel();
+    }
+
+    /**
+     * The top-level nodes. Setting them redraws the tree; keyed branches keep whether they were
+     * expanded and a keyed selection is kept, while the rest starts from the nodes' own flags.
+     */
     get nodes(): TreeNode<T>[] {
         return this.rootNodes ?? [];
     }
 
     set nodes(nodes: TreeNode<T>[]) {
+        this.kept = this.tree.parentElement === this ? this.keyedState() : undefined;
         this.rootNodes = nodes;
         if (this.isConnected) {
             this.draw();
@@ -159,10 +264,11 @@ export class Treeview<T = unknown> extends HTMLElement {
     }
 
     /** Adds a node, at the top level or as the last child of `parent`. */
-    add(node: TreeNode<T>, parent?: TreeNode<T>): void {
+    add(node: TreeNode<T>, parent?: NodeRef<T>): void {
+        const parentItem = parent === undefined ? undefined : this.requireItem(parent);
         const item = this.createItem(node);
-        if (parent) {
-            groupOf(this.requireItem(parent)).append(item);
+        if (parentItem) {
+            groupOf(parentItem).append(item);
         } else {
             this.rootNodes = [...this.nodes, node];
             this.tree.append(item);
@@ -180,47 +286,50 @@ export class Treeview<T = unknown> extends HTMLElement {
      * const [report] = tree.find((data) => data.id === 42);
      * tree.select(report);
      */
-    find(match: (data: T) => boolean, under?: TreeNode<T>): TreeNode<T>[] {
-        const scope = under ? this.requireItem(under) : this.tree;
+    find(match: (data: T) => boolean, under?: NodeRef<T>): TreeNode<T>[] {
+        const scope = under === undefined ? this.tree : this.requireItem(under);
         return Array.from(scope.querySelectorAll('.node'))
             .map((item) => this.nodeOf.get(item)!)
             .filter((node) => match(node.data));
     }
 
-    /** Selects a node, expands every branch above it and dispatches a {@link NodeNavigatedEvent}. */
-    select(node: TreeNode<T>): void {
+    /**
+     * Selects a node and expands every branch above it. Dispatches a {@link NodeNavigatedEvent}
+     * unless `silent` is set.
+     */
+    select(node: NodeRef<T>, options: SelectOptions = {}): void {
         const item = this.requireItem(node);
         for (let ancestor = parentItem(item); ancestor; ancestor = parentItem(ancestor)) {
             ancestor.setAttribute('aria-expanded', 'true');
         }
-        if (this.selectedNode) {
-            this.itemOf.get(this.selectedNode)?.setAttribute('aria-selected', 'false');
+        this.markSelected(item);
+        if (!options.silent) {
+            this.dispatchEvent(new NodeNavigatedEvent<T>(this.selectedNode!));
         }
-        item.setAttribute('aria-selected', 'true');
-        this.selectedNode = node;
-        this.makeFocusable(item);
-        this.dispatchEvent(new NodeNavigatedEvent<T>(node));
     }
 
-    /** Shows the children of a node. */
-    expand(node: TreeNode<T>): void {
-        this.setExpanded(this.requireItem(node), true);
+    /**
+     * Shows the children of a node. Resolves once they are shown, loading them first for a
+     * branch marked `hasChildren`, and rejects when that load fails.
+     */
+    expand(node: NodeRef<T>): Promise<void> {
+        return this.setExpanded(this.requireItem(node), true);
     }
 
     /** Hides the children of a node. */
-    collapse(node: TreeNode<T>): void {
-        this.setExpanded(this.requireItem(node), false);
+    collapse(node: NodeRef<T>): void {
+        void this.setExpanded(this.requireItem(node), false);
     }
 
-    // Collapsing hides the focused node when it sits inside the branch, so focus moves to the branch.
-    private setExpanded(item: HTMLLIElement, expanded: boolean): void {
+    private setExpanded(item: HTMLLIElement, expanded: boolean): Promise<void> {
         if (!item.hasAttribute('aria-expanded')) {
-            return;
+            return Promise.resolve();
         }
         item.setAttribute('aria-expanded', String(expanded));
         if (expanded) {
-            return;
+            return this.loadChildrenOf(item);
         }
+        // Collapsing hides the focused node when it sits inside the branch, so focus moves to the branch.
         const group = item.querySelector(':scope > .children');
         const holdsFocus = group?.contains(document.activeElement);
         if (holdsFocus || group?.querySelector('[tabindex="0"]')) {
@@ -228,6 +337,85 @@ export class Treeview<T = unknown> extends HTMLElement {
             if (holdsFocus) {
                 item.focus();
             }
+        }
+        return Promise.resolve();
+    }
+
+    private toggleByUser(item: HTMLLIElement, expanded: boolean): void {
+        if (!item.hasAttribute('aria-expanded') || (item.getAttribute('aria-expanded') === 'true') === expanded) {
+            return;
+        }
+        // A failed load is already reported; the user who expanded has nobody to hand it to.
+        this.setExpanded(item, expanded).catch(() => undefined);
+        this.dispatchEvent(new NodeToggledEvent<T>(this.nodeOf.get(item)!, expanded));
+    }
+
+    private loadChildrenOf(item: HTMLLIElement): Promise<void> {
+        const running = this.loading.get(item);
+        if (running) {
+            return running;
+        }
+        if (!this.unloaded.has(item)) {
+            return Promise.resolve();
+        }
+        const node = this.nodeOf.get(item)!;
+        const loader = this.loadChildren;
+        if (!loader) {
+            const message = `node '${node.label}' has children to load, but loadChildren is not set`;
+            reportProblem('r-treeview', message);
+            item.setAttribute('aria-expanded', 'false');
+            return Promise.reject(new Error(`r-treeview: ${message}`));
+        }
+        const signal = this.loads.signal;
+        item.setAttribute('aria-busy', 'true');
+        const load = loader(node, signal)
+            .then(
+                (children) => {
+                    if (signal.aborted) {
+                        return;
+                    }
+                    this.unloaded.delete(item);
+                    if (children.length === 0) {
+                        makeLeaf(item);
+                        return;
+                    }
+                    groupOf(item).append(...children.map((child) => this.createItem(child)));
+                    this.restoreSelection();
+                    this.loadExpandedBranches(item);
+                },
+                (error: unknown) => {
+                    if (signal.aborted) {
+                        return;
+                    }
+                    const message = error instanceof Error ? error.message : String(error);
+                    reportProblem('r-treeview', `loading the children of '${node.label}' failed: ${message}`);
+                    item.setAttribute('aria-expanded', 'false');
+                    throw error;
+                },
+            )
+            .finally(() => {
+                item.removeAttribute('aria-busy');
+                this.loading.delete(item);
+            });
+        this.loading.set(item, load);
+        return load;
+    }
+
+    // Branches drawn expanded whose children are still to load, under `scope`.
+    private loadExpandedBranches(scope: Element): void {
+        for (const item of this.unloaded) {
+            if (scope.contains(item) && item.getAttribute('aria-expanded') === 'true') {
+                this.loadChildrenOf(item).catch(() => undefined);
+            }
+        }
+    }
+
+    private applyLabel(): void {
+        const label = this.getAttribute('label');
+        if (label === null) {
+            this.tree.removeAttribute('aria-label');
+        } else {
+            this.tree.setAttribute('aria-label', label);
         }
     }
 
@@ -238,30 +426,104 @@ export class Treeview<T = unknown> extends HTMLElement {
         }
     }
 
+    // Branches still to load keep what the previous nodes set carried for their descendants.
+    private keyedState(): KeyedState {
+        const expanded = new Map(this.kept?.expanded);
+        for (const [key, node] of this.nodeByKey) {
+            const item = this.itemOf.get(node)!;
+            if (item.hasAttribute('aria-expanded')) {
+                expanded.set(key, item.getAttribute('aria-expanded') === 'true');
+            }
+        }
+        const focused = this.tree.querySelector('[tabindex="0"]');
+        return {
+            expanded,
+            selected: this.selectedNode ? this.selectedNode.key : this.kept?.selected,
+            focused: focused ? this.nodeOf.get(focused)?.key : undefined,
+        };
+    }
+
     private draw(): void {
+        this.loads.abort();
+        this.loads = new AbortController();
         this.itemOf.clear();
+        this.nodeByKey.clear();
+        this.unloaded.clear();
+        this.loading.clear();
         this.selectedNode = undefined;
         this.tree.replaceChildren(...this.nodes.map((node) => this.createItem(node)));
-        this.makeFocusable(this.visibleItems()[0]);
+
+        this.restoreSelection();
+        const visible = this.visibleItems();
+        const focusable = [this.itemByKey(this.kept?.focused), this.itemByKey(this.kept?.selected)].find(
+            (item) => item !== undefined && visible.includes(item),
+        );
+        this.makeFocusable(focusable ?? visible[0]);
+        // Deferred, so a loader set right after the nodes is the one asked.
+        queueMicrotask(() => this.loadExpandedBranches(this.tree));
+    }
+
+    private itemByKey(key: string | undefined): HTMLLIElement | undefined {
+        const node = key === undefined ? undefined : this.nodeByKey.get(key);
+        return node ? this.itemOf.get(node) : undefined;
+    }
+
+    // A kept selection may sit in a branch still to load, so this also runs after each load.
+    private restoreSelection(): void {
+        const item = this.selectedNode ? undefined : this.itemByKey(this.kept?.selected);
+        if (item) {
+            const focused = this.tree.querySelector<HTMLLIElement>('[tabindex="0"]');
+            this.markSelected(item);
+            this.makeFocusable(focused ?? item);
+        }
     }
 
     private createItem(node: TreeNode<T>): HTMLLIElement {
         const item = createItemElement(node);
         this.itemOf.set(node, item);
         this.nodeOf.set(item, node);
+        if (node.key !== undefined) {
+            if (this.nodeByKey.has(node.key)) {
+                reportProblem('r-treeview', `key '${node.key}' is used by more than one node`);
+            } else {
+                this.nodeByKey.set(node.key, node);
+            }
+        }
 
+        const keptExpanded = node.key === undefined ? undefined : this.kept?.expanded.get(node.key);
+        const expanded = keptExpanded ?? node.expanded === true;
         if (node.children?.length) {
             groupOf(item).append(...node.children.map((child) => this.createItem(child)));
-            item.setAttribute('aria-expanded', String(node.expanded === true));
+            item.setAttribute('aria-expanded', String(expanded));
+        } else if (node.hasChildren) {
+            groupOf(item);
+            this.unloaded.add(item);
+            item.setAttribute('aria-expanded', String(expanded));
         }
         return item;
     }
 
-    private requireItem(node: TreeNode<T>): HTMLLIElement {
-        const item = node ? this.itemOf.get(node) : undefined;
+    private markSelected(item: HTMLLIElement): void {
+        if (this.selectedNode) {
+            this.itemOf.get(this.selectedNode)?.setAttribute('aria-selected', 'false');
+        }
+        item.setAttribute('aria-selected', 'true');
+        this.selectedNode = this.nodeOf.get(item);
+        this.makeFocusable(item);
+    }
+
+    private requireItem(ref: NodeRef<T>): HTMLLIElement {
+        if (typeof ref === 'string') {
+            const node = this.nodeByKey.get(ref);
+            if (!node) {
+                throw new Error(`r-treeview: no node with key '${ref}' in this tree.`);
+            }
+            return this.itemOf.get(node)!;
+        }
+        const item = ref ? this.itemOf.get(ref) : undefined;
         if (!item) {
             throw new Error(
-                `r-treeview: node '${node?.label}' is not in this tree. Pass a node from nodes, add() or find().`
+                `r-treeview: node '${ref?.label}' is not in this tree. Pass a node from nodes, add() or find().`,
             );
         }
         return item;
@@ -269,7 +531,7 @@ export class Treeview<T = unknown> extends HTMLElement {
 
     private visibleItems(): HTMLLIElement[] {
         return Array.from(this.tree.querySelectorAll<HTMLLIElement>('.node')).filter(
-            (item) => !item.parentElement!.closest('[aria-expanded="false"]')
+            (item) => !item.parentElement!.closest('[aria-expanded="false"]'),
         );
     }
 
@@ -295,10 +557,20 @@ export class Treeview<T = unknown> extends HTMLElement {
             return;
         }
         if (target.closest('.toggle')) {
-            this.setExpanded(item, item.getAttribute('aria-expanded') !== 'true');
+            this.toggleByUser(item, item.getAttribute('aria-expanded') !== 'true');
             return;
         }
         this.select(this.nodeOf.get(item)!);
+    }
+
+    private onDoubleClick(event: MouseEvent): void {
+        const target = event.target as Element;
+        const item = target.closest<HTMLLIElement>('.node');
+        // The arrow already toggled on each of the two clicks.
+        if (!item || !target.closest('.node-row') || target.closest('.toggle')) {
+            return;
+        }
+        this.toggleByUser(item, item.getAttribute('aria-expanded') !== 'true');
     }
 
     private onKeyDown(event: KeyboardEvent): void {
@@ -325,14 +597,14 @@ export class Treeview<T = unknown> extends HTMLElement {
                 break;
             case 'ArrowRight':
                 if (expanded === 'false') {
-                    this.setExpanded(item, true);
+                    this.toggleByUser(item, true);
                 } else if (expanded === 'true') {
                     this.moveFocus(visible[index + 1]);
                 }
                 break;
             case 'ArrowLeft':
                 if (expanded === 'true') {
-                    this.setExpanded(item, false);
+                    this.toggleByUser(item, false);
                 } else {
                     this.moveFocus(parentItem(item));
                 }
@@ -342,7 +614,14 @@ export class Treeview<T = unknown> extends HTMLElement {
                 this.select(this.nodeOf.get(item)!);
                 break;
             default:
-                return;
+                if (!isTypedCharacter(event)) {
+                    return;
+                }
+                this.moveFocus(
+                    this.typeAhead.next(event.key, visible, item, (candidate) =>
+                        this.nodeOf.get(candidate)!.label,
+                    ) as HTMLLIElement | undefined,
+                );
         }
         event.preventDefault();
     }
@@ -363,5 +642,6 @@ declare global {
 
     interface HTMLElementEventMap {
         [NodeNavigatedEvent.type]: NodeNavigatedEvent;
+        [NodeToggledEvent.type]: NodeToggledEvent;
     }
 }

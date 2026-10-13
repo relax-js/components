@@ -17,7 +17,7 @@ const styles = /* css */ `
         .label {
             grid-row: 1;
             grid-column: 1 / -1;
-            color: var(--text);
+            color: var(--text-primary);
         }
 
         r-icon {

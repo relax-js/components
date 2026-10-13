@@ -1,7 +1,7 @@
 {
   "name": "@relax.js/components",
-  "version": "2.0.0",
-  "description": "Ready-made Web Components for Relaxjs: table, tree view, tabs, top menu and spinner.",
+  "version": "2.0.1",
+  "description": "Native Web Components for business apps: tables, tree views, menus, tabs, dialogs, forms, banners, and dashboard figures, meters and charts.",
   "main": "./dist/index.mjs",
   "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
@@ -15,7 +15,10 @@
     "demo:ops": "vite demos/ops-dashboard",
     "demo:office": "vite demos/back-office",
     "demo:finance": "vite demos/finance-tracker",
+    "demo:gallery": "vite demos/gallery",
+    "demo:disco": "vite demos/disco",
     "demo:screenshots": "node demos/shared/screenshot.mjs",
+    "docs:screenshots": "node demos/gallery/screenshot.mjs",
     "demo:check": "tsc -p demos/tsconfig.json",
     "demo:build": "vite build demos/ops-dashboard && vite build demos/back-office && vite build demos/finance-tracker",
     "publish:npm": "npm run build && npm publish --access public"
@@ -26,9 +29,15 @@
     "relaxjs"
   ],
   "author": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/relax-js/components.git"
+  },
+  "homepage": "https://github.com/relax-js/components#readme",
+  "bugs": "https://github.com/relax-js/components/issues",
   "license": "MIT",
   "peerDependencies": {
-    "@relax.js/core": "^2.3.1"
+    "@relax.js/core": "^2.3.0"
   },
   "devDependencies": {
     "@custom-elements-manifest/analyzer": "^0.11.0",
@@ -48,11 +57,19 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs"
     },
-    "./theme.css": "./dist/theme.css"
+    "./theme.css": "./dist/theme.css",
+    "./theme-sizes.css": "./dist/theme-sizes.css",
+    "./theme-colors.css": "./dist/theme-colors.css",
+    "./custom-elements.json": "./dist/custom-elements.json",
+    "./*": {
+      "types": "./dist/*.d.ts",
+      "import": "./dist/*.mjs"
+    }
   },
   "files": [
     "dist",
     "docs",
+    "!docs/manual/images",
     "skills"
   ],
   "customElements": "dist/custom-elements.json"

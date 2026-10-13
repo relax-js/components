@@ -4,6 +4,7 @@ import { mount } from '@relax.js/core/testing';
 import '../../../src/dashboard/heatmap/Heatmap';
 import { formatValue } from '../../../src/foundations/formatting/formatting';
 import { restoreWords, rewordEnglish } from '../../foundations/text/words';
+import { readTheme } from '../../theme';
 import type { Heatmap, HeatmapValue } from '../../../src/dashboard/heatmap/Heatmap';
 
 function heatmap(values: unknown, attributes: Record<string, string> = {}, columns = ['a', 'b']): Heatmap {
@@ -122,10 +123,9 @@ describe('r-heatmap', () => {
     });
 
     it('both_scales_take_colours_from_their_own_theme_variables', async () => {
-        const { readFileSync } = await import('node:fs');
         const { element } = mount(heatmap([[1, 2], [3, 4]]));
         const css = document.head.querySelector('style[data-r-styles="r-heatmap"]')!.textContent!;
-        const theme = readFileSync('src/theme.css', 'utf8');
+        const theme = readTheme();
 
         expect(element.isConnected).toBe(true);
         expect(css).not.toMatch(/--(series|status|accent)-/);

@@ -118,6 +118,21 @@ describe('r-badge', () => {
             expect(badge.textContent).toBe('');
         });
 
+        it('show_zero_shows_a_count_of_zero_because_none_open_is_information', () => {
+            const badge = badgeWith('<r-badge count="0" tone="ok" show-zero></r-badge>');
+
+            expect(badge.hidden).toBe(false);
+            expect(badge.textContent!.trim()).toBe('0');
+            expect(badge.querySelector('r-icon')).not.toBeNull();
+        });
+
+        it('removing_show_zero_hides_the_zero_again', () => {
+            const badge = badgeWith('<r-badge count="0" show-zero></r-badge>');
+            badge.removeAttribute('show-zero');
+
+            expect(badge.hidden).toBe(true);
+        });
+
         it('a_count_above_max_shows_the_maximum_and_a_plus_and_without_max_the_full_number', async () => {
             configureFormatting({ locale: 'en-US' });
             expect(badgeWith('<r-badge count="150" max="99"></r-badge>').textContent).toBe('99+');

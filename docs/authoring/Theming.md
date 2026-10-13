@@ -12,11 +12,17 @@ A variable is named for what its value is for (`--surface-bg`, `--accent-primary
 
 ## Light and Dark
 
-The theme follows the operating system's light or dark setting. Each colour is declared once with `light-dark()`, and the `dark-theme` or `light-theme` class on an ancestor forces one mode.
+The theme follows the operating system's light or dark setting. Each colour is declared once with `light-dark()`, and an ancestor with the `dark-theme` or `light-theme` class, or with `data-theme="dark"` or `data-theme="light"`, forces one mode.
+
+## Sizes and Colours
+
+The default theme is two stylesheets: `theme-sizes.css` holds the scale and the role variables built on it, with no colour value, and `theme-colors.css` holds the palette, `color-scheme` and the switches that force a mode. `theme.css` is both. An app with its own palette loads only the sizes and sets the colour variables itself.
+
+Both sit in the `relax-theme` cascade layer, so a variable the app sets without a layer wins whatever order the stylesheets load in.
 
 ## Variables
 
-This section defines what each variable is for. The values live in the stylesheets: the default theme is [theme.css](../../src/theme.css), shipped as `@relax.js/components/theme.css`. A stylesheet that sets these variables is a theme; a variable added here is added to every stylesheet.
+This section defines what each variable is for. The values live in the stylesheets: the default theme ships as `@relax.js/components/theme.css`, or as `theme-sizes.css` and `theme-colors.css` (in this repository under `src/`). A stylesheet that sets these variables is a theme; a variable added here is added to every stylesheet.
 
 The default theme is minimal Scandinavian: warm linen and birch tones in light mode, cool charcoal in dark mode, muted earthy status colours (sage, slate, ochre, brick), and kiwi green as the accent for focus, selection and primary actions.
 
@@ -33,8 +39,9 @@ The default theme is minimal Scandinavian: warm linen and birch tones in light m
 | | `--text-on-accent` | Text on an accent background |
 | Borders | `--bd-muted` | Separators and quiet outlines |
 | | `--bd-strong` | Outlines that must be seen, such as an input's edge |
-| Accent | `--accent-primary` | Focus, selection and primary actions |
+| Accent | `--accent-primary` | Focus, selection and primary actions, as a fill or a line |
 | | `--accent-hover` | The accent under the pointer |
+| | `--accent-text` | Text written in the accent colour, such as a link; `--accent-primary` by default. A brand whose fill is too dark or light to read as text on the page sets its own. |
 | | `--focus-ring` | The keyboard focus outline |
 | Status | `--status-ok` | The `ok` tone: fine, done |
 | | `--status-info` | The `info` tone: under way |
@@ -43,6 +50,8 @@ The default theme is minimal Scandinavian: warm linen and birch tones in light m
 | | `--status-muted` | The `muted` tone: nothing asked of the reader |
 | | `--status-ok-soft` … `--status-muted-soft` | A quiet background in each status colour |
 | Series | `--series-1` … `--series-5` | Data series in a chart, in this order |
+| Heatmap scales | `--scale-low`, `--scale-high` | The ends of a sequential scale, lowest value first |
+| | `--scale-diverging-low`, `--scale-diverging-mid`, `--scale-diverging-high` | A diverging scale: the hue below the midpoint, the neutral midpoint, the hue above it |
 | Depth | `--shadow-raised` | The shadow under a raised surface |
 | | `--overlay-dim` | The veil over content that is busy or behind a modal |
 | Scale | `--radius-small`, `--radius`, `--radius-large` | Corner rounding steps |
@@ -51,13 +60,13 @@ The default theme is minimal Scandinavian: warm linen and birch tones in light m
 | Controls (button, input, select, tab header, menu item, chip) | `--control-radius`, `--control-padding`, `--control-gap` | |
 | Dense items (table cell, tree node, list row) | `--item-padding`, `--item-separator` | |
 | Content containers (form section, fieldset, accordion item, tab panel, article) | `--content-radius`, `--content-padding`, `--content-heading-gap`, `--content-gap`, `--content-section-gap`, `--content-measure` | `--content-measure` is the longest comfortable line of text |
-| Cards (one self-contained unit in the layout) | `--card-radius`, `--card-padding`, `--card-gap`, `--card-border` | |
+| Cards (one self-contained unit in the layout) | `--card-radius`, `--card-padding`, `--card-gap`, `--card-border`, `--card-heading-size` | `--card-heading-size` is the card's heading at any level |
 | Floating (popover, menu dropdown, tooltip) | `--floating-radius`, `--floating-padding`, `--floating-shadow` | |
-| Dialogs and sheets | `--dialog-radius`, `--dialog-padding` | |
+| Dialogs and sheets | `--dialog-radius`, `--dialog-padding`, `--dialog-gap`, `--dialog-shadow` | `--dialog-gap` also keeps the dialog that far from the window's edges |
 | Panels (sidebar, header bar, page region) | `--panel-padding`, `--panel-gap` | |
 | Wells (code block, read-only value) | `--well-bg`, `--well-radius` | |
 
-A theme stylesheet also declares `color-scheme: light dark` on `:root`, and `.dark-theme` / `.light-theme` rules that set `color-scheme` to one mode.
+A theme's colours also declare `color-scheme: light dark` on `:root`, and `.dark-theme` / `.light-theme` and `[data-theme="dark"]` / `[data-theme="light"]` rules that set `color-scheme` to one mode.
 
 ## Scale and Roles
 
@@ -67,7 +76,7 @@ A variable is used only for what it is for. A purpose no variable covers gets a 
 
 ## Tones
 
-An element with a `data-tone` attribute gets `--tone` and `--tone-soft` from the status pair of that tone (`warn` takes `--status-warning`), and the theme stylesheet sets them. Anything coloured by tone uses only those two. What the tones mean is in [Design Language](DesignLanguage.md#tones).
+An element with a `data-tone` attribute gets `--tone` and `--tone-soft` from the status pair of that tone (`warn` takes `--status-warning`). The theme's colours set them on the page, and the light-DOM components also install the same rules in the root they live in, since page rules never reach into a shadow root. Anything coloured by tone uses only those two. What the tones mean is in [Design Language](DesignLanguage.md#tones).
 
 ## Data Series
 

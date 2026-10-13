@@ -121,6 +121,62 @@ describe('r-card', () => {
         expect(icons[0].getAttribute('name')).toBe('file');
     });
 
+    it('every_direct_child_action_moves_into_the_heading_row_in_order', () => {
+        const card = cardWith(
+            '<r-card heading="H"><r-badge slot="action" id="count">3</r-badge><button slot="action" id="add"></button><p></p></r-card>',
+        );
+        const head = card.querySelector('.card-head')!;
+        expect([...head.children].map((c) => c.id).slice(-2)).toEqual(['count', 'add']);
+    });
+
+    it('a_heading_slot_child_becomes_the_heading_so_it_can_hold_markup', () => {
+        const card = cardWith('<r-card><span slot="heading" id="rich">Invoices <r-badge>3</r-badge></span><p id="body"></p></r-card>');
+        const title = card.querySelector('.card-head hgroup > h2')!;
+        expect(title.firstElementChild).toBe(card.querySelector('#rich'));
+        expect(card.children[1]).toBe(card.querySelector('#body'));
+    });
+
+    it('a_heading_slot_wins_over_the_heading_attribute_and_needs_no_attribute', () => {
+        const reported = captureProblems();
+        const card = cardWith('<r-card heading="Plain"><span slot="heading">Rich</span></r-card>');
+        expect(card.querySelector('h2')!.textContent).toBe('Rich');
+
+        card.removeAttribute('heading');
+        expect(card.querySelector('h2')!.textContent).toBe('Rich');
+        expect(reported.messages()).toEqual([]);
+    });
+
+    it('moving_the_card_keeps_its_one_heading_slot', () => {
+        const card = cardWith('<r-card><span slot="heading">Rich</span></r-card>');
+        const other = document.createElement('div');
+        document.body.append(other);
+        other.append(card);
+        expect(card.querySelectorAll('[slot="heading"]').length).toBe(1);
+        expect(card.querySelector('h2 > [slot="heading"]')).not.toBeNull();
+    });
+
+    it('level_sets_the_heading_element_so_the_page_outline_stays_intact', () => {
+        const card = cardWith('<r-card heading="H" level="3"></r-card>');
+        expect(card.querySelector('hgroup > h3')!.textContent).toBe('H');
+        expect(card.querySelector('h2')).toBeNull();
+
+        card.setAttribute('level', '4');
+        expect(card.querySelector('hgroup > h4')).not.toBeNull();
+    });
+
+    it('a_level_outside_1_to_6_reports_and_falls_back_to_h2', () => {
+        const reported = captureProblems();
+        const card = cardWith('<r-card heading="H" level="7"></r-card>');
+        expect(reported.messages()).toContainEqual('r-card: level "7" must be a whole number from 1 to 6');
+        expect(card.querySelector('hgroup > h2')).not.toBeNull();
+    });
+
+    it('the_heading_size_comes_from_a_card_tier_variable_whatever_the_level', () => {
+        cardWith('<r-card heading="H" level="4"></r-card>');
+        const css = document.head.querySelector('style[data-r-styles="r-card"]')!.textContent!;
+        expect(css).toContain('font-size: var(--card-heading-size)');
+    });
+
     it('changing_attributes_updates_the_heading_row_without_building_a_second_one', () => {
         const card = cardWith(full);
         card.setAttribute('heading', 'Bills');

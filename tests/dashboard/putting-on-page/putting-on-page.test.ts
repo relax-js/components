@@ -1,5 +1,4 @@
 import { captureProblems } from '../../captureProblems';
-import { readFileSync } from 'node:fs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import '../../../src/dashboard/amount/Amount';
 import '../../../src/dashboard/status-grid/StatusGrid';
@@ -7,8 +6,9 @@ import '../../../src/dashboard/status-mark/StatusMark';
 import { formatAmount } from '../../../src/dashboard/amount/Amount';
 import type { StatusGrid, StatusGridState } from '../../../src/dashboard/status-grid/StatusGrid';
 import { toneIcon, type Tone } from '../../../src/foundations/tone/tone';
+import { readTheme } from '../../theme';
 
-const theme = readFileSync('src/theme.css', 'utf8');
+const theme = readTheme();
 const paid: StatusGridState = { id: 'paid', label: 'Paid', tone: 'ok' };
 const open: StatusGridState = { id: 'open', label: 'Open' };
 
@@ -17,7 +17,10 @@ function tiles(grid: StatusGrid): HTMLElement[] {
 }
 
 function installedStyles(): string[] {
-    return Array.from(document.head.querySelectorAll('style[data-r-styles]')).map((style) => style.textContent ?? '');
+    // The tone rules are the theme's own mapping, installed where page rules cannot reach.
+    return Array.from(document.head.querySelectorAll('style[data-r-styles]:not([data-r-styles="r-tones"])')).map(
+        (style) => style.textContent ?? '',
+    );
 }
 
 describe('putting a component on a page', () => {

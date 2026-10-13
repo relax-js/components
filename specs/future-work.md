@@ -6,7 +6,7 @@
 
 ### KPI meter becomes Comparison
 - decided: The KPI meter is renamed Comparison, since it compares any figure with any previous period and carries no unit, while components that render a unit or format, such as Amount and Days left, keep names saying what they show.
-- affects: KPI meter, Stat tile, docs/manual/KpiMeter.md, docs/manual/Components.md
+- affects: KPI meter, Stat tile, docs/manual/dashboard/KpiMeter.md, docs/manual/Components.md
 
 ### Keyboard read-out for charts
 - decided: A keyboard user can later focus a chart and step through its labels or cells to get the read-out; until then, the hidden table is the only way to the values without a pointer.

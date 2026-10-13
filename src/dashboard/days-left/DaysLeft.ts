@@ -1,5 +1,6 @@
 import { reportProblem } from '../../foundations/problems/problems';
 import { formatValue } from '../../foundations/formatting/formatting';
+import { installToneRules } from '../../foundations/styles';
 import { text, whenLanguageChanges } from '../../foundations/text/text';
 import type { Tone } from '../../foundations/tone/tone';
 
@@ -49,6 +50,7 @@ export class DaysLeft extends HTMLElement {
     }
 
     connectedCallback(): void {
+        installToneRules(this);
         this.stopListening = whenLanguageChanges(this.redraw);
         this.draw();
     }

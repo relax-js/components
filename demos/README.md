@@ -13,7 +13,22 @@ Three small applications built with `@relax.js/components` and `@relax.js/core`,
 | ![Ops dashboard](screenshots/ops-dashboard-light.png) | ![Order list](screenshots/back-office-light.png) | ![Household budget](screenshots/finance-tracker-light.png) |
 | ![Ops dashboard, dark](screenshots/ops-dashboard-dark.png) | ![Order list, dark](screenshots/back-office-dark.png) | ![Household budget, dark](screenshots/finance-tracker-dark.png) |
 
-`npm run demo:screenshots` takes these again, in light and dark, after a design change. `npm run demo:check` type-checks all three. `tests/demos` checks every template against its view model and that each translation has the same keys as English.
+`npm run demo:screenshots` takes these again, in light and dark, after a design change.
+
+## Disco
+
+[disco](disco) (`npm run demo:disco`, port 5305) shows how far a theme reaches. It loads only `theme-sizes.css` and works out every colour variable from one hue that keeps turning. Stat tiles, an equalizer bar chart, a dance-floor heatmap and meters pulse to the beat in colours that cycle through the spectrum, over drifting gradients, sweeping spotlights and a mirror ball. None of the components knows about any of it.
+
+## Component gallery
+
+[gallery](gallery) is not an application: it draws each component in its main states, one state per stage. `npm run demo:gallery` (port 5304) shows them all on one page, and `?shot=r-table/sorted` shows one alone.
+
+`npm run docs:screenshots` captures every state to `docs/manual/images/`, in the folders of `src/` (`data-display/table/sorted.png`), and rewrites the generated parts of the manual: each `<!-- screenshots: r-tag -->` block and [Gallery.md](../docs/manual/Gallery.md). The manual ships in the package but the images do not: the manual links them on GitHub's main branch, so a new image shows there once it is pushed. Run it after a change to how a component looks; `npm run docs:screenshots -- r-table` takes one component's shots only. To show a new state, add it to `gallery/src/shots.ts`. To put a component's shots on its manual page, add an empty block there:
+
+```markdown
+<!-- screenshots: r-meter -->
+<!-- /screenshots -->
+``` `npm run demo:check` type-checks all three. `tests/demos` checks every template against its view model and that each translation has the same keys as English.
 
 ## How they are put together
 

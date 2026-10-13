@@ -13,6 +13,7 @@ export function demoConfig(port: number, plugins: Plugin[] = []): UserConfig {
             alias: [
                 { find: /^@relax\.js\/components$/, replacement: `${componentsSource}index.ts` },
                 { find: '@relax.js/components/theme.css', replacement: `${componentsSource}theme.css` },
+                { find: '@relax.js/components/theme-sizes.css', replacement: `${componentsSource}theme-sizes.css` },
             ],
         },
         plugins,

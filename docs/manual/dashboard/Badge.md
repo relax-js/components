@@ -1,0 +1,36 @@
+# Badge
+
+A short status or a count that sits in the line, such as "Draft" beside a record or the number of unread items beside a menu entry. For a status that needs an icon and a note under it, use a [status mark](StatusMark.md).
+
+## Screenshots
+
+<!-- screenshots: r-badge -->
+<!-- /screenshots -->
+
+## Usage
+
+```html
+<r-badge tone="warn">Draft</r-badge>
+<r-badge count="12" max="9" tone="info"></r-badge>
+<r-badge count="0" tone="ok" show-zero></r-badge>
+```
+
+- The badge's own text is shown exactly as given, never translated, and follows later changes to it. A badge with no text and no count is hidden.
+- With `count`, the number is written for the [configured locale](../Formatting.md) in place of the text. A count with a tone other than `muted` shows the tone's icon before the number; a text badge shows no icon, since its text says what the tone means.
+
+## Attributes
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `tone` | `ok \| info \| warn \| danger \| muted` | `muted` | The badge's colour, carried as `data-tone`. An unknown tone reports an error and the badge is `muted`. |
+| `count` | `number` | | A whole number of zero or more shown in place of the text. A negative, fractional or non-numeric count reports an error and the badge renders empty. |
+| `max` | `number` | | A count above it shows as this number followed by a plus, such as `9+`. Must be a whole number above zero. |
+| `show-zero` | `boolean` | | Shows a count of 0. Without it a count of 0 hides the badge, which suits an unread count; set it where "none" is information, such as "0 open findings". |
+
+## Parts
+
+The badge renders into the light DOM: style `r-badge` itself, and `r-badge r-icon` for the tone icon.
+
+## Variables
+
+The badge is filled with `--tone-soft` and written in `--tone`, with `--radius-small` corners and `--control-gap` padding. See [Theming](../../authoring/Theming.md#tones).

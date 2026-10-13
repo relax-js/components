@@ -22,7 +22,7 @@ await loadNamespace('r-components');
 ```
 
 - Without i18n set up, components show English.
-- An attribute on one element, such as `locale` or `currency` on an [amount](Amount.md), overrides the configuration for that element.
+- An attribute on one element, such as `locale` or `currency` on an [amount](dashboard/Amount.md), overrides the configuration for that element.
 - A component reads the configuration and the words as they stand when it draws, and redraws when `setLocale()` changes the language. To change both, call `configureFormatting` first.
 - Text you pass in, such as column titles and menu labels, is shown as given. Translate it before passing it.
 
@@ -49,9 +49,9 @@ A key missing from your file shows its English text.
 | `pages` | `Pages` | Accessible name of a table's pager |
 | `previousPage` | `Previous` | A table's pager |
 | `nextPage` | `Next` | A table's pager |
-| `lastYear` | `last year` | [KPI meter](KpiMeter.md) |
-| `days` | `{n} {count, plural, one {day} other {days}}` | [Days left](DaysLeft.md) |
-| `periodClosed` | `closed` | [Period grid](PeriodGrid.md) |
+| `lastYear` | `last year` | [KPI meter](dashboard/KpiMeter.md) |
+| `days` | `{n} {count, plural, one {day} other {days}}` | [Days left](dashboard/DaysLeft.md) |
+| `periodClosed` | `closed` | [Period grid](dashboard/PeriodGrid.md) |
 | `periodLocked` | `locked` | Period grid |
 | `periodOpen` | `open` | Period grid |
 | `periodComing` | `not started` | Period grid |

@@ -1,5 +1,27 @@
 # Changelog
 
+## 2.0.1
+
+### Breaking
+
+- The theme sits in the `relax-theme` cascade layer, so a variable the app sets wins whatever order the stylesheets load in. An app that relied on overriding theme variables from inside its own cascade layer declares `relax-theme` first.
+
+### Added
+
+- One import per element, such as `import '@relax.js/components/card'`, so an app pays only for the elements it uses. `import '@relax.js/components'` still registers every tag.
+- The theme also ships as `theme-sizes.css` (spacing, shape, motion and roles) and `theme-colors.css` (the palette and light and dark mode); `theme.css` is both.
+- `[data-theme="dark"]` and `[data-theme="light"]` force a mode, beside the `dark-theme` and `light-theme` classes.
+- `--accent-text` for text drawn in the accent colour, and `--card-heading-size` for the size of a card's heading.
+- `r-card`: a `heading` slot for a heading with markup, and a `level` attribute for the heading element.
+- `r-badge`: `show-zero` shows a count of 0.
+- `r-treeview`: nodes with an icon, a note, a badge and a tone; branches whose children load when first expanded (`hasChildren` and `loadChildren`); a `key` per node that keeps expanded branches and the selection across a `nodes` set and that `select`, `expand` and `collapse` accept; `select(node, { silent: true })`; `r-node-toggled` when the user expands or collapses a branch; type-to-jump; double-click to toggle; a `label` attribute for the tree's accessible name.
+
+### Fixed
+
+- Tones did not colour components inside a shadow root, which page rules never reach.
+- The typings of the component words imported a locale file the package did not ship.
+- The peer range asked for `@relax.js/core` 2.3.1 where 2.3.0 is enough.
+
 ## 2.0.0
 
 ### Breaking
@@ -15,6 +37,10 @@
 
 ### Added
 
+- Dashboard elements: `r-amount`, `r-badge`, `r-card`, `r-days-left`, `r-kpi-meter`, `r-meter`, `r-period-grid`, `r-stat-tile`, `r-status-grid` and `r-status-mark`.
+- Charts: `r-line-chart`, `r-area-chart`, `r-bar-chart`, `r-heatmap` and `r-sparkline`, each with a table for screen readers.
+- `r-banner`, `r-dialog`, `r-setting-row`, `r-step` and `r-file-input`.
+- Navigation: `r-dropdown-menu`, `r-side-menu` and `r-section-nav`.
 - `r-icon` and `registerIcons()`.
 - `configureFormatting()` and `formatting()`: locale, currency and texts for every component.
 - `readTone()` and `toneIcon`.

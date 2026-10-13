@@ -32,9 +32,14 @@ const styles = /* css */ `
         overflow-wrap: break-word;
     }
 
-    r-card .card-head h2,
+    r-card .card-head :is(h1, h2, h3, h4, h5, h6),
     r-card .card-head p {
         margin: 0;
+    }
+
+    /* The level keeps the page outline right; the size stays the card's own. */
+    r-card .card-head :is(h1, h2, h3, h4, h5, h6) {
+        font-size: var(--card-heading-size);
     }
 
     r-card .card-head a {
@@ -48,7 +53,9 @@ const styles = /* css */ `
 /**
  * An overview card: a heading row with icon, heading, lead, an optional action and a link to the
  * full list, followed by the page's own content as the body. The heading row is placed before the
- * existing children and is rebuilt in place when an attribute changes.
+ * existing children and is rebuilt in place when an attribute changes. Every direct child with
+ * `slot="action"` moves into the heading row, in order; a direct child with `slot="heading"`
+ * becomes the heading in place of the `heading` text.
  *
  * @example
  * ```html
@@ -58,7 +65,10 @@ const styles = /* css */ `
  * </r-card>
  * ```
  *
- * @attr {string} heading - The card's h2 text
+ * @slot heading - Markup for the heading, such as a span holding a badge; wins over `heading`
+ * @slot action - Controls for the heading row, such as a count badge and a button
+ * @attr {string} heading - The card's heading text
+ * @attr {number} level - The heading element, 1 to 6 for h1 to h6 (default 2)
  * @attr {string} lead - One sentence under the heading
  * @attr {string} icon - An icon name shown in the heading row
  * @attr {string} link-text - Text of the link to the full list
@@ -67,7 +77,7 @@ const styles = /* css */ `
  */
 export class Card extends HTMLElement {
     static get observedAttributes(): string[] {
-        return ['heading', 'lead', 'icon', 'link-text', 'href', 'tone'];
+        return ['heading', 'lead', 'icon', 'link-text', 'href', 'tone', 'level'];
     }
 
     connectedCallback(): void {
@@ -104,10 +114,14 @@ export class Card extends HTMLElement {
             ...(previous?.querySelectorAll<HTMLElement>(':scope > [slot="action"]') ?? []),
             ...this.querySelectorAll<HTMLElement>(':scope > [slot="action"]'),
         ];
+        const richHeading =
+            this.querySelector<HTMLElement>(':scope > [slot="heading"]') ??
+            previous?.querySelector<HTMLElement>(':scope > hgroup > :first-child > [slot="heading"]') ??
+            null;
         previous?.remove();
 
         const heading = this.getAttribute('heading') ?? '';
-        if (heading === '') {
+        if (heading === '' && richHeading === null) {
             reportProblem('r-card', 'heading is missing');
             // Without a heading row an action has nowhere to go; it returns to the body.
             this.prepend(...actions);
@@ -126,8 +140,12 @@ export class Card extends HTMLElement {
         }
 
         const group = document.createElement('hgroup');
-        const title = document.createElement('h2');
-        title.textContent = heading;
+        const title = document.createElement(`h${this.level()}`);
+        if (richHeading !== null) {
+            title.append(richHeading);
+        } else {
+            title.textContent = heading;
+        }
         group.append(title);
         const lead = this.getAttribute('lead') ?? '';
         if (lead !== '') {
@@ -142,6 +160,18 @@ export class Card extends HTMLElement {
             head.append(link);
         }
         this.prepend(head);
+    }
+
+    private level(): number {
+        const raw = this.getAttribute('level');
+        if (raw === null) {
+            return 2;
+        }
+        if (!/^[1-6]$/.test(raw)) {
+            reportProblem('r-card', `level "${raw}" must be a whole number from 1 to 6`);
+            return 2;
+        }
+        return Number(raw);
     }
 
     private iconElement(name: string): HTMLElement {

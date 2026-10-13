@@ -1,0 +1,138 @@
+/* The stage each shot is drawn on, and the few page parts the shots place around components. */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    font-family: system-ui, sans-serif;
+    background: var(--surface-bg);
+    color: var(--text-primary);
+}
+
+body.single {
+    display: inline-block;
+}
+
+main {
+    max-width: 72rem;
+    margin-inline: auto;
+    padding: var(--space-4);
+}
+
+figure {
+    margin: 0 0 var(--space-4);
+
+    & figcaption {
+        margin-bottom: var(--space-2);
+        color: var(--text-muted);
+    }
+
+    & .stage {
+        border: 1px dashed var(--bd-muted);
+    }
+}
+
+.stage {
+    padding: var(--space-4);
+    background: var(--surface-bg);
+}
+
+.stack {
+    display: grid;
+    gap: var(--space-3);
+}
+
+.tiles {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-3);
+}
+
+.settings {
+    display: grid;
+    gap: var(--space-2);
+}
+
+.variants {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    align-items: center;
+    gap: var(--space-3) var(--space-4);
+    margin: 0;
+
+    & dt {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+    }
+
+    & dd {
+        margin: 0;
+    }
+}
+
+.icon-set {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-3);
+
+    & li {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+    }
+
+    & r-icon {
+        font-size: 1.4rem;
+    }
+
+    & code {
+        font-size: 0.85rem;
+        color: var(--text-muted);
+    }
+}
+
+.plain-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+
+    & li {
+        display: flex;
+        justify-content: space-between;
+        padding-block: var(--space-1);
+    }
+}
+
+.filler {
+    padding: var(--space-3);
+
+    & h3 {
+        margin-top: 0;
+    }
+}
+
+fieldset.bare {
+    border: 0;
+    margin: 0;
+    padding: 0;
+}
+
+.form {
+    display: grid;
+    gap: var(--space-3);
+
+    & label {
+        display: grid;
+        gap: var(--space-1);
+    }
+
+    & .buttons {
+        display: flex;
+        justify-content: flex-end;
+    }
+}

@@ -17,7 +17,7 @@ A user sees a notice that concerns the whole page, such as a maintenance window 
   - **Tone changed**: changing `tone` on a drawn banner updates its `data-tone`, icon and role in place
 - **Default tone**: a banner without `tone` is `muted`
   - **Unknown tone**: an unknown `tone` reports an error and the banner is `muted` (specs/dashboard/dashboard-foundations.spec.md#Reading a tone)
-- **Banner action**: a direct child with `slot="action"` is moved to the end of the strip, while one marked deeper down stays where it is (docs/manual/Card.md#Slots)
+- **Banner action**: a direct child with `slot="action"` is moved to the end of the strip, while one marked deeper down stays where it is (docs/manual/dashboard/Card.md#Slots)
 - **Announced**: a `warn` or `danger` banner has `role="alert"`, and a banner of any other tone has `role="status"`
 
 ## Dismissing a notice

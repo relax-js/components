@@ -1,0 +1,60 @@
+# Stat Tile
+
+One key figure in a card-sized tile: the label, the value, and the change against an earlier period, with an optional trend line under it. For the same comparison drawn as a bar against last year, use a [KPI meter](KpiMeter.md).
+
+## Screenshots
+
+<!-- screenshots: r-stat-tile -->
+<!-- /screenshots -->
+
+## Usage
+
+```html
+<r-stat-tile label="Revenue" value="1285400" previous="1150000" period="last month"></r-stat-tile>
+<r-stat-tile label="Churn" value="3.1" previous="2.4" better="lower"></r-stat-tile>
+```
+
+```typescript
+const tile = document.querySelector('r-stat-tile')!;
+tile.trend = {
+    labels: ['Jan', 'Feb', 'Mar'],
+    series: [{ name: 'Revenue', values: [1020000, 1150000, 1285400] }],
+    summary: 'Revenue rose every month this quarter',
+};
+```
+
+- The value is written as a plain grouped number in the [configured locale](../Formatting.md).
+- The change is a whole percent of `previous` with its sign always shown, such as "+12 % vs last month", written as one `changeAgainstPeriod` message from the [`r-components` namespace](../Formatting.md#words). When `previous` is 0 it reads ±0.
+- Without `previous` the tile shows its label and value only.
+- The tile is not interactive: it takes no focus, sends no events and keeps its background under the pointer.
+
+## Attributes
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `label` | `string` | | What the figure is. Required. |
+| `value` | `number` | | This period's figure, as a JavaScript number literal |
+| `previous` | `number` | | The figure compared against; without it no change is shown |
+| `better` | `higher \| lower` | `higher` | Whether a rise is good news |
+| `period` | `string` | "last year" | Name of the period compared against, shown as given |
+
+A missing label, a `value` or `previous` that is not a number, or an unknown `better` reports an error and the tile renders empty.
+
+## Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `trend` | `ChartData \| undefined` | Data drawn as a [sparkline](Sparkline.md) under the figure, in the shape every chart takes. Without it no space is taken. Data the sparkline cannot draw is reported and the tile renders empty. |
+
+## Parts
+
+| Selector | What it is |
+|----------|------------|
+| `.label` | What the figure is |
+| `.value` | The formatted figure |
+| `.change[data-tone]` | The change, `ok` when it moved the way `better` asks for or stayed level, `danger` otherwise |
+| `.trend` | The sparkline, sized by `--sparkline-width` and `--sparkline-height` |
+
+## Variables
+
+The tile takes the card tier's `--card-radius`, `--card-padding`, `--card-gap` and `--card-border`, and casts no shadow. See [Theming](../../authoring/Theming.md#variables).

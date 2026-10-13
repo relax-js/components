@@ -1,0 +1,69 @@
+# Status Grid
+
+A set of items side by side as small tiles, each in a state the app defines, such as services up or down or invoices paid or open. A [period grid](PeriodGrid.md) is a status grid for a year's accounting periods.
+
+## Screenshots
+
+<!-- screenshots: r-status-grid -->
+<!-- /screenshots -->
+
+## Usage
+
+```html
+<r-status-grid id="services"></r-status-grid>
+```
+
+```typescript
+const grid = document.querySelector('#services')!;
+grid.states = [
+    { id: 'up', label: 'Up', tone: 'ok' },
+    { id: 'slow', label: 'Slow', tone: 'warn' },
+    { id: 'down', label: 'Down', tone: 'danger', icon: 'x-circle' },
+];
+grid.items = [
+    { label: 'API', state: 'up' },
+    { label: 'Search', state: 'slow' },
+];
+```
+
+- One tile per item, in the order given, with the item's label beside it. Each tile shows its state's icon, or the tone's icon when the state has none, and its title reads "{item label}: {state label}".
+- A legend under the grid lists every state in the given order, including states no item is in, so colour is never the only clue.
+- Tiles are read-only: they take no focus and send no events.
+
+## Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `states` | `StatusGridState[]` | The states an item can be in |
+| `items` | `StatusGridItem[]` | The items, in the order shown |
+
+```typescript
+interface StatusGridState {
+    id: string;
+    label: string;
+    icon?: string;  // registered icon name; the tone's icon when absent
+    tone?: Tone;    // muted when absent
+}
+interface StatusGridItem { label: string; state: string }
+```
+
+Two states with the same id, or an item whose state id is not among the states, report an error and the grid renders empty. A state with an unknown tone reports an error and is shown as `muted`. An empty item list shows no tiles and reports nothing.
+
+## Parts
+
+| Selector | What it is |
+|----------|------------|
+| `.item` | An item: its tile and label |
+| `.tile[data-tone][data-state]` | The tile, carrying its state's tone and id |
+| `.label` | The item's label |
+| `.legend` | The legend of states |
+
+```css
+r-status-grid .tile[data-state="down"] {
+    outline: 2px solid var(--tone);
+}
+```
+
+## Accessibility
+
+Each tile's accessible name gives the item label and the state label.

@@ -1,0 +1,46 @@
+# Meter
+
+Usage against a limit: a filled track, the figures "{value} of {limit}" and a tone that grows stronger as usage nears the limit, such as storage used of a plan's quota.
+
+## Screenshots
+
+<!-- screenshots: r-meter -->
+<!-- /screenshots -->
+
+## Usage
+
+```html
+<r-meter label="Storage" value="42" max="50" unit="GB"></r-meter>
+<r-meter label="API calls" value="9100" max="10000" warn-at="7500" danger-at="9500"></r-meter>
+```
+
+- The track is filled by the value's share of the limit. A value above the limit fills the whole track and the figures still show the real value; a negative value fills nothing.
+- The figures are one `meterFigures` message from the [`r-components` namespace](../Formatting.md#words), with both numbers written for the [configured locale](../Formatting.md). No percentage is shown.
+- The tone is `ok` below the warning threshold, `warn` from it and `danger` from the danger threshold: 80 % and 100 % of the limit by default. A lower value never gets a stronger tone than a higher one. The tone's icon is shown beside the figures.
+
+## Attributes
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `label` | `string` | | What is measured; names the meter. Required. |
+| `value` | `number` | | Usage so far |
+| `max` | `number` | | The limit, above zero |
+| `warn-at` | `number` | 80 % of `max` | Usage from which the tone is `warn`, in the unit of `value` |
+| `danger-at` | `number` | `max` | Usage from which the tone is `danger` |
+| `unit` | `string` | | Written after each figure exactly as given |
+
+A missing label, a `value` or `max` that is missing or not a number, a `max` of zero or less, or a `warn-at` above `danger-at` reports an error and the meter renders empty. Changing any attribute updates the meter in place.
+
+## Parts
+
+| Selector | What it is |
+|----------|------------|
+| `r-meter[data-tone]` | The meter, carrying its tone |
+| `.label` | What is measured |
+| `.figures` | "{value} of {limit}" |
+| `.track` | The track, filled with `--tone-soft` |
+| `.fill` | The used share, filled with `--tone` |
+
+## Accessibility
+
+The meter is `role="meter"` named by `label`, with `aria-valuemin` 0, the limit as `aria-valuemax`, the value as `aria-valuenow` (the limit when over it) and the written figures as `aria-valuetext`.

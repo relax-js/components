@@ -45,4 +45,4 @@ A developer shows a list of records as a table by declaring its columns in marku
   - **Date strings**: only date values get the short date form, while a date written as a string is shown as given
 - **No records**: with no records, one row shows the `noData` text (docs/manual/data-display/Table.md#What a Cell Shows)
   - **Nothing set yet**: before any `rows` or `provider` is set, the table shows its headers and the `noData` row
-- **Page styles win**: the table's own styles sit in the `relax-components` cascade layer, so the page's rules for the table override them (docs/manual/Customizing.md#Table and Tree View)
+- **Page styles win**: the table's own styles sit in the `relax-components` cascade layer, so the page's rules for the table override them (docs/manual/Customizing.md#Components in the Light DOM)

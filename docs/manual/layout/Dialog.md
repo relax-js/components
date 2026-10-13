@@ -1,0 +1,137 @@
+# Dialog
+
+A modal dialog whose content is created when it opens and gone when it closes, so a page carries no hidden forms. The same dialog serves a page that opens it from code, a quick confirmation that needs no markup, and a route that opens as a dialog. For a menu or a tooltip that lies over the page without blocking it, use a [popover](../PopoverPattern.md).
+
+## Screenshots
+
+<!-- screenshots: r-dialog -->
+<!-- /screenshots -->
+
+## Usage
+
+### From Code
+
+```html
+<r-dialog id="rename" heading="Rename project">
+    <template>
+        <form method="dialog">
+            <input name="title" required>
+            <button value="save">Save</button>
+        </form>
+    </template>
+</r-dialog>
+```
+
+```typescript
+import type { Dialog } from '@relax.js/components';
+
+const dialog = document.querySelector<Dialog>('#rename')!;
+const result = await dialog.open();   // 'save', or undefined when dismissed
+```
+
+- The template's content is copied in when the dialog opens and removed when it closes.
+- The promise from `open()` resolves when the dialog closes, with the result the content closed it with, or `undefined` when it was dismissed. It never rejects.
+- The content closes the dialog with a result by calling `close(result)`. A form with `method="dialog"` closes it with the submitting button's value.
+- Escape and the close button dismiss the dialog. A click outside it leaves it open.
+
+### A Confirmation
+
+```typescript
+import { Dialog } from '@relax.js/components';
+
+const remove = await Dialog.confirm({
+    heading: 'Delete order',
+    message: 'The order and its lines are deleted for good.',
+    tone: 'danger',
+    confirmText: 'Delete',
+});
+```
+
+Resolves `true` on confirm and `false` on cancel or dismissal. The message is shown as text, never as markup, beside its tone's icon.
+
+### A Route in a Dialog
+
+```html
+<r-dialog name="order-editor" heading="Edit order"></r-dialog>
+```
+
+```typescript
+defineRoutes([
+    { name: 'order-edit', path: '/orders/;orderId/edit', target: 'order-editor', componentTagName: 'order-edit-page' },
+]);
+```
+
+A route whose `target` is the dialog's `name` opens in it: the page is created on navigation and removed on close. Navigating to another route with the same target while open replaces the page.
+
+## Attributes
+
+| Attribute | Type | Description |
+|-----------|------|-------------|
+| `heading` | `string` | The dialog's title and accessible name. A dialog without one reports an error and still opens. |
+| `name` | `string` | Registers the dialog as a route target of that name |
+| `open` | `boolean` | Present while the dialog is open; set by the dialog |
+
+## Methods
+
+### open(): Promise\<unknown\>
+
+Opens the dialog and resolves when it closes. Opening a dialog that is already open throws.
+
+### close(result?)
+
+Closes the open dialog with a result for the opener. It never dispatches `r-dialog-closing` and cannot be stopped.
+
+### Dialog.confirm(options): Promise\<boolean\>
+
+Asks for confirmation in a dialog of its own.
+
+```typescript
+interface ConfirmOptions {
+    heading: string;
+    message: string;
+    tone: Tone;           // a tone that is not one of the five throws
+    confirmText?: string; // the confirm text from the r-components namespace by default
+    cancelText?: string;  // the cancel text by default
+}
+```
+
+## Events
+
+### r-dialog-closing
+
+Dispatched as `DialogClosingEvent` before Escape or the close button dismisses the dialog. Cancel it to keep the dialog open, for example while the content has unsaved changes. Bubbles.
+
+```typescript
+dialog.addEventListener('r-dialog-closing', (event) => {
+    if (hasUnsavedChanges()) {
+        event.preventDefault();
+    }
+});
+```
+
+### r-dialog-close
+
+Dispatched as `DialogCloseEvent` every time the dialog closes. Bubbles.
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `result` | `unknown` | What the content closed the dialog with, or `undefined` when it was dismissed |
+
+## Parts
+
+| Selector | What it is |
+|----------|------------|
+| `r-dialog dialog` | The native modal dialog |
+| `.dialog-title` | The heading |
+| `.dialog-close` | The close button, worded with the `close` text from the [`r-components` namespace](../Formatting.md#words) |
+| `.dialog-page` | The page of a route opened in the dialog |
+| `.dialog-message[data-tone]` | A confirmation's message and icon |
+| `.dialog-actions`, `.dialog-cancel`, `.dialog-confirm` | A confirmation's buttons |
+
+## Variables
+
+The dialog takes `--dialog-radius`, `--dialog-padding`, `--dialog-gap` and `--dialog-shadow`, and dims the page behind it with `--overlay-dim`. It never grows wider or taller than the window less `--dialog-gap` on each side, and its content scrolls within it. It fades in over `--motion-base`, at once when the user prefers reduced motion. See [Theming](../../authoring/Theming.md#variables).
+
+## Accessibility
+
+The dialog is a native modal: focus moves into it on open, stays inside while it is open, and returns to the element that had it on close.

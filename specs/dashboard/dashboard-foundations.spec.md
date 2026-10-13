@@ -22,7 +22,7 @@ A developer builds an overview page from small dashboard elements that the theme
 - **Wrong use from code**: a function or method called with arguments it cannot act on throws an error naming the component and what was wrong (docs/authoring/ComponentContract.md#Failing Loudly)
 - **Never colour alone**: anything shown with a tone also shows an icon or text saying the same (docs/authoring/DesignLanguage.md#Tones)
 - **Theme colours**: each component's own stylesheet takes every colour from the theme's variables, each used for what it is meant for, and holds no colour value of its own (docs/authoring/Theming.md#Variables)
-- **Tone colours**: the theme stylesheet gives an element with `data-tone` the `--tone` and `--tone-soft` of that tone's status pair, with `warn` taking `--status-warning`, and tone colouring uses only those two (docs/authoring/Theming.md#Tones)
+- **Tone colours**: the theme stylesheet gives an element with `data-tone` the `--tone` and `--tone-soft` of that tone's status pair, with `warn` taking `--status-warning`, the components install the same rules in the root they live in so tones reach into a shadow root, and tone colouring uses only those two (docs/authoring/Theming.md#Tones)
 
 ## Reading a tone
 - **Missing tone**: reading the `tone` attribute gives one of `ok`, `info`, `warn`, `danger` or `muted`, and the component's fallback tone when the attribute is absent (docs/authoring/CustomComponents.md#Tones)

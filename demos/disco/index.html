@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Club Relax</title>
+</head>
+<body>
+    <div class="light-show" aria-hidden="true">
+        <div class="spotlight left"></div>
+        <div class="spotlight right"></div>
+        <div class="disco-ball"></div>
+    </div>
+
+    <header class="club-header">
+        <h1>Club Relax</h1>
+        <r-badge tone="danger" class="live">On air</r-badge>
+        <r-badge id="track" tone="info"></r-badge>
+    </header>
+
+    <main class="dance-hall">
+        <section class="figures">
+            <r-stat-tile id="bpm" label="Beats per minute" period="last track"></r-stat-tile>
+            <r-stat-tile id="crowd" label="On the floor" period="a minute ago"></r-stat-tile>
+            <r-stat-tile id="drinks" label="Drinks served" period="last hour"></r-stat-tile>
+        </section>
+
+        <r-card heading="Equalizer" lead="Sixteen bands, straight off the mixer." class="equalizer">
+            <r-bar-chart id="equalizer"></r-bar-chart>
+        </r-card>
+
+        <r-card heading="Dance floor" lead="Where the feet are, tile by tile." class="floor">
+        </r-card>
+
+        <r-card heading="The booth" lead="Turn it up until it goes red." class="booth">
+            <div class="meters">
+                <r-meter id="volume" label="Volume" max="120" warn-at="95" danger-at="110" unit="dB"></r-meter>
+                <r-meter id="energy" label="Crowd energy" max="100"></r-meter>
+                <r-meter id="smoke" label="Smoke machine" max="100" warn-at="60" danger-at="85" unit="%"></r-meter>
+            </div>
+        </r-card>
+    </main>
+
+    <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

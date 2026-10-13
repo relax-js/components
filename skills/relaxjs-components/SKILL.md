@@ -13,8 +13,10 @@ you use: it lists every attribute, property, event and styling hook. The typings
 ## Nothing shows until both are loaded
 
 `import '@relax.js/components'` registers every tag; a page that only uses the tags in HTML still
-needs it. The look comes from `@relax.js/components/theme.css`, loaded before the app's own styles.
-Without it the components work but look broken.
+needs it. To load fewer, import each element by its name in `Components.md`, such as
+`import '@relax.js/components/card'`. The look comes from `@relax.js/components/theme.css`.
+Without it the components work but look broken. An app with its own design tokens loads
+`theme-sizes.css` alone and points the colour variables at its tokens.
 
 ## Lists go in properties, never attributes
 

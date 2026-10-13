@@ -32,7 +32,7 @@ function readTone(el: Element, fallback: Tone): Tone;
 const toneIcon: Record<Tone, string>;
 ```
 
-`readTone` reads the `tone` attribute and returns the fallback when it is missing. An unknown value reports an error and returns the fallback too. `toneIcon` names each tone's default [icon](../manual/Icon.md). What the tones mean is in [Design Language](DesignLanguage.md#tones).
+`readTone` reads the `tone` attribute and returns the fallback when it is missing. An unknown value reports an error and returns the fallback too. `toneIcon` names each tone's default [icon](../manual/foundations/Icon.md). What the tones mean is in [Design Language](DesignLanguage.md#tones).
 
 ## Form Components
 
