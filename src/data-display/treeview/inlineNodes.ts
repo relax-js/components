@@ -1,3 +1,4 @@
+import { reportProblem } from '../../foundations/problems/problems';
 import type { TreeNode } from './Treeview';
 
 /** Reads the nodes from a `<template name="data">` child holding JSON, or `undefined` when there are none or they are invalid. */
@@ -14,7 +15,7 @@ export function parseInlineNodes<T>(host: Element): TreeNode<T>[] | undefined {
         }
         return parsed as TreeNode<T>[];
     } catch (error) {
-        console.error(`r-treeview: the data template is not valid JSON: ${(error as Error).message}`);
+        reportProblem('r-treeview', `the data template is not valid JSON: ${(error as Error).message}`);
         return undefined;
     }
 }

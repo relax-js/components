@@ -1,3 +1,4 @@
+import { captureProblems } from '../../captureProblems';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { readTone, toneIcon } from '../../../src/foundations/tone/tone';
 
@@ -15,13 +16,13 @@ describe('readTone', () => {
         expect(readTone(element, 'muted')).toBe('warn');
     });
 
-    it('an_unknown_tone_logs_an_error_naming_the_tag_and_gives_the_fallback', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    it('an_unknown_tone_reports_an_error_naming_the_tag_and_gives_the_fallback', () => {
+        const reported = captureProblems();
         const element = document.createElement('r-card');
         element.setAttribute('tone', 'loud');
 
         expect(readTone(element, 'info')).toBe('info');
-        expect(error.mock.calls[0][0]).toMatch(/^r-card: tone "loud"/);
+        expect(reported.messages()[0]).toMatch(/^r-card: tone "loud"/);
     });
 
     it('every_tone_has_an_icon_so_it_is_never_told_by_colour_alone', () => {

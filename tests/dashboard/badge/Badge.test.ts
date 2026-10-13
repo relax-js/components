@@ -1,3 +1,4 @@
+import { captureProblems } from '../../captureProblems';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import '../../../src/dashboard/badge/Badge';
 import { configureFormatting, resetFormatting } from '../../../src/foundations/formatting/formatting';
@@ -32,8 +33,8 @@ describe('r-badge', () => {
         expect(badge.hidden).toBe(false);
     });
 
-    it('a_badge_with_no_text_and_no_count_is_hidden_and_logs_nothing', async () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    it('a_badge_with_no_text_and_no_count_is_hidden_and_reports_nothing', async () => {
+        const reported = captureProblems();
         const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
         const badge = badgeWith('<r-badge></r-badge>');
 
@@ -42,7 +43,7 @@ describe('r-badge', () => {
         badge.textContent = 'Back';
         await nextMutations();
         expect(badge.hidden).toBe(false);
-        expect(error).not.toHaveBeenCalled();
+        expect(reported.messages()).toEqual([]);
         expect(warn).not.toHaveBeenCalled();
     });
 
@@ -56,11 +57,11 @@ describe('r-badge', () => {
         expect(badge.dataset.tone).toBe('danger');
     });
 
-    it('an_unknown_tone_logs_an_error_and_the_badge_is_muted', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    it('an_unknown_tone_reports_an_error_and_the_badge_is_muted', () => {
+        const reported = captureProblems();
         const badge = badgeWith('<r-badge tone="loud">x</r-badge>');
 
-        expect(error).toHaveBeenCalled();
+        expect(reported.messages()).not.toEqual([]);
         expect(badge.dataset.tone).toBe('muted');
     });
 
@@ -82,10 +83,10 @@ describe('r-badge', () => {
         });
 
         it.each(['-1', '1.5', 'abc', ''])('a_bad_count_%s_logs_an_error_and_renders_empty', (count) => {
-            const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+            const reported = captureProblems();
             const badge = badgeWith(`<r-badge count="${count}">Text</r-badge>`);
 
-            expect(error).toHaveBeenCalled();
+            expect(reported.messages()).not.toEqual([]);
             expect(badge.textContent).toBe('');
             expect(badge.hidden).toBe(true);
         });
@@ -128,10 +129,10 @@ describe('r-badge', () => {
         });
 
         it.each(['0', '-5', '2.5', 'many'])('a_bad_max_%s_logs_an_error_and_renders_empty', (max) => {
-            const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+            const reported = captureProblems();
             const badge = badgeWith(`<r-badge count="5" max="${max}"></r-badge>`);
 
-            expect(error).toHaveBeenCalled();
+            expect(reported.messages()).not.toEqual([]);
             expect(badge.textContent).toBe('');
             expect(badge.hidden).toBe(true);
         });

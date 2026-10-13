@@ -1,3 +1,4 @@
+import { captureProblems } from '../../captureProblems';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { mount } from '@relax.js/core/testing';
 import '../../../src/dashboard/days-left/DaysLeft';
@@ -69,28 +70,28 @@ describe('r-days-left', () => {
     });
 
     it.each<Record<string, string>>([{}, { days: '' }, { days: 'x' }, { days: '2.5' }])('a_days_that_is_not_a_whole_number_logs_and_renders_empty_%j', (attributes) => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+        const reported = captureProblems();
         const { element } = mount(daysLeft(attributes));
 
-        expect(error).toHaveBeenCalled();
+        expect(reported.messages()).not.toEqual([]);
         expect(element.textContent).toBe('');
         expect(element.hasAttribute('data-tone')).toBe(false);
     });
 
     it.each<Record<string, string>>([{ urgent: 'x' }, { soon: '' }])('thresholds_that_are_not_numbers_log_and_render_empty_%j', (attributes) => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+        const reported = captureProblems();
         const { element } = mount(daysLeft({ days: '5', ...attributes }));
 
-        expect(error).toHaveBeenCalled();
+        expect(reported.messages()).not.toEqual([]);
         expect(element.textContent).toBe('');
         expect(element.hasAttribute('data-tone')).toBe(false);
     });
 
-    it('urgent_larger_than_soon_logs_and_renders_empty', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    it('urgent_larger_than_soon_reports_and_renders_empty', () => {
+        const reported = captureProblems();
         const { element } = mount(daysLeft({ days: '5', urgent: '20', soon: '10' }));
 
-        expect(error).toHaveBeenCalled();
+        expect(reported.messages()).not.toEqual([]);
         expect(element.textContent).toBe('');
         expect(element.hasAttribute('data-tone')).toBe(false);
     });

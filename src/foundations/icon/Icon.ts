@@ -1,3 +1,4 @@
+import { reportProblem } from '../problems/problems';
 import { defaultIcons } from './icons';
 
 const shapes = new Map<string, string>(Object.entries(defaultIcons));
@@ -71,13 +72,13 @@ export class Icon extends HTMLElement {
             return;
         }
         if (name === '') {
-            console.error('r-icon: the name attribute is missing or empty');
+            reportProblem('r-icon', 'the name attribute is missing or empty');
             this.replaceChildren();
             return;
         }
         const shape = shapes.get(name);
         if (shape === undefined) {
-            console.error(`r-icon: no icon is registered as "${name}"`);
+            reportProblem('r-icon', `no icon is registered as "${name}"`);
             this.replaceChildren();
             return;
         }

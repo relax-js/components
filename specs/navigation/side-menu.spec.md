@@ -11,7 +11,7 @@ A user finds their way around an app from a titled list of links at the side of 
 
 ## Following the route
 - **Title and links**: the menu shows its title above a list of links, in the order given, inside a navigation landmark labelled by the title
-  - **No title**: a menu without a title logs an error and still shows its links (docs/authoring/ComponentContract.md#Failing Loudly)
+  - **No title**: a menu without a title reports an error and still shows its links (docs/authoring/ComponentContract.md#Failing Loudly)
 - **Items as data**: the links come from the `items` property in the menu item shape the top menu uses, and items set before the menu connects are drawn when it connects (docs/manual/navigation/TopMenu.md#Properties)
 - **Current route marked**: the link for the current route is marked the way a section nav marks it (specs/navigation/section-nav.spec.md#Following the route)
 - **Client-side navigation**: a link to a defined route navigates without reloading the page (docs/manual/navigation/TopMenu.md#Usage)
@@ -22,4 +22,4 @@ A user finds their way around an app from a titled list of links at the side of 
 ## Grouping links
 - **Group headings**: an item with `children` is shown as a heading with its children's links under it, and the heading is not a link
   - **Always open**: groups are always shown and cannot be collapsed
-- **One level deep**: an item whose children have children of their own logs an error and its deeper items are left out (docs/authoring/ComponentContract.md#Failing Loudly)
+- **One level deep**: an item whose children have children of their own reports an error and its deeper items are left out (docs/authoring/ComponentContract.md#Failing Loudly)

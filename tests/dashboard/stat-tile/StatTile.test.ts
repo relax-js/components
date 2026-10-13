@@ -1,3 +1,4 @@
+import { captureProblems } from '../../captureProblems';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { mount } from '@relax.js/core/testing';
 import '../../../src/dashboard/stat-tile/StatTile';
@@ -38,25 +39,25 @@ describe('r-stat-tile', () => {
         expect(change(tile({ value: '110', previous: '100', better: 'lower' }))?.dataset.tone).toBe('danger');
     });
 
-    it('not_a_number_logs_an_error_and_renders_empty', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    it('not_a_number_reports_an_error_and_renders_empty', () => {
+        const reported = captureProblems();
         expect(tile({ value: 'abc' }).childElementCount).toBe(0);
         expect(tile({ value: '1', previous: 'x' }).childElementCount).toBe(0);
-        expect(error).toHaveBeenCalledTimes(2);
+        expect(reported.messages()).toHaveLength(2);
     });
 
-    it('unknown_better_logs_an_error_and_renders_empty', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    it('unknown_better_reports_an_error_and_renders_empty', () => {
+        const reported = captureProblems();
         expect(tile({ previous: '1', better: 'sideways' }).childElementCount).toBe(0);
-        expect(error).toHaveBeenCalledTimes(1);
+        expect(reported.messages()).toHaveLength(1);
     });
 
-    it('missing_label_logs_an_error_and_renders_empty', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    it('missing_label_reports_an_error_and_renders_empty', () => {
+        const reported = captureProblems();
         const element = document.createElement('r-stat-tile');
         element.setAttribute('value', '1');
         expect(mount(element).element.childElementCount).toBe(0);
-        expect(error).toHaveBeenCalledTimes(1);
+        expect(reported.messages()).toHaveLength(1);
     });
 
     it('change_text_is_signed_percent_with_real_minus_in_the_locale_format', () => {
@@ -91,12 +92,12 @@ describe('r-stat-tile', () => {
     });
 
     it('no_comparison_leaves_the_change_out_without_an_error', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+        const reported = captureProblems();
         const element = tile({ value: '5' });
         expect(element.querySelector('.label')).not.toBeNull();
         expect(element.querySelector('.value')).not.toBeNull();
         expect(change(element)).toBeNull();
-        expect(error).not.toHaveBeenCalled();
+        expect(reported.messages()).toEqual([]);
     });
 
     it('trend_data_is_drawn_as_a_sparkline_under_the_figure', () => {
@@ -106,22 +107,22 @@ describe('r-stat-tile', () => {
         element.setAttribute('previous', '4');
         element.trend = { labels: ['Jan', 'Feb'], series: [{ name: 'Revenue', values: [1, 2] }], summary: 'Revenue trend' };
         const mounted = mount(element).element;
-        expect(mounted.querySelector('r-line-chart svg')).not.toBeNull();
-        expect(mounted.lastElementChild?.tagName).toBe('R-LINE-CHART');
+        expect(mounted.querySelector('r-sparkline svg')).not.toBeNull();
+        expect(mounted.lastElementChild?.tagName).toBe('R-SPARKLINE');
     });
 
     it('no_trend_leaves_the_space_out_rather_than_an_empty_sparkline', () => {
-        expect(tile({}).querySelector('r-line-chart')).toBeNull();
+        expect(tile({}).querySelector('r-sparkline')).toBeNull();
     });
 
-    it('bad_trend_logs_an_error_and_renders_empty', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    it('bad_trend_reports_an_error_and_renders_empty', () => {
+        const reported = captureProblems();
         const element = document.createElement('r-stat-tile');
         element.setAttribute('label', 'Revenue');
         element.setAttribute('value', '5');
         element.trend = { labels: ['Jan'], series: [{ name: 'Revenue', values: [1, 2] }], summary: 'Bad' };
         expect(mount(element).element.childElementCount).toBe(0);
-        expect(error).toHaveBeenCalled();
+        expect(reported.messages()).not.toEqual([]);
     });
 
     it('card_tier_takes_card_variables_and_casts_no_shadow', () => {

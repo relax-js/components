@@ -1,3 +1,4 @@
+import { captureProblems } from '../../captureProblems';
 import { readFileSync } from 'node:fs';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import '../../../src/dashboard/amount/Amount';
@@ -83,28 +84,28 @@ describe('putting a component on a page', () => {
         expect(document.head.querySelectorAll('style[data-r-styles="r-status-grid"]')).toHaveLength(1);
     });
 
-    it('a_missing_or_invalid_attribute_logs_the_tag_and_the_problem_and_renders_empty', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    it('a_missing_or_invalid_attribute_reports_the_tag_and_the_problem_and_renders_empty', () => {
+        const reported = captureProblems();
         const amount = document.createElement('r-amount');
         document.body.append(amount);
 
-        expect(error.mock.calls[0][0]).toMatch(/^r-amount: .+/);
+        expect(reported.messages()[0]).toMatch(/^r-amount: .+/);
         expect(amount.textContent).toBe('');
     });
 
     it('data_the_component_cannot_draw_is_reported_and_rendered_empty', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+        const reported = captureProblems();
         const grid = document.createElement('r-status-grid');
         document.body.append(grid);
 
         grid.items = 'not a list' as never;
 
-        expect(error.mock.calls[0][0]).toMatch(/^r-status-grid: .+/);
+        expect(reported.messages()[0]).toMatch(/^r-status-grid: .+/);
         expect(grid.childElementCount).toBe(0);
     });
 
     it('once_the_input_is_valid_again_the_element_draws_normally', () => {
-        vi.spyOn(console, 'error').mockImplementation(() => {});
+        captureProblems();
         const amount = document.createElement('r-amount');
         document.body.append(amount);
         amount.setAttribute('value', 'abc');
@@ -124,12 +125,12 @@ describe('putting a component on a page', () => {
     });
 
     it('a_localized_number_in_an_attribute_is_bad_input_and_a_javascript_literal_is_read', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+        const reported = captureProblems();
         const amount = document.createElement('r-amount');
         amount.setAttribute('value', '1 285 400');
         document.body.append(amount);
 
-        expect(error.mock.calls[0][0]).toMatch(/^r-amount: /);
+        expect(reported.messages()[0]).toMatch(/^r-amount: /);
         expect(amount.textContent).toBe('');
 
         amount.setAttribute('value', '1.5e3');
@@ -168,7 +169,7 @@ describe('putting a component on a page', () => {
             document.createElement('r-status-grid'),
             document.createElement('r-status-mark')
         );
-        vi.spyOn(console, 'error').mockImplementation(() => {});
+        captureProblems();
 
         const styles = installedStyles();
         expect(styles.length).toBeGreaterThan(0);

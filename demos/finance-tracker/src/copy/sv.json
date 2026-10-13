@@ -1,0 +1,59 @@
+{
+    "app": {
+        "title": "Hushållsbudget",
+        "language": "Språk"
+    },
+    "nav": {
+        "overview": "Översikt",
+        "budget": "Budget",
+        "transactions": "Transaktioner"
+    },
+    "overview": {
+        "heading": "Den här månaden",
+        "spending": "Utgifter",
+        "saved": "Sparat",
+        "lastMonth": "förra månaden",
+        "accounts": "Konton",
+        "accountsLead": "Saldon och utvecklingen det senaste året.",
+        "bills": "Kommande räkningar",
+        "balance": "Saldo över året",
+        "balanceLead": "Alla konton tillsammans, mot ditt buffertmål.",
+        "total": "Alla konton",
+        "bufferTarget": "Buffertmål"
+    },
+    "budget": {
+        "heading": "Budget",
+        "byCategory": "Utgifter per kategori",
+        "byCategoryLead": "Den här månaden, mot varje kategoris budget.",
+        "spent": "Spenderat",
+        "budget": "Budget",
+        "limits": "Använd budget",
+        "year": "Året",
+        "yearLead": "En månad stängs när utgifterna är avstämda."
+    },
+    "transactions": {
+        "heading": "Transaktioner",
+        "date": "Datum",
+        "description": "Beskrivning",
+        "category": "Kategori",
+        "amount": "Belopp"
+    },
+    "accounts": {
+        "everyday": "Lönekonto",
+        "savings": "Sparkonto",
+        "buffer": "Buffert"
+    },
+    "categories": {
+        "housing": "Boende",
+        "food": "Mat",
+        "transport": "Transport",
+        "leisure": "Nöje",
+        "utilities": "El och abonnemang"
+    },
+    "bills": {
+        "rent": "Hyra",
+        "electricity": "El",
+        "broadband": "Bredband",
+        "insurance": "Bilförsäkring"
+    }
+}

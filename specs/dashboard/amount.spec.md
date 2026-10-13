@@ -22,8 +22,8 @@ A reader sees money amounts grouped and formatted the way their locale writes th
   - **Turns positive**: when the value changes from negative to zero or positive, the class is removed
 - **Locale and currency attributes**: `locale` and `currency` attributes override the configured locale and currency for that amount (docs/manual/Amount.md#Attributes)
 - **Attributes observed**: changing `value`, `decimals`, `unit`, `signed`, `mark-negative`, `locale` or `currency` reformats the amount (docs/manual/Amount.md#Attributes)
-  - **Not a number**: a missing `value`, an empty one, or one that is not a JavaScript number literal, such as `1 285 400` or `1285400,5`, logs an error and renders empty, never `0 kr`
-- **Bad options**: a `decimals` other than 0 or 2, a `unit` other than `none`, or a locale or currency that cannot be formatted with, logs an error and renders empty (specs/dashboard/dashboard-foundations.spec.md#Putting a component on a page)
+  - **Not a number**: a missing `value`, an empty one, or one that is not a JavaScript number literal, such as `1 285 400` or `1285400,5`, reports an error and renders empty, never `0 kr`
+- **Bad options**: a `decimals` other than 0 or 2, a `unit` other than `none`, or a locale or currency that cannot be formatted with, reports an error and renders empty (specs/dashboard/dashboard-foundations.spec.md#Putting a component on a page)
 - **Kept on one line**: an amount never breaks across lines between its digit groups or before its currency
 
 ## Formatting an amount from code
@@ -33,4 +33,4 @@ A reader sees money amounts grouped and formatted the way their locale writes th
 - **Pipe arguments**: the `amount` pipe takes, in any order, `0` or `2` for decimals, `signed`, `nounit` and a three-letter currency code, as in `{{change | amount:2:signed:EUR}}`
   - **Unknown argument**: any other argument throws an error naming the amount
   - **Empty value**: a `null` or `undefined` value gives empty text, so `| default:…` can follow it
-  - **Value not a number**: any other value that is not a number logs an error and gives empty text, without throwing
+  - **Value not a number**: any other value that is not a number reports an error and gives empty text, without throwing

@@ -1,3 +1,4 @@
+import { reportProblem } from '../../foundations/problems/problems';
 import { installStyles } from '../../foundations/styles';
 import { text } from '../../foundations/text/text';
 import { formatValue } from '../../foundations/formatting/formatting';
@@ -41,6 +42,8 @@ r-sparkline .visually-hidden {
     overflow: hidden;
     clip-path: inset(50%);
     white-space: nowrap;
+    /* A table is never narrower than its cells otherwise, and would widen the page out of sight. */
+    table-layout: fixed;
 }
 r-sparkline .empty { margin: 0; text-align: center; }
 `;
@@ -205,22 +208,21 @@ export class Sparkline extends HTMLElement {
 
     private isValid(data: ChartData): boolean {
         if (typeof data.summary !== 'string' || data.summary === '') {
-            console.error('r-sparkline: the data needs a summary');
+            reportProblem('r-sparkline', 'the data needs a summary');
             return false;
         }
         if (data.series.length > 1) {
-            console.error(`r-sparkline: ${String(data.series.length)} series, a sparkline draws exactly one`);
+            reportProblem('r-sparkline', `${String(data.series.length)} series, a sparkline draws exactly one`);
             return false;
         }
         for (const series of data.series) {
             if (series.values.length !== data.labels.length) {
-                console.error(
-                    `r-sparkline: series "${series.name}" has ${String(series.values.length)} values for ${String(data.labels.length)} labels`,
+                reportProblem('r-sparkline', `series "${series.name}" has ${String(series.values.length)} values for ${String(data.labels.length)} labels`,
                 );
                 return false;
             }
             if (series.values.some((value) => value !== null && !Number.isFinite(value))) {
-                console.error(`r-sparkline: series "${series.name}" has a value that is not a number`);
+                reportProblem('r-sparkline', `series "${series.name}" has a value that is not a number`);
                 return false;
             }
         }

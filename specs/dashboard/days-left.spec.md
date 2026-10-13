@@ -17,7 +17,7 @@ A reader sees how many days remain to a deadline, marked by how urgent it is, so
 - **Deadline passed**: 0 days reads "0 days" and a negative count reads as days overdue, such as "3 days overdue" for `-3`, from its own text in the `r-components` namespace, both with tone `danger`
 - **Days observed**: changing `days` updates the text and tone (docs/manual/DaysLeft.md#Attributes)
   - **Thresholds changed**: changing `urgent` or `soon` on a drawn element updates its tone
-- **Not a whole number**: a missing `days`, or one that is not a whole number, logs an error and the element shows no text and carries no `data-tone` (docs/manual/DaysLeft.md#Attributes)
-- **Bad thresholds**: an `urgent` or `soon` that is not a number logs an error and the element shows no text and carries no `data-tone` (specs/dashboard/dashboard-foundations.spec.md#Putting a component on a page)
+- **Not a whole number**: a missing `days`, or one that is not a whole number, reports an error and the element shows no text and carries no `data-tone` (docs/manual/DaysLeft.md#Attributes)
+- **Bad thresholds**: an `urgent` or `soon` that is not a number reports an error and the element shows no text and carries no `data-tone` (specs/dashboard/dashboard-foundations.spec.md#Putting a component on a page)
   - **Thresholds reversed**: an `urgent` larger than `soon` is bad input the same way
 - **Exported rule matches**: `deadlineTone(days, urgent, soon)` gives the same tone as the element for the same values, and throws when `days` is not a whole number (docs/manual/DaysLeft.md#Usage)

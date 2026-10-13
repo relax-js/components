@@ -28,7 +28,7 @@ registerIcons({
 
 | Attribute | Type | Description |
 |-----------|------|-------------|
-| `name` | `string` | The shape to draw. A name with no registered shape logs an error and draws nothing. |
+| `name` | `string` | The shape to draw. A name with no registered shape reports an error and draws nothing. |
 
 ## Accessibility
 

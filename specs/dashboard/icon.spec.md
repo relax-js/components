@@ -16,10 +16,10 @@ A developer places a small line icon next to text by name; it matches the text's
 - **Name change redraws**: changing `name` on a connected icon draws the new shape in place of the old one (docs/manual/Icon.md#Usage)
   - **Disconnected name change**: a name change while disconnected draws nothing until the icon connects, then draws the current name (docs/manual/Icon.md#Usage)
   - **Moved icon**: moving the icon elsewhere in the page never adds a second shape (docs/authoring/ComponentContract.md#Drawing Once)
-- **Unknown name**: a name with no registered shape logs `console.error` starting with `r-icon:` and naming the name, and the icon shows no shape (docs/manual/Icon.md#Attributes)
+- **Unknown name**: a name with no registered shape reports an error through the Relaxjs error channel starting with `r-icon:` and naming the name, and the icon shows no shape (docs/manual/Icon.md#Attributes)
   - **Unknown after known**: changing a drawn icon to an unknown name removes the shape it showed
-  - **Missing name**: a missing or empty `name` logs an error starting with `r-icon:` and shows no shape (docs/authoring/ComponentContract.md#Failing Loudly)
-  - **Template placeholder**: the unbound placeholder name a template carries before it binds the real name neither draws nor logs an error (docs/manual/Icon.md#Usage)
+  - **Missing name**: a missing or empty `name` reports an error starting with `r-icon:` and shows no shape (docs/authoring/ComponentContract.md#Failing Loudly)
+  - **Template placeholder**: the unbound placeholder name a template carries before it binds the real name neither draws nor reports an error (docs/manual/Icon.md#Usage)
 
 ## Adding icons
 - **Register icons**: `registerIcons(record)` adds shapes by name, each the SVG content of one 24-unit icon, that every icon can then use (docs/manual/Icon.md#Adding Shapes)

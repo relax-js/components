@@ -1,3 +1,4 @@
+import { captureProblems } from '../../captureProblems';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { mount } from '@relax.js/core/testing';
 import '../../../src/dashboard/period-grid/PeriodGrid';
@@ -36,12 +37,12 @@ describe('r-period-grid', () => {
         expect(element.firstElementChild?.className).toBe('year');
     });
 
-    it('missing_or_non_numeric_year_logs_an_error_and_renders_empty', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    it('missing_or_non_numeric_year_reports_an_error_and_renders_empty', () => {
+        const reported = captureProblems();
 
         expect(mount(grid(null, months)).element.children).toHaveLength(0);
         expect(mount(grid('abc', months)).element.children).toHaveLength(0);
-        expect(error).toHaveBeenCalledTimes(2);
+        expect(reported.messages()).toHaveLength(2);
     });
 
     it('changing_year_updates_the_heading_and_every_tile_title', () => {
@@ -101,12 +102,12 @@ describe('r-period-grid', () => {
     });
 
     it('closed_is_an_unknown_state_once_the_page_replaces_the_states_without_it', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+        const reported = captureProblems();
         const { element } = mount(grid('2026', [{ month: 'Jan', state: 'closed' }]));
 
         element.states = [{ id: 'paid', label: 'Paid' }];
 
-        expect(error).toHaveBeenCalled();
+        expect(reported.messages()).not.toEqual([]);
         expect(element.children).toHaveLength(0);
     });
 

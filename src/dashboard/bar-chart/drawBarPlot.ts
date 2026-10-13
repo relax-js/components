@@ -1,9 +1,13 @@
 import type { ChartData } from './BarChart';
-import { element, height, pad, width } from './chartSvg';
+import { element, height, labelGap, labelStep, labelText, textHeight, textWidth, valueAxisRoom, widestText } from './chartSvg';
+import type { Pad } from './chartSvg';
 
-const textHeight = 12;
-const characterWidth = 6.5;
 const valueGap = 4;
+// Upright bars whose labels do not fit side by side turn them this far, and give them at most this share of the height.
+const turn = 45;
+const turnedShare = 0.4;
+// The share of the width sideways bars give their labels at most.
+const labelShare = 0.4;
 
 /**
  * The axis for the given extremes: it starts at zero (or the lowest value below it) and ends on a
@@ -37,6 +41,9 @@ interface Plot {
 interface Layout {
     horizontal: boolean;
     stacked: boolean;
+    pad: Pad;
+    /** Labels are written turned, because they do not fit side by side. */
+    turned: boolean;
     plot: Plot;
     bandSize: number;
     valueExtent: number;
@@ -45,6 +52,8 @@ interface Layout {
 }
 
 export interface PlotOptions {
+    /** The width to draw at, in pixels: the chart's own width, so text keeps its size. */
+    width: number;
     horizontal: boolean;
     stacked: boolean;
     showValues: boolean;
@@ -52,12 +61,20 @@ export interface PlotOptions {
     valueFormat: (value: number) => string;
 }
 
-export function drawBarPlot(data: ChartData, options: PlotOptions): SVGSVGElement {
-    const { horizontal, stacked } = options;
+/** A drawn plot, and the box of each label's band for the chart to hang pointer handling on. */
+export interface BarPlot {
+    svg: SVGSVGElement;
+    band: (label: number) => Plot;
+}
+
+export function drawBarPlot(data: ChartData, options: PlotOptions): BarPlot {
+    const { horizontal, stacked, width } = options;
     const svg = element('svg', { viewBox: `0 0 ${String(width)} ${String(height)}`, 'aria-hidden': 'true' });
     const segments = segmentsOf(data, stacked);
     const ends = segments.flat(2).flatMap((segment) => [segment.from, segment.to]);
     const scale = niceScale(Math.min(0, ...ends), Math.max(0, ...ends));
+    const ticks = Array.from({ length: Math.round((scale.top - scale.bottom) / scale.step) + 1 }, (_, i) => scale.bottom + i * scale.step);
+    const { pad, turned } = padding(data.labels, ticks.map(options.axisFormat), horizontal, width);
 
     const plot = { left: pad.left, top: pad.top, width: width - pad.left - pad.right, height: height - pad.top - pad.bottom };
     const span = scale.top - scale.bottom;
@@ -70,6 +87,8 @@ export function drawBarPlot(data: ChartData, options: PlotOptions): SVGSVGElemen
     const layout: Layout = {
         horizontal,
         stacked,
+        pad,
+        turned,
         plot,
         bandSize,
         valueExtent: horizontal ? plot.width : plot.height,
@@ -77,11 +96,35 @@ export function drawBarPlot(data: ChartData, options: PlotOptions): SVGSVGElemen
         bandStart: (label) => (horizontal ? plot.top : plot.left) + label * bandSize,
     };
 
-    drawValueAxis(svg, scale, layout, options.axisFormat);
+    drawValueAxis(svg, ticks, layout, options.axisFormat);
     drawLabelAxis(svg, data, layout);
     drawBars(svg, data, segments, layout, options);
     drawThresholds(svg, data, layout);
-    return svg;
+    const band = (label: number): Plot => horizontal
+        ? { left: plot.left, top: layout.bandStart(label), width: plot.width, height: bandSize }
+        : { left: layout.bandStart(label), top: plot.top, width: bandSize, height: plot.height };
+    return { svg, band };
+}
+
+/**
+ * Room around the plot for the axis text. Value labels beside upright bars get the width of the
+ * widest; labels below upright bars are turned when they do not fit side by side; labels beside
+ * sideways bars get the width of the widest, up to a share of the chart. Either side gets at least
+ * the value axis room.
+ */
+function padding(labels: string[], values: string[], horizontal: boolean, width: number): { pad: Pad; turned: boolean } {
+    const edge = 12;
+    if (horizontal) {
+        const left = Math.min(Math.max(widestText(labels) + 2 * labelGap, valueAxisRoom), Math.round(width * labelShare));
+        // The last value label is centred on the plot's right edge.
+        const right = Math.max(edge, textWidth(values[values.length - 1]) / 2 + 2);
+        return { pad: { left, right, top: edge, bottom: 28 }, turned: false };
+    }
+    const left = Math.ceil(Math.max(widestText(values) + labelGap + 2, valueAxisRoom));
+    const bandSize = (width - left - edge) / labels.length;
+    const turned = widestText(labels) + labelGap > bandSize;
+    const bottom = turned ? Math.min(widestText(labels) * Math.sin((turn * Math.PI) / 180) + textHeight + labelGap, height * turnedShare) : 28;
+    return { pad: { left, right: edge, top: edge, bottom: Math.round(bottom) }, turned };
 }
 
 /** The segments of each label's bars, one list per series (empty for threshold series). */
@@ -109,31 +152,53 @@ function segmentsOf(data: ChartData, stacked: boolean): Segment[][][] {
     return result;
 }
 
-/** Grid and value axis. */
-function drawValueAxis(svg: SVGSVGElement, scale: { bottom: number; top: number; step: number }, layout: Layout, format: (value: number) => string): void {
-    const { horizontal, plot } = layout;
-    const stepCount = Math.round((scale.top - scale.bottom) / scale.step);
-    for (let i = 0; i <= stepCount; i++) {
-        const value = scale.bottom + i * scale.step;
+/** Grid and value axis; where the value labels would not fit side by side under sideways bars, every nth is written. */
+function drawValueAxis(svg: SVGSVGElement, ticks: number[], layout: Layout, format: (value: number) => string): void {
+    const { horizontal, plot, pad } = layout;
+    const spacing = ticks.length > 1 ? Math.abs(layout.along(ticks[1]) - layout.along(ticks[0])) : Infinity;
+    const step = horizontal ? labelStep(spacing, widestText(ticks.map(format)) + labelGap) : labelStep(spacing, textHeight);
+    ticks.forEach((value, i) => {
         const position = layout.along(value);
         const line = horizontal
             ? element('line', { x1: position, x2: position, y1: plot.top, y2: plot.top + plot.height })
             : element('line', { x1: plot.left, x2: plot.left + plot.width, y1: position, y2: position });
         line.classList.add(value === 0 ? 'zero' : 'grid');
-        const label = element('text', horizontal ? { x: position, y: height - 8, 'text-anchor': 'middle' } : { x: pad.left - 6, y: position + 4, 'text-anchor': 'end' });
+        svg.append(line);
+        if (i % step !== 0) {
+            return;
+        }
+        const label = element('text', horizontal
+            ? { x: position, y: height - 8, 'text-anchor': 'middle' }
+            : { x: pad.left - labelGap, y: position + 4, 'text-anchor': 'end' });
         label.classList.add('axis-label');
         label.textContent = format(value);
-        svg.append(line, label);
-    }
+        svg.append(label);
+    });
 }
 
+/**
+ * A label per band: beside sideways bars, shortened to the room the padding gives; below upright
+ * bars, side by side or turned, and every nth only where even turned they would not fit.
+ */
 function drawLabelAxis(svg: SVGSVGElement, data: ChartData, layout: Layout): void {
-    const { horizontal } = layout;
+    const { horizontal, turned, pad, plot, bandSize } = layout;
+    const step = labelStep(bandSize, horizontal || turned ? textHeight : 0);
+    const turnedRoom = (pad.bottom - textHeight) / Math.sin((turn * Math.PI) / 180);
     data.labels.forEach((text, index) => {
-        const centre = layout.bandStart(index) + layout.bandSize / 2;
-        const label = element('text', horizontal ? { x: pad.left - 6, y: centre + 4, 'text-anchor': 'end' } : { x: centre, y: height - 8, 'text-anchor': 'middle' });
+        if (index % step !== 0) {
+            return;
+        }
+        const centre = layout.bandStart(index) + bandSize / 2;
+        let label: SVGTextElement;
+        if (horizontal) {
+            label = labelText({ x: pad.left - labelGap, y: centre + 4, 'text-anchor': 'end' }, text, pad.left - 2 * labelGap);
+        } else if (turned) {
+            const y = plot.top + plot.height + labelGap + 4;
+            label = labelText({ x: centre, y, 'text-anchor': 'end', transform: `rotate(-${String(turn)} ${String(centre)} ${String(y)})` }, text, turnedRoom);
+        } else {
+            label = labelText({ x: centre, y: height - 8, 'text-anchor': 'middle' }, text, bandSize);
+        }
         label.classList.add('axis-label', 'label');
-        label.textContent = text;
         svg.append(label);
     });
 }
@@ -174,7 +239,7 @@ function drawBar(segment: Segment, barStart: number, barSize: number, layout: La
         return [bar];
     }
     const written = options.valueFormat(segment.value);
-    const textLength = written.length * characterWidth;
+    const textLength = textWidth(written);
     const fitted = placeValue({ horizontal, stacked, segment, written, textLength, a, b, barStart, barSize, bandSize, plot, valueExtent, along });
     return fitted ? [bar, fitted] : [bar];
 }

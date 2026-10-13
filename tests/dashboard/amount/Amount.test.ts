@@ -1,3 +1,4 @@
+import { captureProblems } from '../../captureProblems';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { mount } from '@relax.js/core/testing';
 import '../../../src/dashboard/amount/Amount';
@@ -126,21 +127,21 @@ describe('r-amount', () => {
     });
 
     it.each([[null], [''], ['1 285 400'], ['1285400,5'], ['abc']])('a_value_that_is_not_a_number_logs_and_renders_empty_%s', (value) => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+        const reported = captureProblems();
         const { element } = mount(value === null ? amount({}) : amount({ value }));
 
         expect(element.textContent).toBe('');
-        expect(error).toHaveBeenCalled();
+        expect(reported.messages()).not.toEqual([]);
     });
 
     it.each([[{ decimals: '1' }], [{ unit: 'kr' }], [{ locale: 'not a locale' }], [{ currency: 'XX' }]])(
         'bad_options_log_and_render_empty_%j',
         (options) => {
-            const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+            const reported = captureProblems();
             const { element } = mount(amount({ value: '5', ...options }));
 
             expect(element.textContent).toBe('');
-            expect(error).toHaveBeenCalled();
+            expect(reported.messages()).not.toEqual([]);
         },
     );
 

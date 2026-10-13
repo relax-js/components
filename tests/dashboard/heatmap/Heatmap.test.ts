@@ -1,3 +1,4 @@
+import { captureProblems } from '../../captureProblems';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { mount } from '@relax.js/core/testing';
 import '../../../src/dashboard/heatmap/Heatmap';
@@ -38,19 +39,19 @@ describe('r-heatmap', () => {
         expect(cells(element).map((cell) => `${cell.dataset.row}, ${cell.dataset.column}`)).toEqual(['r1, a', 'r1, b', 'r2, a', 'r2, b']);
     });
 
-    it('a_row_with_the_wrong_number_of_values_logs_an_error_naming_the_tag_and_renders_empty', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    it('a_row_with_the_wrong_number_of_values_reports_an_error_naming_the_tag_and_renders_empty', () => {
+        const reported = captureProblems();
         const { element } = mount(heatmap([[1, 2], [3]]));
 
-        expect(error).toHaveBeenCalledWith(expect.stringContaining('r-heatmap'));
+        expect(reported.messages()).toContainEqual(expect.stringContaining('r-heatmap'));
         expect(element.children).toHaveLength(0);
     });
 
-    it('a_value_that_is_not_a_number_logs_an_error_and_renders_empty', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    it('a_value_that_is_not_a_number_reports_an_error_and_renders_empty', () => {
+        const reported = captureProblems();
         const { element } = mount(heatmap([[1, 'x'], [3, 4]]));
 
-        expect(error).toHaveBeenCalled();
+        expect(reported.messages()).not.toEqual([]);
         expect(element.children).toHaveLength(0);
     });
 
@@ -60,12 +61,12 @@ describe('r-heatmap', () => {
         expect(positions(element)).toEqual(['0', '0.5', '1', '0.5']);
     });
 
-    it('when_every_value_is_equal_every_cell_takes_one_colour_and_nothing_logs', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    it('when_every_value_is_equal_every_cell_takes_one_colour_and_nothing_reports', () => {
+        const reported = captureProblems();
         const { element } = mount(heatmap([[3, 3], [3, 3]]));
 
         expect(new Set(positions(element)).size).toBe(1);
-        expect(error).not.toHaveBeenCalled();
+        expect(reported.messages()).toEqual([]);
     });
 
     it('diverging_scale_gives_two_sides_stronger_with_distance_and_the_midpoint_the_middle', () => {
@@ -88,12 +89,12 @@ describe('r-heatmap', () => {
         expect(positions(element)).toEqual(['0', '1', '1', '0']);
     });
 
-    it('an_unknown_scale_or_a_midpoint_that_is_not_a_number_logs_an_error_and_renders_empty', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    it('an_unknown_scale_or_a_midpoint_that_is_not_a_number_reports_an_error_and_renders_empty', () => {
+        const reported = captureProblems();
         const unknown = mount(heatmap([[1, 2], [3, 4]], { scale: 'rainbow' })).element;
         const midpoint = mount(heatmap([[1, 2], [3, 4]], { scale: 'diverging', midpoint: 'abc' })).element;
 
-        expect(error).toHaveBeenCalledTimes(2);
+        expect(reported.messages()).toHaveLength(2);
         expect(unknown.children).toHaveLength(0);
         expect(midpoint.children).toHaveLength(0);
     });
@@ -112,11 +113,11 @@ describe('r-heatmap', () => {
         expect(cells(element)[1].textContent).toBe('50');
     });
 
-    it('a_minimum_not_below_the_maximum_logs_an_error_and_renders_empty', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    it('a_minimum_not_below_the_maximum_reports_an_error_and_renders_empty', () => {
+        const reported = captureProblems();
         const { element } = mount(heatmap([[1, 2], [3, 4]], { min: '5', max: '5' }));
 
-        expect(error).toHaveBeenCalled();
+        expect(reported.messages()).not.toEqual([]);
         expect(element.children).toHaveLength(0);
     });
 
@@ -259,13 +260,13 @@ describe('r-heatmap', () => {
         expect(element.querySelector('table')!.closest('[aria-hidden]')).toBeNull();
     });
 
-    it('data_without_a_summary_logs_an_error_and_draws_nothing', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    it('data_without_a_summary_reports_an_error_and_draws_nothing', () => {
+        const reported = captureProblems();
         const element = heatmap([[1, 2], [3, 4]]);
         element.summary = '';
         mount(element);
 
-        expect(error).toHaveBeenCalledWith(expect.stringContaining('r-heatmap'));
+        expect(reported.messages()).toContainEqual(expect.stringContaining('r-heatmap'));
         expect(element.children).toHaveLength(0);
     });
 

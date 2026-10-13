@@ -1,3 +1,4 @@
+import { captureProblems } from '../../captureProblems';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import '../../../src/dashboard/bar-chart/BarChart';
 import '../../../src/dashboard/line-chart/LineChart';
@@ -110,13 +111,13 @@ describe('chart reading', () => {
             expect(subject.source).not.toMatch(/var\(--(danger|warn|success|ok|error|status)/);
         });
 
-        it('more_series_than_the_five_theme_colours_logs_an_error_naming_the_tag_and_draws_nothing', () => {
-            const error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+        it('more_series_than_the_five_theme_colours_reports_an_error_naming_the_tag_and_draws_nothing', () => {
+            const reported = captureProblems();
             const six = series([1, 2, 3], [1, 2, 3], [1, 2, 3], [1, 2, 3], [1, 2, 3], [1, 2, 3]);
 
             const element = chart(subject.tag, six);
 
-            expect(error).toHaveBeenCalledWith(expect.stringContaining(subject.tag));
+            expect(reported.messages()).toContainEqual(expect.stringContaining(subject.tag));
             expect(element.querySelector('svg')).toBeNull();
         });
 
@@ -176,14 +177,14 @@ describe('chart reading', () => {
             expect(figure.getAttribute('aria-label')).toBe('Nothing yet');
         });
 
-        it('data_without_a_summary_logs_an_error_naming_the_tag_and_draws_nothing', () => {
-            const error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+        it('data_without_a_summary_reports_an_error_naming_the_tag_and_draws_nothing', () => {
+            const reported = captureProblems();
             const element = document.createElement(subject.tag) as AnyChart;
             document.body.append(element);
 
             element.data = { labels: ['A', 'B', 'C'], series: sample, summary: '' };
 
-            expect(error).toHaveBeenCalledWith(expect.stringContaining(subject.tag));
+            expect(reported.messages()).toContainEqual(expect.stringContaining(subject.tag));
             expect(element.querySelector('svg')).toBeNull();
             expect(element.querySelector('table')).toBeNull();
         });

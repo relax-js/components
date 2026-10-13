@@ -1,3 +1,4 @@
+import { captureProblems } from '../../captureProblems';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import '../../../src/dashboard/sparkline/Sparkline';
 import type { Sparkline } from '../../../src/dashboard/sparkline/Sparkline';
@@ -37,8 +38,8 @@ describe('r-sparkline', () => {
         expect(element.data.labels).toEqual(['A']);
     });
 
-    it('more_than_one_series_logs_an_error_naming_the_tag_and_draws_nothing', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    it('more_than_one_series_reports_an_error_naming_the_tag_and_draws_nothing', () => {
+        const reported = captureProblems();
         const element = document.createElement('r-sparkline');
         document.body.append(element);
         const data: ChartData = {
@@ -50,7 +51,7 @@ describe('r-sparkline', () => {
             summary: 'S',
         };
         element.data = data;
-        expect(error).toHaveBeenCalledWith(expect.stringContaining('r-sparkline'));
+        expect(reported.messages()).toContainEqual(expect.stringContaining('r-sparkline'));
         expect(element.childElementCount).toBe(0);
     });
 

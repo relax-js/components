@@ -1,0 +1,39 @@
+incident-banners {
+    display: grid;
+    gap: var(--space-2);
+
+    &:not(:empty) {
+        margin-block-end: var(--space-4);
+    }
+}
+
+.meter-list {
+    display: grid;
+    gap: var(--space-3);
+}
+
+.certificates {
+    width: 100%;
+    border-collapse: collapse;
+
+    & th {
+        text-align: start;
+        color: var(--text-muted);
+        font-weight: 600;
+    }
+
+    & th,
+    & td {
+        padding: var(--item-padding);
+        border-bottom: var(--item-separator);
+    }
+}
+
+/* Traffic takes most of the row with capacity beside it; narrow screens stack them. */
+.overview-panels {
+    grid-template-columns: minmax(0, 3fr) minmax(18rem, 1fr);
+
+    @media (width < 60rem) {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}

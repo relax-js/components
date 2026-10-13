@@ -25,7 +25,7 @@ A reader sees one key figure for this period next to the same period last year, 
 - **Meter markup**: the meter shows `.label`, `.figures` with the formatted value and `.change[data-tone]`, a `.bar[data-tone]` whose `--fill` and `--mark` position `.this-year` and `.last-year`, and under it `.previous` (docs/manual/KpiMeter.md#Parts)
 - **Bar hidden from screen readers**: the bar is hidden from assistive technology, since the written figures and change say the same
 - **Attributes observed**: changing any attribute of a connected meter redraws it in place, without a second copy of its markup
-- **Bad attributes reported**: a missing or invalid `label`, `value`, `previous` or `better` logs an error naming the meter and renders nothing (specs/dashboard/dashboard-foundations.spec.md#Putting a component on a page)
+- **Bad attributes reported**: a missing or invalid `label`, `value`, `previous` or `better` reports an error naming the meter and renders nothing (specs/dashboard/dashboard-foundations.spec.md#Putting a component on a page)
   - **Not a number**: a `value` or `previous` that is not a JavaScript number literal, such as `1 285 400`, is bad input
   - **Unknown better**: a `better` other than `higher` or `lower` is bad input
   - **Missing label**: a meter without a `label` is bad input

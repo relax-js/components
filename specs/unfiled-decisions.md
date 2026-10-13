@@ -9,11 +9,11 @@
 - affects: Top menu, Dropdown menu
 
 ### Bad input keeps the page's own content
-- decided: A component whose body is the page's own content, such as the card, leaves out only the markup it draws itself when an attribute is missing or invalid, and logs the error, instead of rendering empty.
+- decided: A component whose body is the page's own content, such as the card, leaves out only the markup it draws itself when an attribute is missing or invalid, and reports the error, instead of rendering empty.
 - affects: Dashboard card, Dashboard foundations, docs/authoring/ComponentContract.md
 
 ### Card link needs an address
-- decided: A card given link text but no `href` logs an error and leaves the link out, instead of linking to `#`.
+- decided: A card given link text but no `href` reports an error and leaves the link out, instead of linking to `#`.
 - affects: Dashboard card, docs/manual/Card.md
 
 ### Card without an icon shows its tone's icon
@@ -29,7 +29,7 @@
 - affects: Amount
 
 ### Dashboard foundations owns overrides and bad-input reporting
-- decided: The general rules that a per-element attribute overrides the formatting config and that bad input logs an error and renders empty belong to Dashboard foundations, and Amount keeps only its own attributes and cites foundations for how errors are reported.
+- decided: The general rules that a per-element attribute overrides the formatting config and that bad input reports an error and renders empty belong to Dashboard foundations, and Amount keeps only its own attributes and cites foundations for how errors are reported.
 - affects: Amount, Dashboard foundations
 
 ### Tone colours and drawing once are shared
@@ -57,7 +57,7 @@
 - affects: Bar chart, Area chart
 
 ### Stacked totals and negatives in a stack
-- decided: In any stacked chart the read-out's total takes its word from the `r-components` namespace and is left out when there is a single series, the hidden table gains a total column, and a negative value in a stack logs an error naming its series and nothing is drawn.
+- decided: In any stacked chart the read-out's total takes its word from the `r-components` namespace and is left out when there is a single series, the hidden table gains a total column, and a negative value in a stack reports an error naming its series and nothing is drawn.
 - affects: Bar chart, Area chart
 
 ### Line chart shades a series, Area chart stacks
@@ -73,7 +73,7 @@
 - affects: Bar chart, Area chart
 
 ### A chart takes at most five series
-- decided: A chart given more series than the theme's five series colours logs an error and draws nothing, instead of folding the extra series into one.
+- decided: A chart given more series than the theme's five series colours reports an error and draws nothing, instead of folding the extra series into one.
 - affects: Bar chart, Area chart, docs/authoring/Theming.md
 
 ### A missing chart value is a gap

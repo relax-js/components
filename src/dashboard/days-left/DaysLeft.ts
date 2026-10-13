@@ -1,3 +1,4 @@
+import { reportProblem } from '../../foundations/problems/problems';
 import { formatValue } from '../../foundations/formatting/formatting';
 import { text, whenLanguageChanges } from '../../foundations/text/text';
 import type { Tone } from '../../foundations/tone/tone';
@@ -86,7 +87,7 @@ export class DaysLeft extends HTMLElement {
             this.textContent = days < 0 ? text('daysOverdue', { count: -days, n }) : text('days', { count: days, n });
             this.dataset.tone = deadlineTone(days, urgent, soon);
         } catch (error) {
-            console.error(`r-days-left: ${error instanceof Error ? error.message : String(error)}`);
+            reportProblem('r-days-left', error instanceof Error ? error.message : String(error));
         }
     }
 }

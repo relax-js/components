@@ -1,3 +1,4 @@
+import { reportProblem } from '../problems/problems';
 import { createPipeRegistry, type PipeFunction, type PipeRegistry } from '@relax.js/core';
 import { formatAmount, type AmountOptions } from '../../dashboard/amount/Amount';
 
@@ -8,7 +9,7 @@ export const amountPipe: PipeFunction = (value: unknown, ...args: unknown[]): st
         return '';
     }
     if (typeof value !== 'number' || !Number.isFinite(value)) {
-        console.error(`amount: ${String(value)} is not a number`);
+        reportProblem('amount', `${String(value)} is not a number`);
         return '';
     }
     return formatAmount(value, options);

@@ -35,6 +35,15 @@ const styles = /* css */ `
     }
 `;
 
+/** Dispatched by `<r-banner>` when the user closes it with its close button. */
+export class BannerDismissEvent extends Event {
+    static readonly type = 'r-banner-dismiss';
+
+    constructor() {
+        super(BannerDismissEvent.type, { bubbles: true });
+    }
+}
+
 /**
  * A notice about the whole page, drawn as a strip: the tone's icon, then the page's own children
  * as the message, then an optional action. The message is left as the page wrote it, so it may
@@ -49,6 +58,7 @@ const styles = /* css */ `
  * @attr {string} tone - ok, info, warn, danger or muted (default)
  * @attr {boolean} dismissible - Shows a close button that hides the banner and fires `r-banner-dismiss`
  * @slot action - A direct child with this slot is moved to the end of the strip
+ * @fires r-banner-dismiss - {@link BannerDismissEvent}
  */
 export class Banner extends HTMLElement {
     static get observedAttributes(): string[] {
@@ -111,7 +121,7 @@ export class Banner extends HTMLElement {
     // Nothing is stored: a fresh page load shows the banner again.
     private dismiss(): void {
         this.hidden = true;
-        this.dispatchEvent(new CustomEvent('r-banner-dismiss', { bubbles: true }));
+        this.dispatchEvent(new BannerDismissEvent());
     }
 }
 
@@ -120,6 +130,9 @@ if (!customElements.get('r-banner')) {
 }
 
 declare global {
+    interface HTMLElementEventMap {
+        [BannerDismissEvent.type]: BannerDismissEvent;
+    }
     interface HTMLElementTagNameMap {
         'r-banner': Banner;
     }

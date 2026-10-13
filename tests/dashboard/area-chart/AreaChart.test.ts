@@ -1,3 +1,4 @@
+import { captureProblems } from '../../captureProblems';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { mount } from '@relax.js/core/testing';
 import '../../../src/dashboard/area-chart/AreaChart';
@@ -38,11 +39,11 @@ describe('r-area-chart', () => {
         expect(chart.querySelectorAll('g.series')).toHaveLength(1);
     });
 
-    it('a_series_with_a_different_number_of_values_than_labels_logs_an_error_naming_it_and_draws_nothing', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    it('a_series_with_a_different_number_of_values_than_labels_reports_an_error_naming_it_and_draws_nothing', () => {
+        const reported = captureProblems();
         const chart = chartWith({ labels, series: [rent, { name: 'Short', values: [1] }], summary: 'Costs' });
 
-        expect(error).toHaveBeenCalledWith(expect.stringContaining('Short'));
+        expect(reported.messages()).toContainEqual(expect.stringContaining('Short'));
         expect(chart.querySelector('svg')).toBeNull();
     });
 

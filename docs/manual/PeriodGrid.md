@@ -48,7 +48,7 @@ interface Period { month: string; state: string }
 interface PeriodStateDefinition { id: string; text: string; icon?: string }
 ```
 
-A period whose state is not in the set logs an error and the grid renders empty.
+A period whose state is not in the set reports an error and the grid renders empty.
 
 ## Parts
 

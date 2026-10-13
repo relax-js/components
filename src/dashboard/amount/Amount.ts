@@ -1,3 +1,4 @@
+import { reportProblem } from '../../foundations/problems/problems';
 import { formatting } from '../../foundations/formatting/formatting';
 import { whenLanguageChanges } from '../../foundations/text/text';
 import { installStyles } from '../../foundations/styles';
@@ -133,7 +134,7 @@ export class Amount extends HTMLElement {
             this.textContent = written.text;
             this.classList.toggle('negative', written.negative && this.hasAttribute('mark-negative'));
         } catch (error) {
-            console.error(`r-amount: ${error instanceof Error ? error.message : String(error)}`);
+            reportProblem('r-amount', error instanceof Error ? error.message : String(error));
         }
     }
 }

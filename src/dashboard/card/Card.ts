@@ -1,3 +1,4 @@
+import { reportProblem } from '../../foundations/problems/problems';
 import { installStyles } from '../../foundations/styles';
 import '../../foundations/icon/Icon';
 import { readTone, toneIcon, type Tone } from '../../foundations/tone/tone';
@@ -17,14 +18,18 @@ const styles = /* css */ `
         border-inline-start: 4px solid var(--tone);
     }
 
+    /* The action and link drop under the heading when there is no room beside it. */
     r-card .card-head {
         display: flex;
+        flex-wrap: wrap;
         align-items: flex-start;
         gap: var(--card-gap);
     }
 
     r-card .card-head hgroup {
-        flex: 1;
+        flex: 1 1 12rem;
+        min-width: 0;
+        overflow-wrap: break-word;
     }
 
     r-card .card-head h2,
@@ -81,7 +86,7 @@ export class Card extends HTMLElement {
     }
 
     private render(): void {
-        // An unknown tone is logged by readTone and leaves the card without a tone.
+        // An unknown tone is reported by readTone and leaves the card without a tone.
         const raw = this.getAttribute('tone');
         const known = raw !== null && Object.hasOwn(toneIcon, raw);
         if (raw !== null) {
@@ -103,7 +108,7 @@ export class Card extends HTMLElement {
 
         const heading = this.getAttribute('heading') ?? '';
         if (heading === '') {
-            console.error('r-card: heading is missing');
+            reportProblem('r-card', 'heading is missing');
             // Without a heading row an action has nowhere to go; it returns to the body.
             this.prepend(...actions);
             return;
@@ -152,7 +157,7 @@ export class Card extends HTMLElement {
         }
         const href = this.getAttribute('href') ?? '';
         if (href === '') {
-            console.error('r-card: link-text needs an href');
+            reportProblem('r-card', 'link-text needs an href');
             return null;
         }
         const link = document.createElement('a');

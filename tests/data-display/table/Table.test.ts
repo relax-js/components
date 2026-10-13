@@ -1,3 +1,4 @@
+import { captureProblems } from '../../captureProblems';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { flush } from '@relax.js/core/testing';
 import { resetFormatting } from '../../../src/foundations/formatting/formatting';
@@ -73,12 +74,12 @@ describe('r-table', () => {
             expect(cells(table)).toEqual([['1'], ['2'], ['3']]);
         });
 
-        it('a_declared_column_without_field_logs_an_error_and_renders_empty', () => {
-            const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+        it('a_declared_column_without_field_reports_an_error_and_renders_empty', () => {
+            const reported = captureProblems();
             const table = mountTable('<r-table><r-column>Name</r-column></r-table>');
 
             expect(table.querySelector('table')).toBeNull();
-            expect(error).toHaveBeenCalledWith(expect.stringMatching(/^r-table: <r-column> "Name" has no field/));
+            expect(reported.messages()).toContainEqual(expect.stringMatching(/^r-table: <r-column> "Name" has no field/));
         });
 
         it('a_column_from_code_without_field_throws', () => {
@@ -98,23 +99,23 @@ describe('r-table', () => {
     });
 
     describe('column definitions', () => {
-        it('an_unrecognised_sort_logs_an_error_and_renders_empty', () => {
-            const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+        it('an_unrecognised_sort_reports_an_error_and_renders_empty', () => {
+            const reported = captureProblems();
             const table = mountTable(declared.replace('field="name" sortable', 'field="name" sort="up"'));
 
             expect(table.querySelector('table')).toBeNull();
-            expect(error).toHaveBeenCalledWith(expect.stringMatching(/sort="up"/));
+            expect(reported.messages()).toContainEqual(expect.stringMatching(/sort="up"/));
         });
 
         it('several_columns_with_a_sort_are_sorted_by_the_first_without_an_error', async () => {
-            const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+            const reported = captureProblems();
             const table = mountTable(
                 declared.replace('field="name" sortable', 'field="name" sort="desc"').replace('width="80px"', 'sort="asc"')
             );
             table.rows = people;
             await flush();
 
-            expect(error).not.toHaveBeenCalled();
+            expect(reported.messages()).toEqual([]);
             expect(cells(table).map((row) => row[0])).toEqual(['Cecilia', 'Bertil', 'Adam']);
         });
 
@@ -470,12 +471,12 @@ describe('r-table', () => {
             expect(table.querySelector<HTMLElement>('.pager')!.hidden).toBe(true);
         });
 
-        it('an_invalid_page_size_logs_an_error_and_renders_empty', () => {
-            const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+        it('an_invalid_page_size_reports_an_error_and_renders_empty', () => {
+            const reported = captureProblems();
             const table = mountTable(declared.replace('<r-table>', '<r-table page-size="many">'));
 
             expect(table.querySelector('table')).toBeNull();
-            expect(error).toHaveBeenCalledWith('r-table: page-size="many" is not a whole number above zero');
+            expect(reported.messages()).toContainEqual('r-table: page-size="many" is not a whole number above zero');
         });
 
         it('page_size_is_25_when_the_attribute_is_absent', async () => {
@@ -608,7 +609,7 @@ describe('r-table', () => {
         });
 
         it('a_failing_provider_is_reported_by_refresh', async () => {
-            vi.spyOn(console, 'error').mockImplementation(() => {});
+            captureProblems();
             const table = mountTable(declared);
             const failure = new Error('server down');
             let fail = false;
@@ -711,7 +712,7 @@ describe('r-table', () => {
         });
 
         it('a_refresh_overtaken_by_a_failing_load_rejects_with_that_error', async () => {
-            vi.spyOn(console, 'error').mockImplementation(() => {});
+            captureProblems();
             const table = mountTable(paged);
             const failure = new Error('page 2 down');
             let fail = false;
@@ -752,16 +753,17 @@ describe('r-table', () => {
             await flush();
             pageButtons(table).find((button) => button.textContent === '3')!.click();
             await flush();
-            totalCount = 2;
+            totalCount = 4;
 
             await table.refresh();
 
             expect(table.querySelector('tbody tr')!.classList.contains('empty')).toBe(true);
-            expect(table.querySelector('.pager [aria-current="page"]')!.textContent).toBe('3');
+            expect(table.querySelector('.pager [aria-current="page"]')).toBeNull();
+            expect(pageButtons(table).at(-1)!.disabled).toBe(true);
         });
 
-        it('a_provider_failing_while_paging_logs_the_error_keeps_the_rows_and_the_pager_page', async () => {
-            const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+        it('a_provider_failing_while_paging_reports_the_error_keeps_the_rows_and_the_pager_page', async () => {
+            const reported = captureProblems();
             const table = mountTable(paged);
             const failure = new Error('server down');
             table.provider = async (request) => {
@@ -775,13 +777,13 @@ describe('r-table', () => {
             pageButtons(table).find((button) => button.textContent === '2')!.click();
             await flush();
 
-            expect(error).toHaveBeenCalledWith('r-table: the provider failed to load page', failure);
+            expect(reported.errors).toContainEqual(expect.objectContaining({ message: 'r-table: the provider failed to load page', context: expect.objectContaining({ error: failure }) }));
             expect(cells(table)).toEqual([['Page 1', '1']]);
             expect(table.querySelector('.pager [aria-current="page"]')!.textContent).toBe('1');
         });
 
-        it('a_first_load_failing_logs_the_error_and_leaves_the_body_blank', async () => {
-            const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+        it('a_first_load_failing_reports_the_error_and_leaves_the_body_blank', async () => {
+            const reported = captureProblems();
             const table = mountTable(declared);
             const failure = new Error('server down');
 
@@ -791,7 +793,7 @@ describe('r-table', () => {
             };
 
             expect(await unhandled).toBe(failure);
-            expect(error).toHaveBeenCalledWith('r-table: the provider failed to load page', failure);
+            expect(reported.errors).toContainEqual(expect.objectContaining({ message: 'r-table: the provider failed to load page', context: expect.objectContaining({ error: failure }) }));
             expect(table.querySelectorAll('tbody tr')).toHaveLength(0);
         });
     });

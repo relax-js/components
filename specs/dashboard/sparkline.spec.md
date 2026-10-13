@@ -11,7 +11,7 @@ A reader sees the trend of one figure in a line small enough to sit beside text 
 
 ## Showing a trend
 - **Chart data**: the page sets the `data` property every chart takes, with labels, exactly one series and a summary (specs/dashboard/chart-foundations.spec.md#Reading a chart)
-- **One series**: data with more than one series logs an error naming the tag and draws nothing (specs/dashboard/dashboard-foundations.spec.md#Putting a component on a page)
+- **One series**: data with more than one series reports an error naming the tag and draws nothing (specs/dashboard/dashboard-foundations.spec.md#Putting a component on a page)
 - **Line without axes**: the values are drawn as one line with no axes, grid or labels
 - **No legend**: the sparkline shows no legend
 - **Fits its box**: the drawing stretches to the element's width and height without keeping a fixed shape

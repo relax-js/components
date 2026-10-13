@@ -1,3 +1,4 @@
+import { captureProblems } from '../../captureProblems';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import '../../../src/feedback/banner/Banner';
 import type { Banner } from '../../../src/feedback/banner/Banner';
@@ -56,10 +57,10 @@ describe('r-banner', () => {
         expect(banner.dataset.tone).toBe('muted');
     });
 
-    it('an_unknown_tone_logs_an_error_and_is_muted', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    it('an_unknown_tone_reports_an_error_and_is_muted', () => {
+        const reported = captureProblems();
         const banner = bannerWith('<r-banner tone="loud">Hi</r-banner>');
-        expect(error).toHaveBeenCalled();
+        expect(reported.messages()).not.toEqual([]);
         expect(banner.dataset.tone).toBe('muted');
     });
 

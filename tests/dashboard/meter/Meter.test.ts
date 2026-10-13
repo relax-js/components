@@ -1,3 +1,4 @@
+import { captureProblems } from '../../captureProblems';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { mount } from '@relax.js/core/testing';
 import '../../../src/dashboard/meter/Meter';
@@ -121,8 +122,8 @@ describe('r-meter', () => {
         expect(element.getAttribute('aria-valuetext')).toBe('150 of 100');
     });
 
-    it('bad_input_logs_an_error_and_renders_empty', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    it('bad_input_reports_an_error_and_renders_empty', () => {
+        const reported = captureProblems();
         const bad: Record<string, string>[] = [
             { max: '100', value: '1' },
             { label: 'x', max: '100' },
@@ -139,7 +140,7 @@ describe('r-meter', () => {
             expect(element.childElementCount).toBe(0);
             expect(element.hasAttribute('role')).toBe(false);
         }
-        expect(error).toHaveBeenCalledTimes(bad.length);
+        expect(reported.messages()).toHaveLength(bad.length);
     });
 
     it('changing_attributes_updates_in_place_without_a_second_track', () => {

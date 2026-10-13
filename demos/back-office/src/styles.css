@@ -1,0 +1,140 @@
+.page-title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin-block-end: var(--space-3);
+
+    & .page-heading {
+        margin: 0;
+    }
+
+    & > :last-child {
+        margin-inline-start: auto;
+    }
+}
+
+.app-header r-top-menu {
+    flex: 1;
+}
+
+/* Only the app's own controls: the components keep their own look. */
+.button,
+.form button,
+.form-actions button {
+    display: inline-block;
+    padding: var(--control-padding);
+    border: 1px solid var(--bd-strong);
+    border-radius: var(--control-radius);
+    background: var(--surface-raised);
+    color: var(--text-primary);
+    font: inherit;
+    text-decoration: none;
+    cursor: pointer;
+
+    &.primary {
+        background: var(--accent-primary);
+        border-color: var(--accent-primary);
+        color: var(--text-on-accent);
+    }
+}
+
+.filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3);
+    margin-block-end: var(--space-3);
+
+    & label {
+        display: grid;
+        gap: var(--space-1);
+        color: var(--text-muted);
+    }
+}
+
+:is(.form, .filters) :is(input, select, textarea) {
+    padding: var(--control-padding);
+    border: 1px solid var(--bd-strong);
+    border-radius: var(--control-radius);
+    background: var(--surface-bg);
+    color: var(--text-primary);
+    font: inherit;
+}
+
+r-table.orders tbody tr:not(.empty) {
+    cursor: pointer;
+
+    &:hover {
+        background: var(--surface-hover);
+    }
+}
+
+.form {
+    display: grid;
+    gap: var(--space-2);
+    max-width: 32rem;
+}
+
+.form-actions {
+    display: flex;
+    gap: var(--space-2);
+    margin-block-start: var(--space-2);
+}
+
+.order-total {
+    text-align: end;
+    font-weight: 600;
+}
+
+.details {
+    display: grid;
+    grid-template-columns: max-content 1fr;
+    gap: var(--space-2) var(--space-4);
+
+    & dt {
+        color: var(--text-muted);
+    }
+
+    & dd {
+        margin: 0;
+    }
+}
+
+.history time {
+    color: var(--text-muted);
+    margin-inline-end: var(--space-2);
+}
+
+.wizard-steps {
+    display: flex;
+    gap: var(--space-4);
+    padding: 0;
+    list-style: none;
+    counter-reset: step;
+    color: var(--text-muted);
+
+    & li {
+        counter-increment: step;
+
+        &::before {
+            content: counter(step) '. ';
+        }
+
+        &[aria-current='step'] {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+    }
+}
+
+.master-detail {
+    display: grid;
+    grid-template-columns: 18rem 1fr;
+    gap: var(--space-4);
+    align-items: start;
+}
+
+.setting-list {
+    display: grid;
+    gap: var(--space-2);
+    margin-block-start: var(--space-3);
+}

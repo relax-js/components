@@ -1,3 +1,4 @@
+import { reportProblem } from '../../foundations/problems/problems';
 import { formatValue } from '../../foundations/formatting/formatting';
 import { installStyles } from '../../foundations/styles';
 import { text } from '../../foundations/text/text';
@@ -166,7 +167,7 @@ export class Meter extends HTMLElement {
             this.setAttribute('aria-valuetext', figures);
         } catch (error) {
             this.clear();
-            console.error(`r-meter: ${error instanceof Error ? error.message : String(error)}`);
+            reportProblem('r-meter', error instanceof Error ? error.message : String(error));
         }
     }
 }

@@ -1,8 +1,10 @@
+import { reportProblem } from '../../foundations/problems/problems';
 import { formatAmount } from '../amount/Amount';
 import { installStyles } from '../../foundations/styles';
 import { text } from '../../foundations/text/text';
-import { element, height, pad, width } from './chartSvg';
+import { ChartWidth, element } from './chartSvg';
 import { drawBarPlot } from './drawBarPlot';
+import type { BarPlot } from './drawBarPlot';
 
 export { niceScale } from './drawBarPlot';
 
@@ -87,6 +89,8 @@ r-bar-chart .visually-hidden {
     overflow: hidden;
     clip-path: inset(50%);
     white-space: nowrap;
+    /* A table is never narrower than its cells otherwise, and would widen the page out of sight. */
+    table-layout: fixed;
 }
 r-bar-chart .empty { padding: 1rem; text-align: center; }
 `;
@@ -111,6 +115,9 @@ export class BarChart extends HTMLElement {
     private chartData: ChartData | undefined;
     private axisFormatter: (value: number) => string = (value) => formatAmount(value, { withUnit: false });
     private valueFormatter: (value: number) => string = (value) => formatAmount(value);
+    private readonly width = new ChartWidth(this, () => {
+        this.draw();
+    });
 
     /** What to draw; setting it on a connected chart redraws it. */
     get data(): ChartData | undefined {
@@ -144,7 +151,12 @@ export class BarChart extends HTMLElement {
 
     connectedCallback(): void {
         installStyles(this, 'r-bar-chart', css);
+        this.width.observe();
         this.draw();
+    }
+
+    disconnectedCallback(): void {
+        this.width.disconnect();
     }
 
     attributeChangedCallback(): void {
@@ -165,7 +177,7 @@ export class BarChart extends HTMLElement {
         }
         const orientation = this.getAttribute('orientation') ?? 'vertical';
         if (orientation !== 'vertical' && orientation !== 'horizontal') {
-            console.error(`r-bar-chart: orientation must be "vertical" or "horizontal", not "${orientation}"`);
+            reportProblem('r-bar-chart', `orientation must be "vertical" or "horizontal", not "${orientation}"`);
             return;
         }
         if (!this.isValid(data)) {
@@ -184,7 +196,8 @@ export class BarChart extends HTMLElement {
         }
         const horizontal = orientation === 'horizontal';
         const stacked = this.hasAttribute('stacked');
-        const svg = drawBarPlot(data, {
+        const plot = drawBarPlot(data, {
+            width: this.width.take(),
             horizontal,
             stacked,
             showValues: this.hasAttribute('show-values'),
@@ -194,20 +207,16 @@ export class BarChart extends HTMLElement {
         const readout = document.createElement('div');
         readout.className = 'readout';
         readout.hidden = true;
-        this.bandsOf(svg, data, horizontal, readout, stacked);
-        figure.append(svg, this.drawLegend(data), readout, this.drawTable(data, stacked));
+        this.bandsOf(plot, data, readout, stacked);
+        figure.append(plot.svg, this.drawLegend(data), readout, this.drawTable(data, stacked));
     }
 
     /** One invisible band per label, so pointing anywhere in it selects the label, bars or not. */
-    private bandsOf(svg: SVGSVGElement, data: ChartData, horizontal: boolean, readout: HTMLElement, stacked: boolean): void {
-        const plotWidth = width - pad.left - pad.right;
-        const plotHeight = height - pad.top - pad.bottom;
-        const bandSize = (horizontal ? plotHeight : plotWidth) / data.labels.length;
+    private bandsOf(plot: BarPlot, data: ChartData, readout: HTMLElement, stacked: boolean): void {
+        const { svg } = plot;
         data.labels.forEach((_, label) => {
-            const start = (horizontal ? pad.top : pad.left) + label * bandSize;
-            const band = horizontal
-                ? element('rect', { x: pad.left, y: start, width: plotWidth, height: bandSize })
-                : element('rect', { x: start, y: pad.top, width: bandSize, height: plotHeight });
+            const area = plot.band(label);
+            const band = element('rect', { x: area.left, y: area.top, width: area.width, height: area.height });
             band.classList.add('band');
             const show = (event: Event): void => {
                 const pointer = event as PointerEvent;
@@ -289,22 +298,21 @@ export class BarChart extends HTMLElement {
 
     private isValid(data: ChartData): boolean {
         if (typeof data.summary !== 'string' || data.summary === '') {
-            console.error('r-bar-chart: the data needs a summary');
+            reportProblem('r-bar-chart', 'the data needs a summary');
             return false;
         }
         if (data.series.length > seriesColours) {
-            console.error(`r-bar-chart: ${String(data.series.length)} series is more than the ${String(seriesColours)} the theme colours`);
+            reportProblem('r-bar-chart', `${String(data.series.length)} series is more than the ${String(seriesColours)} the theme colours`);
             return false;
         }
         for (const series of data.series) {
             if (series.values.length !== data.labels.length) {
-                console.error(
-                    `r-bar-chart: series "${series.name}" has ${String(series.values.length)} values for ${String(data.labels.length)} labels`,
+                reportProblem('r-bar-chart', `series "${series.name}" has ${String(series.values.length)} values for ${String(data.labels.length)} labels`,
                 );
                 return false;
             }
             if (series.values.some((value) => value !== null && !Number.isFinite(value))) {
-                console.error(`r-bar-chart: series "${series.name}" has a value that is not a number`);
+                reportProblem('r-bar-chart', `series "${series.name}" has a value that is not a number`);
                 return false;
             }
         }

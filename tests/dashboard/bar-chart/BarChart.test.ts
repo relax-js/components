@@ -1,3 +1,4 @@
+import { captureProblems } from '../../captureProblems';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import '../../../src/dashboard/bar-chart/BarChart';
 import type { BarChart, ChartData } from '../../../src/dashboard/bar-chart/BarChart';
@@ -39,30 +40,30 @@ describe('r-bar-chart', () => {
         vi.restoreAllMocks();
     });
 
-    it('a_series_with_the_wrong_number_of_values_logs_an_error_naming_it_and_draws_nothing', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    it('a_series_with_the_wrong_number_of_values_reports_an_error_naming_it_and_draws_nothing', () => {
+        const reported = captureProblems();
         const element = chart(data({ name: 'Cash', values: [1, 2] }));
 
-        expect(error).toHaveBeenCalledWith(expect.stringContaining('Cash'));
+        expect(reported.messages()).toContainEqual(expect.stringContaining('Cash'));
         expect(element.querySelector('svg')).toBeNull();
     });
 
-    it('a_series_with_the_wrong_number_of_values_logs_an_error_naming_the_tag_and_the_series', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    it('a_series_with_the_wrong_number_of_values_reports_an_error_naming_the_tag_and_the_series', () => {
+        const reported = captureProblems();
         chart(data({ name: 'Cash', values: [1, 2] }));
 
-        expect(error).toHaveBeenCalledWith(expect.stringContaining('r-bar-chart'));
-        expect(error).toHaveBeenCalledWith(expect.stringContaining('"Cash"'));
+        expect(reported.messages()).toContainEqual(expect.stringContaining('r-bar-chart'));
+        expect(reported.messages()).toContainEqual(expect.stringContaining('"Cash"'));
     });
 
     it.each([Number.NaN, Number.POSITIVE_INFINITY, '5' as unknown as number])(
         'a_value_that_is_not_a_finite_number_logs_an_error_naming_the_tag_and_series_and_draws_nothing',
         (bad) => {
-            const error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+            const reported = captureProblems();
             const element = chart(data({ name: 'Bad', values: [1, bad, 3] }));
 
-            expect(error).toHaveBeenCalledWith(expect.stringContaining('r-bar-chart'));
-            expect(error).toHaveBeenCalledWith(expect.stringContaining('"Bad"'));
+            expect(reported.messages()).toContainEqual(expect.stringContaining('r-bar-chart'));
+            expect(reported.messages()).toContainEqual(expect.stringContaining('"Bad"'));
             expect(element.querySelector('svg')).toBeNull();
         },
     );
@@ -97,11 +98,11 @@ describe('r-bar-chart', () => {
         expect(sideways.querySelector('text.label')?.getAttribute('text-anchor')).toBe('end');
     });
 
-    it('an_orientation_other_than_vertical_or_horizontal_logs_an_error_naming_the_tag_and_draws_nothing', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    it('an_orientation_other_than_vertical_or_horizontal_reports_an_error_naming_the_tag_and_draws_nothing', () => {
+        const reported = captureProblems();
         const element = chart(data({ name: 'One', values: [1, 2, 3] }), { orientation: 'diagonal' });
 
-        expect(error).toHaveBeenCalledWith(expect.stringContaining('r-bar-chart'));
+        expect(reported.messages()).toContainEqual(expect.stringContaining('r-bar-chart'));
         expect(element.querySelector('svg')).toBeNull();
     });
 

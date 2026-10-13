@@ -1,3 +1,4 @@
+import { reportProblem } from '../../foundations/problems/problems';
 import { formatValue } from '../../foundations/formatting/formatting';
 import { installStyles } from '../../foundations/styles';
 import { text } from '../../foundations/text/text';
@@ -49,6 +50,8 @@ const styles = /* css */ `
             overflow: hidden;
             clip-path: inset(50%);
             white-space: nowrap;
+            /* A table is never narrower than its cells otherwise, and would widen the page out of sight. */
+            table-layout: fixed;
         }
 
         .grid {
@@ -69,7 +72,18 @@ const styles = /* css */ `
         }
 
         .column-label {
-            text-align: center;
+            display: flex;
+            justify-content: center;
+            white-space: nowrap;
+        }
+
+        .column-label[data-thinned] {
+            visibility: hidden;
+            overflow: hidden;
+        }
+
+        .column-label[data-at-end] {
+            justify-content: flex-end;
         }
 
         .cell {
@@ -258,7 +272,7 @@ export class Heatmap extends HTMLElement {
             return;
         }
         if (typeof this.pageSummary !== 'string' || this.pageSummary === '') {
-            console.error(`${tag}: the heatmap needs a summary`);
+            reportProblem(tag, 'the heatmap needs a summary');
             this.replaceChildren();
             return;
         }
@@ -300,7 +314,7 @@ export class Heatmap extends HTMLElement {
         plot.append(grid, drawLegend(settings, range, anyMissing, this.valueFormatter), readout);
         figure.append(plot, drawTable(this.rowLabels, this.columnLabels, this.cellValues, this.valueFormatter));
         this.replaceChildren(figure);
-        this.hideValuesThatDoNotFit(valueTexts);
+        this.fitToWidth(grid, valueTexts);
     }
 
     private drawGrid(settings: Settings, range: ScaleRange, valueTexts: HTMLElement[]): HTMLElement {
@@ -330,17 +344,34 @@ export class Heatmap extends HTMLElement {
         return grid;
     }
 
-    /** A value that does not fit inside its cell is left out. Unmeasurable (not laid out) cells keep theirs. */
-    private hideValuesThatDoNotFit(texts: HTMLElement[]): void {
+    /**
+     * Fits the text to the cells' width, again whenever it changes: a value that does not fit
+     * inside its cell is left out, and when the column labels do not fit side by side every nth
+     * is shown, starting with the first. Unmeasurable (not laid out) maps keep all of them.
+     */
+    private fitToWidth(grid: HTMLElement, texts: HTMLElement[]): void {
+        const labels = [...grid.querySelectorAll<HTMLElement>('.column-label')];
         const fit = (): void => {
             for (const text of texts) {
                 text.hidden = false;
                 const cell = text.parentElement!;
                 text.hidden = cell.clientWidth > 0 && text.scrollWidth > cell.clientWidth;
             }
+            const pitch = labels.length > 1 ? labels[1].offsetLeft - labels[0].offsetLeft : 0;
+            if (pitch <= 0) {
+                return;
+            }
+            const widths = labels.map(textWidth);
+            // Labels need a little space between them to read as separate.
+            const step = Math.max(1, Math.ceil((Math.max(...widths) + 4) / pitch));
+            labels.forEach((label, index) => {
+                label.toggleAttribute('data-thinned', index % step !== 0);
+                // The last label is wider than its column ends at the map's edge instead of past it.
+                label.toggleAttribute('data-at-end', index === labels.length - 1 && widths[index] > label.clientWidth);
+            });
         };
         fit();
-        if (texts.length > 0 && typeof ResizeObserver !== 'undefined') {
+        if (typeof ResizeObserver !== 'undefined') {
             this.resizeObserver = new ResizeObserver(fit);
             this.resizeObserver.observe(this);
         }
@@ -348,8 +379,15 @@ export class Heatmap extends HTMLElement {
 
 }
 
-if (!customElements.get(tag)) {
-    customElements.define(tag, Heatmap);
+/** The width of an element's text as written, whatever the width of its box. */
+function textWidth(element: HTMLElement): number {
+    const range = document.createRange();
+    range.selectNodeContents(element);
+    return range.getBoundingClientRect().width;
+}
+
+if (!customElements.get('r-heatmap')) {
+    customElements.define('r-heatmap', Heatmap);
 }
 
 declare global {

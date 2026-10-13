@@ -1,0 +1,98 @@
+/* The shell every demo shares: a header, an optional side menu and the routed page. */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    display: grid;
+    grid-template-rows: auto 1fr;
+    min-height: 100vh;
+    margin: 0;
+    font-family: system-ui, sans-serif;
+    background: var(--surface-bg);
+    color: var(--text-primary);
+}
+
+.app-header {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-4);
+    background: var(--surface-raised);
+    border-bottom: 1px solid var(--bd-muted);
+
+    & h1 {
+        margin: 0;
+        font-size: 1.15rem;
+    }
+
+    & > :last-child {
+        margin-inline-start: auto;
+    }
+}
+
+/* A top menu inside the header is part of the header's bar, not a bar of its own. */
+.app-header r-top-menu::part(bar) {
+    background: none;
+    border-bottom: none;
+}
+
+.app-body {
+    display: grid;
+    grid-template-columns: 14rem 1fr;
+
+    & > r-side-menu {
+        border-inline-end: 1px solid var(--bd-muted);
+        padding: var(--space-3);
+    }
+}
+
+main {
+    padding: var(--space-4);
+    min-width: 0;
+}
+
+/* A page without a side menu, centred; the width keeps the grid row from shrinking it to its content. */
+main.single-column {
+    width: 100%;
+    max-width: 72rem;
+    margin-inline: auto;
+}
+
+.page-heading {
+    margin: 0 0 var(--space-3);
+}
+
+.figure-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: var(--space-3);
+    margin-block-end: var(--space-4);
+}
+
+.panels {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(26rem, 1fr));
+    gap: var(--space-4);
+
+    & > .wide {
+        grid-column: 1 / -1;
+    }
+}
+
+r-card {
+    background: var(--surface-raised);
+}
+
+/* A KPI meter in a row of stat tiles gets the same frame, so the row reads as one set. */
+.figure-row r-kpi-meter {
+    padding: var(--card-padding);
+    border: var(--card-border);
+    border-radius: var(--card-radius);
+    background: var(--surface-raised);
+}
+
+r-stat-tile {
+    background: var(--surface-raised);
+}

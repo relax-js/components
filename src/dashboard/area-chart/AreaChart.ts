@@ -1,7 +1,9 @@
+import { reportProblem } from '../../foundations/problems/problems';
 import { installStyles } from '../../foundations/styles';
 import { text } from '../../foundations/text/text';
 import { formatAmount } from '../amount/Amount';
 import { niceScale } from '../bar-chart/BarChart';
+import { ChartWidth, plotPad } from '../bar-chart/chartSvg';
 import {
     appendAxes,
     appendSeries,
@@ -86,6 +88,8 @@ const styles = /* css */ `
             overflow: hidden;
             clip-path: inset(50%);
             white-space: nowrap;
+            /* A table is never narrower than its cells otherwise, and would widen the page out of sight. */
+            table-layout: fixed;
         }
 
         svg {
@@ -153,6 +157,9 @@ export class AreaChart extends HTMLElement {
     private chartData: AreaChartData | undefined;
     private axisFormatter: (value: number) => string = (value) => formatAmount(value, { withUnit: false });
     private valueFormatter: (value: number) => string = (value) => formatAmount(value);
+    private readonly width = new ChartWidth(this, () => {
+        this.draw();
+    });
 
     /** Formats the axis labels; whole amounts without the unit by default. */
     get axisFormat(): (value: number) => string {
@@ -176,7 +183,12 @@ export class AreaChart extends HTMLElement {
 
     connectedCallback(): void {
         installStyles(this, 'r-area-chart', styles);
+        this.width.observe();
         this.draw();
+    }
+
+    disconnectedCallback(): void {
+        this.width.disconnect();
     }
 
     /** What to draw; setting it on a connected chart redraws it. */
@@ -215,9 +227,11 @@ export class AreaChart extends HTMLElement {
 
         const drawn = [...edges.flatMap((e) => [...e.top, ...e.bottom]), ...thresholds.flatMap((t) => t.values), 0];
         const scale = niceScale(Math.min(...drawn), Math.max(...drawn));
-        const plot = createPlot(data.labels.length, scale);
+        const ticks = Array.from({ length: Math.round((scale.top - scale.bottom) / scale.step) + 1 }, (_, i) => scale.bottom + i * scale.step);
+        const width = this.width.take();
+        const plot = createPlot(data.labels.length, scale, width, plotPad(data.labels, ticks.map(this.axisFormatter)));
 
-        const svg = createSvg();
+        const svg = createSvg(width);
         appendAxes(svg, data, plot, scale, this.axisFormatter);
         appendSeries(svg, data, stacked, thresholds, edges, plot);
         const readout = attachReadout(svg, this, data, plot, this.valueFormatter);
@@ -261,17 +275,16 @@ export class AreaChart extends HTMLElement {
 
     private isDrawable(data: AreaChartData): boolean {
         if (typeof data.summary !== 'string' || data.summary === '') {
-            console.error('r-area-chart: the data needs a summary');
+            reportProblem('r-area-chart', 'the data needs a summary');
             return false;
         }
         if (data.series.length > seriesColours) {
-            console.error(`r-area-chart: ${data.series.length} series is more than the ${seriesColours} the theme colours`);
+            reportProblem('r-area-chart', `${data.series.length} series is more than the ${seriesColours} the theme colours`);
             return false;
         }
         for (const series of data.series) {
             if (series.values.length !== data.labels.length) {
-                console.error(
-                    `r-area-chart: series "${series.name}" has ${series.values.length} values for ${data.labels.length} labels`
+                reportProblem('r-area-chart', `series "${series.name}" has ${series.values.length} values for ${data.labels.length} labels`
                 );
                 return false;
             }

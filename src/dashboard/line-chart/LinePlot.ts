@@ -1,10 +1,8 @@
 import { niceScale } from '../bar-chart/BarChart';
 import type { ChartData } from '../bar-chart/BarChart';
+import { defaultWidth, element, height, labelGap, labelStep, plotPad, widestText } from '../bar-chart/chartSvg';
+import type { Pad } from '../bar-chart/chartSvg';
 
-const svgNamespace = 'http://www.w3.org/2000/svg';
-const width = 640;
-const height = 230;
-const pad = { left: 72, right: 12, top: 12, bottom: 28 };
 const markerRadius = 4;
 
 type Scale = ReturnType<typeof niceScale>;
@@ -24,10 +22,14 @@ export interface PlotHost {
     fillReadout: (readout: HTMLElement, data: ChartData, label: number) => void;
 }
 
-export function drawPlot(data: ChartData, plotHost: PlotHost): SVGSVGElement {
+/** Draws the plot `width` units wide, which the chart sets to its own width in pixels so text and markers keep their size. */
+export function drawPlot(data: ChartData, plotHost: PlotHost, width = defaultWidth): SVGSVGElement {
     const svg = element('svg', { viewBox: `0 0 ${String(width)} ${String(height)}`, 'aria-hidden': 'true' });
     const present = data.series.flatMap((series) => series.values.filter((value): value is number => value !== null));
     const scale = niceScale(Math.min(0, ...present), Math.max(0, ...present));
+    const stepCount = Math.round((scale.top - scale.bottom) / scale.step);
+    const ticks = Array.from({ length: stepCount + 1 }, (_, i) => scale.bottom + i * scale.step);
+    const pad = plotPad(data.labels, ticks.map(plotHost.axisFormat));
     const plotWidth = width - pad.left - pad.right;
     const plotHeight = height - pad.top - pad.bottom;
     const span = scale.top - scale.bottom;
@@ -37,26 +39,38 @@ export function drawPlot(data: ChartData, plotHost: PlotHost): SVGSVGElement {
         y: (value) => pad.top + plotHeight * (1 - (value - scale.bottom) / span),
     };
 
-    drawAxes(svg, data, scale, projection, plotHost.axisFormat);
+    drawAxes(svg, data, { ticks, projection, width, pad, axisFormat: plotHost.axisFormat });
     data.series.forEach((series, index) => {
         svg.append(drawSeries(series, index, projection));
     });
-    attachReadout(svg, data, projection, plotHeight, plotHost);
+    attachReadout(svg, data, { projection, plotHeight, width, pad }, plotHost);
     return svg;
 }
 
-function drawAxes(svg: SVGSVGElement, data: ChartData, scale: Scale, { x, y }: Projection, axisFormat: (value: number) => string): void {
-    const stepCount = Math.round((scale.top - scale.bottom) / scale.step);
-    for (let i = 0; i <= stepCount; i++) {
-        const value = scale.bottom + i * scale.step;
+interface Axes {
+    ticks: number[];
+    projection: Projection;
+    width: number;
+    pad: Pad;
+    axisFormat: (value: number) => string;
+}
+
+function drawAxes(svg: SVGSVGElement, data: ChartData, { ticks, projection: { x, y }, width, pad, axisFormat }: Axes): void {
+    for (const value of ticks) {
         const line = element('line', { x1: pad.left, x2: width - pad.right, y1: y(value), y2: y(value) });
         line.classList.add(value === 0 ? 'zero' : 'grid');
-        const label = element('text', { x: pad.left - 6, y: y(value) + 4, 'text-anchor': 'end' });
+        const label = element('text', { x: pad.left - labelGap, y: y(value) + 4, 'text-anchor': 'end' });
         label.classList.add('axis-label');
         label.textContent = axisFormat(value);
         svg.append(line, label);
     }
+    // Every nth label is shown when they do not all fit side by side.
+    const spacing = data.labels.length > 1 ? x(1) - x(0) : Infinity;
+    const every = labelStep(spacing, widestText(data.labels) + 2 * labelGap);
     data.labels.forEach((labelText, index) => {
+        if (index % every !== 0) {
+            return;
+        }
         const label = element('text', { x: x(index), y: height - 8, 'text-anchor': 'middle' });
         label.classList.add('axis-label', 'label');
         label.textContent = labelText;
@@ -127,7 +141,14 @@ function nearestLabel(count: number, x: (index: number) => number, pointerX: num
     return nearest;
 }
 
-function attachReadout(svg: SVGSVGElement, data: ChartData, { x }: Projection, plotHeight: number, plotHost: PlotHost): void {
+interface Frame {
+    projection: Projection;
+    plotHeight: number;
+    width: number;
+    pad: Pad;
+}
+
+function attachReadout(svg: SVGSVGElement, data: ChartData, { projection: { x }, plotHeight, width, pad }: Frame, plotHost: PlotHost): void {
     const { host, readout, fillReadout } = plotHost;
     const crosshair = element('line', { y1: pad.top, y2: pad.top + plotHeight });
     crosshair.classList.add('crosshair');
@@ -161,12 +182,4 @@ function attachReadout(svg: SVGSVGElement, data: ChartData, { x }: Projection, p
         readout.hidden = false;
     });
     svg.addEventListener('pointerleave', hide);
-}
-
-function element<K extends keyof SVGElementTagNameMap>(name: K, attributes: Record<string, string | number>): SVGElementTagNameMap[K] {
-    const created = document.createElementNS(svgNamespace, name);
-    for (const [key, value] of Object.entries(attributes)) {
-        created.setAttribute(key, String(value));
-    }
-    return created;
 }

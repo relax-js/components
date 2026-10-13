@@ -1,3 +1,5 @@
+import { reportProblem } from '../problems/problems';
+
 /** How much something asks of the reader: fine, under way, worth a look, wrong, or nothing. */
 export declare type Tone = 'ok' | 'info' | 'warn' | 'danger' | 'muted';
 
@@ -19,7 +21,7 @@ export const toneIcon: Record<Tone, string> = {
 
 /**
  * Reads the `tone` attribute of `element`. Returns `fallback` when the attribute is missing,
- * and also when its value is not a tone, after logging an error naming the tag.
+ * and also when its value is not a tone, after reporting an error naming the tag.
  */
 export function readTone(element: Element, fallback: Tone): Tone {
     return parseTone(element.getAttribute('tone'), fallback, element.localName);
@@ -27,7 +29,7 @@ export function readTone(element: Element, fallback: Tone): Tone {
 
 /**
  * Turns a tone name into a tone. Returns `fallback` when `value` is missing, and also when it
- * is not a tone, after logging an error naming `owner`.
+ * is not a tone, after reporting an error naming `owner`.
  */
 export function parseTone(value: string | null | undefined, fallback: Tone, owner: string): Tone {
     if (value === null || value === undefined) {
@@ -36,6 +38,6 @@ export function parseTone(value: string | null | undefined, fallback: Tone, owne
     if ((tones as readonly string[]).includes(value)) {
         return value as Tone;
     }
-    console.error(`${owner}: tone "${value}" is not one of ${tones.join(', ')}`);
+    reportProblem(owner, `tone "${value}" is not one of ${tones.join(', ')}`);
     return fallback;
 }

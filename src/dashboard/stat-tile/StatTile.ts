@@ -1,5 +1,6 @@
+import { reportProblem } from '../../foundations/problems/problems';
 import { compareYears, type Better } from '../kpi-meter/KpiMeter';
-import '../line-chart/LineChart';
+import '../sparkline/Sparkline';
 import type { ChartData } from '../bar-chart/BarChart';
 import { formatValue } from '../../foundations/formatting/formatting';
 import { installStyles } from '../../foundations/styles';
@@ -29,16 +30,25 @@ r-stat-tile {
         display: none;
     }
 
+    & .label {
+        color: var(--text-muted);
+    }
+
+    & .value {
+        font-size: 1.75rem;
+        font-weight: 600;
+        line-height: 1.1;
+        font-variant-numeric: tabular-nums;
+    }
+
+    & .change[data-tone] {
+        color: var(--tone);
+    }
+
     & .trend {
-        height: 3rem;
-
-        & svg {
-            height: 100%;
-        }
-
-        & .legend {
-            display: none;
-        }
+        display: block;
+        --sparkline-width: 100%;
+        --sparkline-height: 2.5rem;
     }
 }
 `;
@@ -130,18 +140,18 @@ export class StatTile extends HTMLElement {
             }
         } catch (error) {
             this.textContent = '';
-            console.error(`r-stat-tile: ${error instanceof Error ? error.message : String(error)}`);
+            reportProblem('r-stat-tile', error instanceof Error ? error.message : String(error));
         }
     }
 }
 
-/** Draws the trend as a small line chart; a chart that cannot draw the data renders nothing, which is reported. */
+/** Draws the trend as a sparkline; a sparkline that cannot draw the data renders nothing, which is reported. */
 function drawTrend(host: HTMLElement, data: ChartData): void {
-    const chart = document.createElement('r-line-chart');
-    chart.className = 'trend';
-    host.append(chart);
-    chart.data = data;
-    if (chart.childElementCount === 0) {
+    const sparkline = document.createElement('r-sparkline');
+    sparkline.className = 'trend';
+    host.append(sparkline);
+    sparkline.data = data;
+    if (sparkline.childElementCount === 0) {
         throw new Error('the trend cannot be drawn');
     }
 }

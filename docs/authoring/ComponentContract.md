@@ -16,7 +16,7 @@ Tags start with `r-`. A class is named after its tag without the prefix (`r-tabs
 
 ## Typings
 
-Every tag is registered in `HTMLElementTagNameMap` and every event in `HTMLElementEventMap`, and the package ships a `custom-elements.json` manifest.
+Every tag is registered in `HTMLElementTagNameMap` and every event in `HTMLElementEventMap`, and the package ships a `custom-elements.json` manifest generated from the class JSDoc. A tag is defined with its literal name, and every event is declared on its component with `@fires r-<name>`; without those the manifest names neither.
 
 ## State in the DOM
 
@@ -44,5 +44,6 @@ Every word a component writes comes from the Relaxjs i18n namespace `r-component
 
 Nothing wrong is ignored or patched over with a guessed value; how it is reported depends on who made the mistake.
 
-- **Bad data:** an attribute value that is missing, not a number or not one of the allowed values logs `console.error("<tag>: <what is wrong>")` and the component renders empty. Such a value often comes from data or a template binding that nobody can wrap in a `try`, so a throw would break the page instead of one element.
+- **Bad data:** an attribute value that is missing, not a number or not one of the allowed values is reported through the Relaxjs error channel, and the component renders empty. The report is a `RelaxError` with the message `<tag>: <what is wrong>` and the tag as `component` in its context, so it reaches the app's `onError()` handler, `window.relaxErrors` and `captureRelaxErrors()` in a test. It is never thrown: such a value often comes from data or a template binding that nobody can wrap in a `try`, so a throw would break the page instead of one element.
+- **A failed load or save:** a data provider or save function that rejects is reported the same way, with the rejection as `error` in the context, and the component keeps what it showed.
 - **Wrong use from code:** a method called with arguments it cannot act on, or configuration added too late, throws an error naming the component and what was wrong.

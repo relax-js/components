@@ -1,3 +1,5 @@
+import { reportProblem } from '../../foundations/problems/problems';
+
 /**
  * Dispatched by `<r-tabs>` when a different tab becomes selected, by a click, the keyboard or
  * `select()`. Not dispatched when the `selected` attribute is changed directly.
@@ -76,10 +78,13 @@ export class Tabs extends HTMLElement {
                     display: block;
                 }
 
+                /* Headers that do not fit scroll sideways within the bar. The line under the bar is a shadow so the selected header's line can cover it without overflowing the scrolling bar. */
                 [role='tablist'] {
                     display: flex;
                     gap: var(--control-gap);
-                    border-bottom: 2px solid var(--bd-muted);
+                    overflow-x: auto;
+                    scrollbar-width: thin;
+                    box-shadow: inset 0 -2px 0 var(--bd-muted);
                 }
 
                 button {
@@ -89,7 +94,8 @@ export class Tabs extends HTMLElement {
                     border: none;
                     border-radius: var(--control-radius) var(--control-radius) 0 0;
                     padding: var(--control-padding);
-                    margin-bottom: -2px;
+                    flex: none;
+                    white-space: nowrap;
                     border-bottom: 2px solid transparent;
                     cursor: pointer;
                     transition: background var(--motion-fast) ease;
@@ -177,7 +183,7 @@ export class Tabs extends HTMLElement {
         const headers = this.tabs.map((tab, index) => {
             const label = tab.getAttribute('label') ?? '';
             if (!label) {
-                console.error(`r-tabs: tab ${index} has no label`);
+                reportProblem('r-tabs', `tab ${index} has no label`);
             }
             const button = document.createElement('button');
             button.type = 'button';
@@ -208,8 +214,7 @@ export class Tabs extends HTMLElement {
         const selected = this.selectedIndex;
         this.shownTab = this.tabs[selected] ?? null;
         if (selected === -1 && this.isConnected && this.tabs.length > 0) {
-            console.error(
-                `r-tabs: selected="${this.getAttribute('selected')}" is not the index of one of its ${this.tabs.length} tabs`
+            reportProblem('r-tabs', `selected="${this.getAttribute('selected')}" is not the index of one of its ${this.tabs.length} tabs`
             );
         }
         this.tabs.forEach((tab, index) => {
@@ -222,6 +227,22 @@ export class Tabs extends HTMLElement {
             button.setAttribute('tabindex', isSelected || (selected === -1 && index === 0) ? '0' : '-1');
             button.setAttribute('part', isSelected ? 'tab selected' : 'tab');
         });
+        this.revealSelected();
+    }
+
+    /** Scrolls the bar, and only the bar, so the selected header is in view. */
+    private revealSelected(): void {
+        const header = this.tablist.children[this.selectedIndex] as HTMLElement | undefined;
+        if (!header) {
+            return;
+        }
+        const bar = this.tablist.getBoundingClientRect();
+        const box = header.getBoundingClientRect();
+        if (box.left < bar.left) {
+            this.tablist.scrollLeft -= bar.left - box.left;
+        } else if (box.right > bar.right) {
+            this.tablist.scrollLeft += box.right - bar.right;
+        }
     }
 
     private onHeaderClick(event: Event): void {

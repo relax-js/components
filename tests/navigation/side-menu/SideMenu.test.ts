@@ -1,3 +1,4 @@
+import { captureProblems } from '../../captureProblems';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { defineRoutes, startRouting } from '@relax.js/core/routing';
 import '../../../src/navigation/side-menu/SideMenu';
@@ -49,11 +50,11 @@ describe('r-side-menu', () => {
         expect(links(menu).map((link) => link.textContent)).toEqual(['Profile', 'Billing', 'Settings']);
     });
 
-    it('a_menu_without_a_title_logs_an_error_and_still_shows_its_links', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    it('a_menu_without_a_title_reports_an_error_and_still_shows_its_links', () => {
+        const reported = captureProblems();
         const menu = mountMenu(null);
 
-        expect(error).toHaveBeenCalledWith(expect.stringContaining('r-side-menu'));
+        expect(reported.messages()).toContainEqual(expect.stringContaining('r-side-menu'));
         expect(links(menu)).toHaveLength(3);
     });
 
@@ -152,8 +153,8 @@ describe('r-side-menu', () => {
         expect(menu.shadowRoot!.querySelector('details')).toBeNull();
     });
 
-    it('an_item_nested_deeper_than_one_group_logs_an_error_and_is_left_out', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    it('an_item_nested_deeper_than_one_group_reports_an_error_and_is_left_out', () => {
+        const reported = captureProblems();
         const menu = mountMenu();
         menu.items = [
             { name: 'account', title: 'Account', children: [
@@ -162,7 +163,7 @@ describe('r-side-menu', () => {
             ] },
         ];
 
-        expect(error).toHaveBeenCalledWith(expect.stringContaining('r-side-menu'));
+        expect(reported.messages()).toContainEqual(expect.stringContaining('r-side-menu'));
         expect(links(menu).map((link) => link.textContent)).toEqual(['Profile']);
         expect(menu.shadowRoot!.textContent).not.toContain('Deep');
     });

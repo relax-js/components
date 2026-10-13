@@ -12,11 +12,13 @@ A developer gives a page an `r-dropdown-menu`: a button that opens a short list 
 ## Opening and closing the menu
 - **Trigger label**: the `label` attribute is the trigger button's text, and the `icon` attribute adds that `r-icon` before it
   - **Icon-only trigger**: with `icon-only` set the trigger shows only the icon and the label stays its accessible name
-  - **Missing label**: a menu without `label` logs an error naming `r-dropdown-menu` and renders empty (docs/authoring/ComponentContract.md#Failing Loudly)
+  - **Missing label**: a menu without `label` reports an error naming `r-dropdown-menu` and renders empty (docs/authoring/ComponentContract.md#Failing Loudly)
 - **Trigger toggles**: clicking the trigger opens the panel of items as a popover in the top layer, and clicking it again closes it (docs/authoring/DesignLanguage.md#Native First)
 - **Expanded state**: the element reflects `open` while the panel shows, and the trigger carries `aria-haspopup="menu"` and an `aria-expanded` that matches it (docs/authoring/ComponentContract.md#State in the DOM)
 - **Placement**: the panel opens below the trigger, aligned with its start edge
   - **Near the viewport edge**: a panel that would overflow the viewport flips above the trigger or to its other edge so it stays inside
+- **One item per line**: the panel lists its items one under the other, each the full width of the panel
+- **Narrow window**: the panel is as wide as its longest item but never wider than the window, and a longer item wraps
 - **Floating panel**: the panel takes the floating tier's role variables and casts a shadow (docs/authoring/DesignLanguage.md#Component Tiers)
 - **Outside click closes**: a click outside the menu closes the panel (docs/authoring/DesignLanguage.md#Transient vs Modal)
   - **Another menu opens**: opening another dropdown menu closes this one, so only one is open at a time
@@ -27,7 +29,7 @@ A developer gives a page an `r-dropdown-menu`: a button that opens a short list 
 - **Set items**: setting `items`, in the same item shape as the top menu, shows each item's title in the panel, in order (docs/manual/navigation/TopMenu.md#Properties)
   - **Set before connecting**: items set before the menu connects are drawn when it connects
   - **No items**: with no items the trigger is disabled
-- **No submenus**: an item with `children` logs an error naming `r-dropdown-menu` and is left out
+- **No submenus**: an item with `children` reports an error naming `r-dropdown-menu` and is left out
 - **Action items**: an item without `href` is a button, and choosing it dispatches `r-menu-selected` carrying the item (docs/manual/navigation/TopMenu.md#r-menu-selected)
 - **Link items**: an item with `href` is a link the browser follows, after `r-menu-selected` is dispatched for it (docs/manual/navigation/TopMenu.md#Usage)
 - **Choosing closes**: choosing an item closes the panel

@@ -1,3 +1,4 @@
+import { captureProblems } from '../../captureProblems';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { mount } from '@relax.js/core/testing';
 import { NavigateRouteEvent } from '@relax.js/core';
@@ -94,11 +95,11 @@ describe('r-dialog', () => {
         expect(dialog.querySelector('.dialog-close')!.textContent).toBe('Shut');
     });
 
-    it('missing_heading_logs_an_error_naming_the_component_and_still_opens', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    it('missing_heading_reports_an_error_naming_the_component_and_still_opens', () => {
+        const reported = captureProblems();
         const { element } = mount(dialogElement({}));
         void element.open();
-        expect(error).toHaveBeenCalledWith(expect.stringContaining('r-dialog'));
+        expect(reported.messages()).toContainEqual(expect.stringContaining('r-dialog'));
         expect(element.hasAttribute('open')).toBe(true);
     });
 
@@ -149,13 +150,13 @@ describe('r-dialog', () => {
 
     it('every_close_fires_r_dialog_close_carrying_the_result_or_no_value_when_dismissed', () => {
         const { element } = mount(dialogElement({ heading: 'Title' }));
-        const details: unknown[] = [];
-        element.addEventListener('r-dialog-close', (e) => details.push((e as CustomEvent).detail));
+        const results: unknown[] = [];
+        element.addEventListener('r-dialog-close', (event) => results.push(event.result));
         void element.open();
         element.close('a');
         void element.open();
         element.querySelector<HTMLElement>('.dialog-close')!.click();
-        expect(details).toEqual(['a', null]); // event detail has no undefined: null is "no value"
+        expect(results).toEqual(['a', undefined]);
     });
 
     it('escape_dismisses_the_dialog_the_same_way_the_close_button_does', () => {

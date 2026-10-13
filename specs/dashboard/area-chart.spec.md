@@ -11,7 +11,7 @@ A reader sees how an amount over time is made up of its parts: several series st
 
 ## Drawing areas
 - **Same chart data**: the page sets the same `data` shape as the line chart, with `labels`, `series` and a `summary` (docs/manual/LineChart.md#Properties)
-- **Mismatched series**: a series whose number of values differs from the number of labels logs an error naming that series and nothing is drawn (docs/manual/LineChart.md#Properties)
+- **Mismatched series**: a series whose number of values differs from the number of labels reports an error naming that series and nothing is drawn (docs/manual/LineChart.md#Properties)
 - **Stacked areas**: with several series, each series is a band drawn on top of the ones before it in the order given, so the first series sits on the zero line and the top edge of the last is the total
 - **Single area**: a single series is drawn as a line with the space between it and zero shaded
   - **Below zero**: a single series with negative values dips below the zero line, shaded up to zero, and the axis extends down to cover it

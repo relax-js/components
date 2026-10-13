@@ -1,3 +1,4 @@
+import { reportProblem } from '../../foundations/problems/problems';
 import { formatValue, formatting } from '../../foundations/formatting/formatting';
 import { installStyles } from '../../foundations/styles';
 import { text } from '../../foundations/text/text';
@@ -167,7 +168,7 @@ export class KpiMeter extends HTMLElement {
             this.append(labelElement, figures, bar, previousText);
         } catch (error) {
             this.textContent = '';
-            console.error(`r-kpi-meter: ${error instanceof Error ? error.message.replace(/^r-kpi-meter: /, '') : String(error)}`);
+            reportProblem('r-kpi-meter', error instanceof Error ? error.message.replace(/^r-kpi-meter: /, '') : String(error));
         }
     }
 }

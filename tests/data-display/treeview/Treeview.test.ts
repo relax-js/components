@@ -1,3 +1,4 @@
+import { captureProblems } from '../../captureProblems';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { mount } from '@relax.js/core/testing';
 import '../../../src/data-display/treeview/Treeview';
@@ -113,12 +114,12 @@ describe('r-treeview', () => {
         expect(Array.from(tree.querySelectorAll('.label')).map((label) => label.textContent)).toEqual(['Root', 'Child']);
     });
 
-    it('invalid_inline_json_logs_an_error_and_renders_empty', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    it('invalid_inline_json_reports_an_error_and_renders_empty', () => {
+        const reported = captureProblems();
         document.body.innerHTML = '<r-treeview><template name="data">[{ label: </template></r-treeview>';
 
         expect(document.querySelectorAll('.node')).toHaveLength(0);
-        expect(error).toHaveBeenCalledWith(expect.stringMatching(/^r-treeview: the data template is not valid JSON/));
+        expect(reported.messages()).toContainEqual(expect.stringMatching(/^r-treeview: the data template is not valid JSON/));
     });
 
     it('clicking_a_label_selects_the_node_and_reports_it', () => {
@@ -421,12 +422,12 @@ describe('r-treeview', () => {
         expect(Array.from(tree.querySelectorAll('.label')).map((label) => label.textContent)).toEqual(['FromCode']);
     });
 
-    it('json_that_is_not_a_node_list_logs_an_error_and_renders_empty', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    it('json_that_is_not_a_node_list_reports_an_error_and_renders_empty', () => {
+        const reported = captureProblems();
         document.body.innerHTML = '<r-treeview><template name="data">{ "label": "Root" }</template></r-treeview>';
 
         expect(document.querySelectorAll('.node')).toHaveLength(0);
-        expect(error).toHaveBeenCalledWith(expect.stringMatching(/^r-treeview:/));
+        expect(reported.messages()).toContainEqual(expect.stringMatching(/^r-treeview:/));
     });
 
     it('the_tree_never_changes_the_nodes_it_is_given', () => {

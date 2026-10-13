@@ -18,6 +18,8 @@ export class StepDoneEvent extends Event {
  * ```html
  * <r-step><form><input name="email" required><button>Next</button></form></r-step>
  * ```
+ *
+ * @fires r-step-done - {@link StepDoneEvent}
  */
 export class Step extends HTMLElement {
     private values: Record<string, string> = {};

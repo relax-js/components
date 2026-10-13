@@ -11,7 +11,7 @@ A reader sees a year's accounting periods side by side and how far each has come
 
 ## Seeing a year's periods
 - **Year heading**: the grid shows its `year` attribute above the periods (docs/manual/PeriodGrid.md#Attributes)
-  - **Invalid year**: a missing or non-numeric `year` logs an error and the grid renders empty (specs/dashboard/dashboard-foundations.spec.md#Putting a component on a page)
+  - **Invalid year**: a missing or non-numeric `year` reports an error and the grid renders empty (specs/dashboard/dashboard-foundations.spec.md#Putting a component on a page)
   - **Year changed**: changing `year` on a drawn grid updates the heading and every tile's title
 - **Months as items**: each entry of the `periods` property becomes a status grid item labelled `"{month} {year}"` in the given order, so a tile's title reads such as `"Jan 2026: closed"` (specs/dashboard/status-grid.spec.md#Seeing where each item stands)
   - **Months shown as given**: the month text is shown exactly as the page gave it, never translated, and months the page left out are not filled in (docs/authoring/TextAndValues.md#Data Is Shown as Given)

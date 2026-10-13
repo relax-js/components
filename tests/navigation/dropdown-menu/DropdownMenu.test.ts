@@ -1,3 +1,4 @@
+import { captureProblems } from '../../captureProblems';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { mount } from '@relax.js/core/testing';
 import '../../../src/navigation/dropdown-menu/DropdownMenu';
@@ -68,12 +69,12 @@ describe('r-dropdown-menu', () => {
         expect(button.getAttribute('aria-label')).toBe('Account');
     });
 
-    it('missing_label_logs_an_error_naming_the_element_and_renders_empty', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    it('missing_label_reports_an_error_naming_the_element_and_renders_empty', () => {
+        const reported = captureProblems();
 
         const menu = mountMenu({});
 
-        expect(error).toHaveBeenCalledWith(expect.stringContaining('r-dropdown-menu'));
+        expect(reported.messages()).toContainEqual(expect.stringContaining('r-dropdown-menu'));
         expect(menu.shadowRoot!.childElementCount).toBe(0);
     });
 
@@ -209,15 +210,15 @@ describe('r-dropdown-menu', () => {
         expect(trigger(menu).disabled).toBe(false);
     });
 
-    it('item_with_children_logs_an_error_naming_the_element_and_is_left_out', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    it('item_with_children_reports_an_error_naming_the_element_and_is_left_out', () => {
+        const reported = captureProblems();
         const menu = mountMenu();
         menu.items = [
             { name: 'a', title: 'Parent', children: [{ name: 'c', title: 'Child' }] },
             { name: 'b', title: 'Plain' },
         ];
 
-        expect(error).toHaveBeenCalledWith(expect.stringContaining('r-dropdown-menu'));
+        expect(reported.messages()).toContainEqual(expect.stringContaining('r-dropdown-menu'));
         expect(items(menu).map((i) => i.textContent)).toEqual(['Plain']);
     });
 

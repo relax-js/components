@@ -1,0 +1,59 @@
+{
+    "app": {
+        "title": "Household budget",
+        "language": "Language"
+    },
+    "nav": {
+        "overview": "Overview",
+        "budget": "Budget",
+        "transactions": "Transactions"
+    },
+    "overview": {
+        "heading": "This month",
+        "spending": "Spending",
+        "saved": "Saved",
+        "lastMonth": "last month",
+        "accounts": "Accounts",
+        "accountsLead": "Balances, and the trend over the last year.",
+        "bills": "Upcoming bills",
+        "balance": "Balance over the year",
+        "balanceLead": "All accounts together, against your buffer target.",
+        "total": "All accounts",
+        "bufferTarget": "Buffer target"
+    },
+    "budget": {
+        "heading": "Budget",
+        "byCategory": "Spending by category",
+        "byCategoryLead": "This month, against each category's budget.",
+        "spent": "Spent",
+        "budget": "Budget",
+        "limits": "Budget used",
+        "year": "The year",
+        "yearLead": "A month is closed once its spending is reconciled."
+    },
+    "transactions": {
+        "heading": "Transactions",
+        "date": "Date",
+        "description": "Description",
+        "category": "Category",
+        "amount": "Amount"
+    },
+    "accounts": {
+        "everyday": "Everyday",
+        "savings": "Savings",
+        "buffer": "Buffer"
+    },
+    "categories": {
+        "housing": "Housing",
+        "food": "Food",
+        "transport": "Transport",
+        "leisure": "Leisure",
+        "utilities": "Utilities"
+    },
+    "bills": {
+        "rent": "Rent",
+        "electricity": "Electricity",
+        "broadband": "Broadband",
+        "insurance": "Car insurance"
+    }
+}

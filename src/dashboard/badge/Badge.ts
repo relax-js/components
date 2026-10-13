@@ -1,3 +1,4 @@
+import { reportProblem } from '../../foundations/problems/problems';
 import { installStyles } from '../../foundations/styles';
 import { formatting } from '../../foundations/formatting/formatting';
 import { text, whenLanguageChanges } from '../../foundations/text/text';
@@ -105,7 +106,7 @@ export class Badge extends HTMLElement {
             this.append(shown);
         } catch (error) {
             this.replaceChildren();
-            console.error(`r-badge: ${error instanceof Error ? error.message : String(error)}`);
+            reportProblem('r-badge', error instanceof Error ? error.message : String(error));
         } finally {
             this.observer.observe(this, { childList: true, characterData: true, subtree: true });
         }

@@ -1,3 +1,4 @@
+import { captureProblems } from '../../captureProblems';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import '../../../src/dashboard/status-mark/StatusMark';
 import type { StatusMark } from '../../../src/dashboard/status-mark/StatusMark';
@@ -38,11 +39,11 @@ describe('r-status-mark', () => {
         expect(markWith('<r-status-mark>Paid</r-status-mark>').dataset.tone).toBe('muted');
     });
 
-    it('an_unknown_tone_logs_an_error_and_is_muted', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    it('an_unknown_tone_reports_an_error_and_is_muted', () => {
+        const reported = captureProblems();
         const mark = markWith('<r-status-mark tone="loud">Paid</r-status-mark>');
 
-        expect(error).toHaveBeenCalled();
+        expect(reported.messages()).not.toEqual([]);
         expect(mark.dataset.tone).toBe('muted');
     });
 

@@ -1,3 +1,4 @@
+import { reportProblem } from '../../foundations/problems/problems';
 import { registerRouteTarget, unregisterRouteTarget, type NavigateRouteEvent } from '@relax.js/core';
 import { installStyles } from '../../foundations/styles';
 import '../../foundations/icon/Icon';
@@ -21,6 +22,10 @@ r-dialog {
         display: flex;
         flex-direction: column;
         gap: var(--dialog-gap);
+        /* The browser's own limits leave room for its small padding only; these include ours, so the dialog stays inside the window and scrolls within itself. */
+        box-sizing: border-box;
+        max-width: calc(100vw - 2 * var(--dialog-gap));
+        max-height: calc(100dvh - 2 * var(--dialog-gap));
         padding: var(--dialog-padding);
         border: 1px solid var(--bd-muted);
         border-radius: var(--dialog-radius);
@@ -86,6 +91,30 @@ r-dialog {
 }
 `;
 
+/**
+ * Dispatched by `<r-dialog>` before Escape or the close button dismisses it. Cancel it to keep the
+ * dialog open, for example while the content has unsaved changes.
+ */
+export class DialogClosingEvent extends Event {
+    static readonly type = 'r-dialog-closing';
+
+    constructor() {
+        super(DialogClosingEvent.type, { bubbles: true, cancelable: true });
+    }
+}
+
+/** Dispatched by `<r-dialog>` every time it closes. */
+export class DialogCloseEvent extends Event {
+    static readonly type = 'r-dialog-close';
+
+    constructor(
+        /** What the content closed the dialog with, or `undefined` when it was dismissed. */
+        public readonly result: unknown
+    ) {
+        super(DialogCloseEvent.type, { bubbles: true });
+    }
+}
+
 let nextId = 0;
 
 /**
@@ -99,6 +128,8 @@ let nextId = 0;
  *
  * @attr {string} heading - The dialog's title, also its accessible name
  * @attr {boolean} open - Present while the dialog is open; set by the dialog
+ * @fires r-dialog-closing - {@link DialogClosingEvent}
+ * @fires r-dialog-close - {@link DialogCloseEvent}
  */
 export class Dialog extends HTMLElement {
     private dialog?: HTMLDialogElement;
@@ -141,7 +172,7 @@ export class Dialog extends HTMLElement {
               ? new route.component()
               : undefined;
         if (!page) {
-            console.error('r-dialog: the route names no component');
+            reportProblem('r-dialog', 'the route names no component');
             return;
         }
         if (routeData) {
@@ -221,7 +252,7 @@ export class Dialog extends HTMLElement {
         }
         const heading = this.getAttribute('heading') ?? '';
         if (heading === '') {
-            console.error('r-dialog: the heading attribute is missing');
+            reportProblem('r-dialog', 'the heading attribute is missing');
         }
 
         const dialog = document.createElement('dialog');
@@ -275,7 +306,7 @@ export class Dialog extends HTMLElement {
 
     // Escape and the close button dismiss; the page may veto that, e.g. for unsaved changes.
     private dismiss(dialog: HTMLDialogElement): void {
-        const closing = new CustomEvent('r-dialog-closing', { bubbles: true, cancelable: true });
+        const closing = new DialogClosingEvent();
         this.dispatchEvent(closing);
         if (!closing.defaultPrevented) {
             dialog.close();
@@ -299,7 +330,7 @@ export class Dialog extends HTMLElement {
         if (opener instanceof HTMLElement && opener.isConnected) {
             opener.focus();
         }
-        this.dispatchEvent(new CustomEvent('r-dialog-close', { bubbles: true, detail: result }));
+        this.dispatchEvent(new DialogCloseEvent(result));
         this.resolveClosed?.(result);
         this.resolveClosed = undefined;
     }
@@ -310,6 +341,10 @@ if (!customElements.get('r-dialog')) {
 }
 
 declare global {
+    interface HTMLElementEventMap {
+        [DialogClosingEvent.type]: DialogClosingEvent;
+        [DialogCloseEvent.type]: DialogCloseEvent;
+    }
     interface HTMLElementTagNameMap {
         'r-dialog': Dialog;
     }

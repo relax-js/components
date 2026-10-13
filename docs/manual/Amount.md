@@ -23,7 +23,7 @@ formatAmount(value: number, options?: {
 
 | Attribute | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `value` | `number` | | The amount. A value that is not a number logs an error and clears the text. |
+| `value` | `number` | | The amount. A value that is not a number reports an error and clears the text. |
 | `decimals` | `0 \| 2` | `0` | Whole figures, or two decimals |
 | `unit` | `none` | | `none` leaves the currency out |
 | `signed` | flag | | Shows the sign of a non-zero amount both ways and none on zero; meant for a movement rather than a balance |

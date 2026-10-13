@@ -33,7 +33,7 @@ The number format follows the [formatting configuration](Formatting.md), and the
 | `previous` | `number` | | The same period last year |
 | `better` | `higher \| lower` | `higher` | Whether a rise is good news |
 
-A `value` or `previous` that is not a number, or a `better` other than `higher` or `lower`, logs an error and the meter renders nothing.
+A `value` or `previous` that is not a number, or a `better` other than `higher` or `lower`, reports an error and the meter renders nothing.
 
 ## Parts
 

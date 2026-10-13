@@ -1,3 +1,4 @@
+import { captureProblems } from '../../captureProblems';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { formatAmount } from '../../../src/dashboard/amount/Amount';
 import { createComponentPipeRegistry } from '../../../src/foundations/pipes/pipes';
@@ -51,10 +52,10 @@ describe('amount pipe', () => {
         expect(amount(undefined)).toBe('');
     });
 
-    it('pipe_logs_and_gives_empty_text_for_a_value_that_is_not_a_number', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    it('pipe_reports_and_gives_empty_text_for_a_value_that_is_not_a_number', () => {
+        const reported = captureProblems();
 
         expect(amount('abc')).toBe('');
-        expect(error).toHaveBeenCalledOnce();
+        expect(reported.messages()).toHaveLength(1);
     });
 });

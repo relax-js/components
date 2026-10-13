@@ -65,14 +65,14 @@ Each cell shows the record's value for its column's `field`, written for the loc
 
 | Attribute | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `page-size` | `number` | `25` | Rows per page. Anything but a whole number above zero logs an error and the table renders empty. |
+| `page-size` | `number` | `25` | Rows per page. Anything but a whole number above zero reports an error and the table renders empty. |
 | `loading` | `boolean` | | Set by the table while a page is loading |
 
 ### r-column
 
 | Attribute | Type | Description |
 |-----------|------|-------------|
-| `field` | `string` | Property of each record shown in this column, and the sort key the provider receives. Required: a column without it logs an error and the table renders empty. |
+| `field` | `string` | Property of each record shown in this column, and the sort key the provider receives. Required: a column without it reports an error and the table renders empty. |
 | `width` | `string` | CSS width of the column, such as `120px` or `20%` |
 | `sortable` | `boolean` | Lets the user sort by this column by clicking its header |
 | `sort` | `asc \| desc` | Sorts by this column when the table first loads |
@@ -127,7 +127,7 @@ await saveUser(user);
 await table.refresh();
 ```
 
-A provider that fails while the user pages or sorts logs `r-table: the provider failed to load page` with the error, and the rows on screen stay as they were.
+A provider that fails while the user pages or sorts reports `r-table: the provider failed to load page` with the error, and the rows on screen stay as they were.
 
 ## Parts
 
@@ -135,6 +135,7 @@ The table renders into the light DOM, so style it with ordinary selectors:
 
 | Selector | What it is |
 |----------|------------|
+| `r-table .scroller` | Holds the table, and scrolls it sideways when it is wider than the space it is given |
 | `r-table table` | The native table |
 | `r-table th` | A header cell; `aria-sort` says how it is sorted |
 | `r-table th .sort` | The button in the header of a sortable column |

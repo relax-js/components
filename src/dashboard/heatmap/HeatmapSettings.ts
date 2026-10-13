@@ -1,3 +1,4 @@
+import { reportProblem } from '../../foundations/problems/problems';
 const tag = 'r-heatmap';
 
 export type Scale = 'sequential' | 'diverging';
@@ -18,7 +19,7 @@ export interface ScaleRange {
 export function readSettings(element: HTMLElement): Settings | undefined {
     const scale = element.getAttribute('scale') ?? 'sequential';
     if (scale !== 'sequential' && scale !== 'diverging') {
-        console.error(`${tag}: scale must be "sequential" or "diverging", not "${scale}"`);
+        reportProblem(tag, `scale must be "sequential" or "diverging", not "${scale}"`);
         return undefined;
     }
     const midpoint = readNumber(element, 'midpoint');
@@ -36,7 +37,7 @@ export function readSettings(element: HTMLElement): Settings | undefined {
     };
 }
 
-/** The attribute as a number, undefined when absent, null after logging one that is not a number. */
+/** The attribute as a number, undefined when absent, null after reporting one that is not a number. */
 function readNumber(element: HTMLElement, name: string): number | undefined | null {
     const raw = element.getAttribute(name);
     if (raw === null || raw.trim() === '') {
@@ -44,16 +45,16 @@ function readNumber(element: HTMLElement, name: string): number | undefined | nu
     }
     const value = Number(raw);
     if (!Number.isFinite(value)) {
-        console.error(`${tag}: ${name} must be a number, not "${raw}"`);
+        reportProblem(tag, `${name} must be a number, not "${raw}"`);
         return null;
     }
     return value;
 }
 
-/** The fixed ends where the page gave them, the data's own otherwise. Undefined after logging a bad range. */
+/** The fixed ends where the page gave them, the data's own otherwise. Undefined after reporting a bad range. */
 export function scaleRange(settings: Settings, data: number[]): ScaleRange | undefined {
     if (settings.min !== undefined && settings.max !== undefined && settings.min >= settings.max) {
-        console.error(`${tag}: min (${settings.min}) must be below max (${settings.max})`);
+        reportProblem(tag, `min (${settings.min}) must be below max (${settings.max})`);
         return undefined;
     }
     const low = settings.min ?? (data.length > 0 ? Math.min(...data) : 0);

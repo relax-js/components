@@ -1,3 +1,4 @@
+import { reportProblem } from '../../foundations/problems/problems';
 import { installStyles } from '../../foundations/styles';
 import { text, whenLanguageChanges, type TextKey } from '../../foundations/text/text';
 import { parseTone, toneIcon, type Tone } from '../../foundations/tone/tone';
@@ -151,18 +152,18 @@ export class PeriodGrid extends HTMLElement {
         this.replaceChildren(year, this.drawMonths(states, yearText), this.drawKey(states));
     }
 
-    /** Validates the inputs and returns the states by id, or null (after logging) when the grid cannot be drawn. */
+    /** Validates the inputs and returns the states by id, or null (after reporting) when the grid cannot be drawn. */
     private resolveStates(raw: string | null): Map<string, PeriodState & { label: string }> | null {
         if (raw === null || raw.trim() === '' || !Number.isFinite(Number(raw))) {
-            console.error(`r-period-grid: year "${raw ?? ''}" is not a number`);
+            reportProblem('r-period-grid', `year "${raw ?? ''}" is not a number`);
             return null;
         }
         if (!Array.isArray(this.periodList)) {
-            console.error('r-period-grid: periods must be an array');
+            reportProblem('r-period-grid', 'periods must be an array');
             return null;
         }
         if (!Array.isArray(this.stateList)) {
-            console.error('r-period-grid: states must be an array');
+            reportProblem('r-period-grid', 'states must be an array');
             return null;
         }
         const states = new Map<string, PeriodState & { label: string }>();
@@ -178,7 +179,7 @@ export class PeriodGrid extends HTMLElement {
         }
         for (const period of this.periodList) {
             if (!states.has(period.state)) {
-                console.error(`r-period-grid: period "${period.month}" is in state "${period.state}", which is not defined`);
+                reportProblem('r-period-grid', `period "${period.month}" is in state "${period.state}", which is not defined`);
                 return null;
             }
         }

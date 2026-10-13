@@ -1,3 +1,4 @@
+import { reportProblem } from '../../foundations/problems/problems';
 import '../../foundations/icon/Icon';
 import { MenuSelectedEvent, type MenuItem } from '../top-menu/TopMenu';
 import { panelPosition } from './panelPosition';
@@ -68,13 +69,26 @@ export class DropdownMenu extends HTMLElement {
                 position: fixed;
                 inset: auto;
                 margin: 0;
-                min-width: max-content;
+                box-sizing: border-box;
+                /* As wide as its longest item, but never wider than a phone's window; a long item wraps instead. */
+                width: max-content;
+                max-width: calc(100vw - 16px);
                 background: var(--surface-raised);
                 color: var(--text-primary);
                 border: 1px solid var(--bd-muted);
                 border-radius: var(--floating-radius);
                 padding: var(--floating-padding);
                 box-shadow: var(--floating-shadow);
+            }
+
+            /* One item per line, the whole width of the panel. */
+            .panel [role='menuitem'] {
+                display: flex;
+                width: 100%;
+                box-sizing: border-box;
+                text-align: start;
+                color: inherit;
+                text-decoration: none;
             }
         `;
 
@@ -245,7 +259,7 @@ export class DropdownMenu extends HTMLElement {
     private render(): void {
         const label = this.getAttribute('label');
         if (!label) {
-            console.error('r-dropdown-menu: the label attribute is missing or empty');
+            reportProblem('r-dropdown-menu', 'the label attribute is missing or empty');
             this.close();
             this.shadowRoot!.replaceChildren();
             return;
@@ -269,7 +283,7 @@ export class DropdownMenu extends HTMLElement {
 
         const entries = this.menuItems.filter((item) => {
             if (item.children) {
-                console.error(`r-dropdown-menu: item "${item.name}" has children, but submenus are not supported`);
+                reportProblem('r-dropdown-menu', `item "${item.name}" has children, but submenus are not supported`);
                 return false;
             }
             return true;

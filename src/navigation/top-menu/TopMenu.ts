@@ -1,3 +1,4 @@
+import { reportProblem } from '../../foundations/problems/problems';
 import '../../foundations/icon/Icon';
 import { text, whenLanguageChanges } from '../../foundations/text/text';
 
@@ -111,22 +112,31 @@ export class TopMenu extends HTMLElement {
                     inset: 0;
                     display: flex;
                     align-items: center;
-                    justify-content: var(--align);
+                    /* Items that do not fit scroll sideways, starting from the first rather than cut off at both ends. */
+                    justify-content: safe var(--align);
+                    overflow-x: auto;
+                    scrollbar-width: none;
                     gap: var(--control-gap);
                     margin: 0;
                     padding: 0 var(--panel-padding);
                     list-style: none;
                     background: var(--surface-raised);
-                    transition: transform var(--motion-base) ease-in-out;
+                    transition: transform var(--motion-base) ease-in-out, visibility var(--motion-base);
                 }
 
+                li {
+                    flex: none;
+                }
+
+                /* The level slid out of view is hidden too, so it takes no focus. */
                 .submenu {
                     transform: translateX(100%);
+                    visibility: hidden;
                 }
 
                 nav.submenu-open {
-                    .root { transform: translateX(-100%); }
-                    .submenu { transform: translateX(0); }
+                    .root { transform: translateX(-100%); visibility: hidden; }
+                    .submenu { transform: translateX(0); visibility: visible; }
                 }
 
                 button,
@@ -223,7 +233,7 @@ export class TopMenu extends HTMLElement {
     private hasValidAlignment(): boolean {
         const align = this.getAttribute('align');
         if (align !== null && !alignments.includes(align)) {
-            console.error(`r-top-menu: align="${align}" is not one of ${alignments.join(', ')}`);
+            reportProblem('r-top-menu', `align="${align}" is not one of ${alignments.join(', ')}`);
             return false;
         }
         return true;

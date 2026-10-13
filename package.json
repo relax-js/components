@@ -1,46 +1,59 @@
 {
-    "name": "@relax.js/components",
-    "version": "2.0.0",
-    "description": "Ready-made Web Components for Relaxjs: table, tree view, tabs, top menu and spinner.",
-    "main": "./dist/index.mjs",
-    "module": "./dist/index.mjs",
-    "types": "./dist/index.d.ts",
-    "scripts": {
-        "build": "tsc --emitDeclarationOnly && node build.js",
-        "check": "tsc -p tsconfig.check.json",
-        "test": "vitest run --config ./vitest.config.ts",
-        "test:watch": "vitest --config ./vitest.config.ts",
-        "publish:npm": "npm run build && npm publish --access public"
+  "name": "@relax.js/components",
+  "version": "2.0.0",
+  "description": "Ready-made Web Components for Relaxjs: table, tree view, tabs, top menu and spinner.",
+  "main": "./dist/index.mjs",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsc --emitDeclarationOnly && npm run manifest && node build.js",
+    "manifest": "cem analyze --globs \"src/**/*.ts\" --outdir dist",
+    "check": "tsc -p tsconfig.check.json",
+    "test": "npm run check && vitest run --config ./vitest.config.ts",
+    "test:watch": "vitest --config ./vitest.config.ts",
+    "test:browser": "vitest run --config ./vitest.browser.config.ts",
+    "demo:ops": "vite demos/ops-dashboard",
+    "demo:office": "vite demos/back-office",
+    "demo:finance": "vite demos/finance-tracker",
+    "demo:screenshots": "node demos/shared/screenshot.mjs",
+    "demo:check": "tsc -p demos/tsconfig.json",
+    "demo:build": "vite build demos/ops-dashboard && vite build demos/back-office && vite build demos/finance-tracker",
+    "publish:npm": "npm run build && npm publish --access public"
+  },
+  "keywords": [
+    "web-components",
+    "custom-elements",
+    "relaxjs"
+  ],
+  "author": "",
+  "license": "MIT",
+  "peerDependencies": {
+    "@relax.js/core": "^2.3.1"
+  },
+  "devDependencies": {
+    "@custom-elements-manifest/analyzer": "^0.11.0",
+    "@relax.js/core": "^2.3.1",
+    "@types/jsdom": "^21.1.7",
+    "@vitest/browser": "^3.2.4",
+    "@vitest/coverage-v8": "^3.0.5",
+    "esbuild": "^0.25.0",
+    "jsdom": "^26.1.0",
+    "playwright": "^1.64.0",
+    "typescript": "^5.7.3",
+    "vite": "^6.0.7",
+    "vitest": "^3.0.5"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs"
     },
-    "keywords": [
-        "web-components",
-        "custom-elements",
-        "relaxjs"
-    ],
-    "author": "",
-    "license": "MIT",
-    "peerDependencies": {
-        "@relax.js/core": "^2.3.1"
-    },
-    "devDependencies": {
-        "@relax.js/core": "^2.3.1",
-        "@types/jsdom": "^21.1.7",
-        "@vitest/coverage-v8": "^3.0.5",
-        "esbuild": "^0.25.0",
-        "jsdom": "^26.1.0",
-        "typescript": "^5.7.3",
-        "vite": "^6.0.7",
-        "vitest": "^3.0.5"
-    },
-    "exports": {
-        ".": {
-            "types": "./dist/index.d.ts",
-            "import": "./dist/index.mjs"
-        },
-        "./theme.css": "./dist/theme.css"
-    },
-    "files": [
-        "dist",
-        "docs"
-    ]
+    "./theme.css": "./dist/theme.css"
+  },
+  "files": [
+    "dist",
+    "docs",
+    "skills"
+  ],
+  "customElements": "dist/custom-elements.json"
 }

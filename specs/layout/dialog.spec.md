@@ -16,9 +16,10 @@ A developer asks the user for attention, a confirmation or a form, in a modal di
   - **Moved while open**: moving an open dialog in the page never copies its content a second time (docs/authoring/ComponentContract.md#Drawing Once)
 - **Open state reflected**: an open dialog carries the `open` attribute, and a closed one does not (docs/authoring/ComponentContract.md#State in the DOM)
 - **Title and close button**: the dialog shows its `heading` and a close button labelled with the `r-components` close text, and the heading is its accessible name
-  - **Missing heading**: a dialog without a `heading` logs an error naming the component and still opens
+  - **Missing heading**: a dialog without a `heading` reports an error naming the component and still opens
 - **Focus returns**: on open the focus moves into the dialog, and on close it returns to the element that had it
 - **Dialog tier look**: the dialog takes its radius, padding, gaps and shadow from the dialog tier's role variables (docs/authoring/DesignLanguage.md#Component Tiers)
+- **Inside the window**: the dialog, padding and border included, is never wider or taller than the window less a gap on each side, and content that does not fit scrolls within it
 - **Dimmed backdrop**: the page behind an open dialog is dimmed with `--overlay-dim` (docs/authoring/DesignLanguage.md#Dimming)
 - **Opening motion**: the dialog fades in with the theme's motion variables, and appears at once when the user prefers reduced motion (docs/authoring/DesignLanguage.md#Motion)
 

@@ -45,7 +45,7 @@ A `template` named `data` holding a JSON list of nodes draws them without code:
 </r-treeview>
 ```
 
-JSON that does not parse logs an error and the tree renders empty.
+JSON that does not parse reports an error and the tree renders empty.
 
 ## Properties
 

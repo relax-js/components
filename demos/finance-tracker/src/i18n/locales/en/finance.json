@@ -1,0 +1,5 @@
+{
+    "transactionCount": "{count, plural, one {# transaction} other {# transactions}} this month",
+    "billsDue": "{count, plural, =0 {Nothing due in the next two weeks} one {# bill due in the next two weeks} other {# bills due in the next two weeks}}",
+    "overBudget": "{count, plural, =0 {Every category is within budget} one {# category is over budget} other {# categories are over budget}}"
+}

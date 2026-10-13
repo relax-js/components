@@ -1,3 +1,4 @@
+import { reportProblem } from '../../foundations/problems/problems';
 import { installStyles } from '../../foundations/styles';
 import { text, whenLanguageChanges } from '../../foundations/text/text';
 
@@ -77,6 +78,7 @@ export class SettingSavedEvent extends Event {
  *
  * @attr {string} name - The setting's name
  * @attr {string} state - Text describing the current state
+ * @fires r-setting-saved - {@link SettingSavedEvent}
  */
 export class SettingRow extends HTMLElement {
     static get observedAttributes(): string[] {
@@ -115,7 +117,7 @@ export class SettingRow extends HTMLElement {
         const template = this.querySelector(':scope > template');
         this.querySelectorAll(':scope > .setting-text, :scope > button').forEach((part) => part.remove());
         if (name === '') {
-            console.error('r-setting-row: the name attribute is missing');
+            reportProblem('r-setting-row', 'the name attribute is missing');
             return;
         }
 
@@ -131,7 +133,7 @@ export class SettingRow extends HTMLElement {
         this.append(label);
 
         if (!template) {
-            console.error('r-setting-row: there is no form template');
+            reportProblem('r-setting-row', 'there is no form template');
             return;
         }
         const button = document.createElement('button');
@@ -194,7 +196,7 @@ export class SettingRow extends HTMLElement {
             return;
         }
         if (!this.save) {
-            console.error('r-setting-row: no save function has been set');
+            reportProblem('r-setting-row', 'no save function has been set');
             return;
         }
         const values: Record<string, string> = {};
@@ -224,7 +226,7 @@ export class SettingRow extends HTMLElement {
             if (controller.signal.aborted) {
                 return;
             }
-            console.error('r-setting-row: saving failed', error);
+            reportProblem('r-setting-row', 'saving failed', { error });
             const failure = document.createElement('p');
             failure.className = 'setting-failure';
             failure.setAttribute('role', 'alert');

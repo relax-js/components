@@ -1,3 +1,4 @@
+import { reportProblem } from '../../foundations/problems/problems';
 import { installStyles } from '../../foundations/styles';
 import { parseTone, toneIcon, type Tone } from '../../foundations/tone/tone';
 import '../../foundations/icon/Icon';
@@ -36,6 +37,13 @@ const styles = /* css */ `
             display: inline-flex;
             align-items: center;
             gap: var(--control-gap);
+            max-width: 100%;
+        }
+
+        /* A label longer than the whole grid is wide breaks rather than sticking out. */
+        .item .label {
+            min-width: 0;
+            overflow-wrap: anywhere;
         }
 
         .tile {
@@ -110,7 +118,7 @@ export class StatusGrid extends HTMLElement {
             return;
         }
         if (!Array.isArray(this.stateList) || !Array.isArray(this.itemList)) {
-            console.error('r-status-grid: states and items must each be an array');
+            reportProblem('r-status-grid', 'states and items must each be an array');
             this.replaceChildren();
             return;
         }
@@ -137,12 +145,12 @@ export class StatusGrid extends HTMLElement {
         this.replaceChildren(items, legend);
     }
 
-    /** The states by id with their tone settled, or undefined after logging a duplicate id. */
+    /** The states by id with their tone settled, or undefined after reporting a duplicate id. */
     private resolveStates(): Map<string, ResolvedState> | undefined {
         const states = new Map<string, ResolvedState>();
         for (const state of this.stateList) {
             if (states.has(state.id)) {
-                console.error(`r-status-grid: state id "${state.id}" is used more than once`);
+                reportProblem('r-status-grid', `state id "${state.id}" is used more than once`);
                 return undefined;
             }
             const tone = parseTone(state.tone, 'muted', 'r-status-grid');
@@ -154,7 +162,7 @@ export class StatusGrid extends HTMLElement {
     private itemsHaveStates(states: Map<string, ResolvedState>): boolean {
         for (const item of this.itemList) {
             if (!states.has(item.state)) {
-                console.error(`r-status-grid: item "${item.label}" is in state "${item.state}", which is not defined`);
+                reportProblem('r-status-grid', `item "${item.label}" is in state "${item.state}", which is not defined`);
                 return false;
             }
         }

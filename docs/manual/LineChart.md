@@ -22,9 +22,9 @@ chart.data = {
 
 ### Drawing
 
-- The SVG has a 640×230 `viewBox` with padding of 72 left, 12 right, 12 top and 28 bottom, and a grid line and axis label at each step.
+- The SVG's `viewBox` is as wide as the chart in pixels (640 before it is laid out) and 230 high, with padding of 12 top and 28 bottom, at least 72 left (more when the widest value label needs it) and at least 12 right (more when the last X label needs it), and a grid line and axis label at each step. The chart redraws when its width changes, so text and markers keep their size from a phone card to a wide page. Below 160 pixels the chart is drawn 160 wide and scaled down.
 - The Y axis ends on a round figure a person would say out loud, from `niceScale(max, steps = 4)`: the step is 1, 2, 2.5, 5 or 10 × 10ⁿ and the top is `ceil(max / step) × step`. When `max` is 0 or less the axis has top 1 and step 1.
-- X labels are spaced evenly; a single label sits in the middle.
+- X labels are spaced evenly; a single label sits in the middle. When they do not fit side by side, every nth label is shown, starting with the first.
 - Series are coloured `--series-1`, `--series-2` and so on in the order given, and the first series is the one the chart is about.
 - A `threshold` series is a level to stay above, drawn dashed without markers. An `area` series is shaded under its line. Every other series has a marker of radius 4 at each point.
 
@@ -47,7 +47,7 @@ interface ChartSeries { name: string; values: number[]; threshold?: boolean; are
 interface ChartData { labels: string[]; series: ChartSeries[]; summary: string }
 ```
 
-A series whose number of values differs from the number of labels logs an error naming that series and nothing is drawn. The default formats follow the [formatting configuration](Formatting.md).
+A series whose number of values differs from the number of labels reports an error naming that series and nothing is drawn. The default formats follow the [formatting configuration](Formatting.md).
 
 ## Parts
 

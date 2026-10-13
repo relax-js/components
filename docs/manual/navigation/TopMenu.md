@@ -38,7 +38,7 @@ menu.addEventListener('r-menu-selected', (event) => {
 
 | Attribute | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `align` | `left \| center \| right` | `center` | Placement of the items in the bar. Any other value logs an error and the menu renders empty. |
+| `align` | `left \| center \| right` | `center` | Placement of the items in the bar. Any other value reports an error and the menu renders empty. |
 
 ## Properties
 

@@ -17,13 +17,15 @@ A developer gives an application a horizontal menu bar whose items open submenus
   - **Duplicate names**: items whose names are not unique within the menu throw a named error
 - **Titles as given**: each item's title is shown exactly as given, as text, never parsed as markup or translated (docs/authoring/TextAndValues.md#Data Is Shown as Given)
 - **Alignment**: the `align` attribute places the items left, center or right, and center when it is absent (docs/manual/navigation/TopMenu.md#Attributes)
-  - **Invalid alignment**: any other value logs an error and the menu renders empty
+  - **Invalid alignment**: any other value reports an error and the menu renders empty
+- **Crowded bar**: items that do not fit the bar scroll sideways within it, starting from the first item whatever the alignment, so none is cut off or out of reach
 - **Claims hide items** [removed]: a menu item or submenu item with required claims is shown only to a user holding every one of them
 
 ## Opening a submenu
 - **Submenu marker**: an item with children carries `aria-haspopup="menu"` and shows a chevron icon (docs/manual/navigation/TopMenu.md#Accessibility)
 - **Submenu reveal**: choosing an item with children slides its submenu in over the bar and never reports the item as selected, to any depth (docs/manual/navigation/TopMenu.md#Usage)
   - **Reduced motion**: when the user prefers reduced motion, the submenu replaces the level without sliding
+- **Level out of view**: the level slid out of view is hidden, so its items take no focus
 - **Back button**: a submenu shows a back button, labelled with the `back` text, that returns one level (docs/manual/navigation/TopMenu.md#Accessibility)
   - **Escape goes back**: Escape also goes back one level
   - **Escape at top level**: Escape on the top level changes nothing

@@ -1,8 +1,10 @@
+import { reportProblem } from '../../foundations/problems/problems';
 import '../../foundations/icon/Icon';
-import { formatValue } from '../../foundations/formatting/formatting';
-import { text, whenLanguageChanges } from '../../foundations/text/text';
+import { whenLanguageChanges } from '../../foundations/text/text';
 import { installStyles } from '../../foundations/styles';
+import { readDeclaredColumns } from './declaredColumns';
 import { drawPager } from './pager';
+import { TableGrid } from './tableGrid';
 import { rowsProvider } from './rowsProvider';
 
 /** One record shown as a table row. */
@@ -53,6 +55,10 @@ const styles = /* css */ `
 
         r-column {
             display: none;
+        }
+
+        .scroller {
+            overflow-x: auto;
         }
 
         table {
@@ -171,8 +177,7 @@ export class Table extends HTMLElement {
     private tableColumns?: TableColumn[];
     private tableRows?: TableRow[];
     private tableProvider?: TableProvider;
-    private table?: HTMLTableElement;
-    private pager?: HTMLElement;
+    private grid?: TableGrid;
     private page = 1;
     private shownPage = 1;
     private waiting: { resolve: () => void; reject: (error: unknown) => void }[] = [];
@@ -195,7 +200,7 @@ export class Table extends HTMLElement {
         installStyles(this, 'r-table', styles);
         this.stopListening?.();
         this.stopListening = whenLanguageChanges(this.redrawWords);
-        if (this.table) {
+        if (this.grid) {
             return;
         }
         if (!this.tableColumns && document.readyState === 'loading' && !this.querySelector('r-column')) {
@@ -203,7 +208,7 @@ export class Table extends HTMLElement {
             return;
         }
         if (!this.tableColumns) {
-            this.tableColumns = this.readDeclaredColumns();
+            this.tableColumns = readDeclaredColumns(this);
         }
         // The page size is read once, when the table loads; later attribute changes are ignored.
         this.loadedPageSize = this.pageSize;
@@ -227,7 +232,7 @@ export class Table extends HTMLElement {
         }
         const size = Number(value);
         if (!Number.isInteger(size) || size < 1) {
-            console.error(`r-table: page-size="${value}" is not a whole number above zero`);
+            reportProblem('r-table', `page-size="${value}" is not a whole number above zero`);
             return undefined;
         }
         return size;
@@ -279,38 +284,12 @@ export class Table extends HTMLElement {
         return this.load();
     }
 
-    private readDeclaredColumns(): TableColumn[] | undefined {
-        const declared = Array.from(this.querySelectorAll(':scope > r-column'));
-        const columns: TableColumn[] = [];
-        for (const element of declared) {
-            const field = element.getAttribute('field');
-            if (!field) {
-                console.error(`r-table: <r-column> "${element.textContent?.trim()}" has no field attribute`);
-                return undefined;
-            }
-            const sort = element.getAttribute('sort');
-            if (sort !== null && sort !== 'asc' && sort !== 'desc') {
-                console.error(`r-table: <r-column field="${field}"> has sort="${sort}", which is not asc or desc`);
-                return undefined;
-            }
-            columns.push({
-                field,
-                title: element.textContent?.trim() ?? '',
-                width: element.getAttribute('width') ?? undefined,
-                sortable: element.hasAttribute('sortable'),
-                sort: sort ?? undefined,
-            });
-        }
-        return columns;
-    }
-
     private redraw(): void {
         if (!this.isConnected) {
             return;
         }
-        this.table?.remove();
-        this.pager?.remove();
-        this.table = undefined;
+        this.grid?.remove();
+        this.grid = undefined;
         this.drawTable();
         this.page = 1;
         void this.load();
@@ -321,38 +300,8 @@ export class Table extends HTMLElement {
         const initial = columns.find((column) => column.sort);
         this.sort = initial ? { column: initial.field, direction: initial.sort! } : undefined;
 
-        const table = document.createElement('table');
-        const colgroup = table.appendChild(document.createElement('colgroup'));
-        const headerRow = table.createTHead().insertRow();
-        for (const column of columns) {
-            const col = colgroup.appendChild(document.createElement('col'));
-            if (column.width) {
-                col.style.width = column.width;
-            }
-            const th = headerRow.appendChild(document.createElement('th'));
-            th.scope = 'col';
-            th.dataset.field = column.field;
-            if (column.sortable) {
-                const button = document.createElement('button');
-                button.type = 'button';
-                button.className = 'sort';
-                button.append(column.title, document.createElement('r-icon'));
-                button.addEventListener('click', () => this.sortBy(column.field));
-                th.append(button);
-            } else {
-                th.textContent = column.title;
-            }
-        }
-        table.createTBody();
-
-        const pager = document.createElement('nav');
-        pager.className = 'pager';
-        pager.hidden = true;
-
-        this.append(table, pager);
-        this.table = table;
-        this.pager = pager;
-        this.showSortState();
+        this.grid = new TableGrid(this, columns, (field) => this.sortBy(field));
+        this.grid.showSortState(this.sort);
     }
 
     private sortBy(field: string): void {
@@ -363,23 +312,9 @@ export class Table extends HTMLElement {
         } else {
             this.sort = undefined;
         }
-        this.showSortState();
+        this.grid!.showSortState(this.sort);
         this.page = 1;
         this.loadForUser();
-    }
-
-    private showSortState(): void {
-        const sort = this.sort;
-        this.table!.querySelectorAll<HTMLTableCellElement>('th').forEach((th) => {
-            const sorted = sort && sort.column === th.dataset.field ? sort.direction : undefined;
-            const icon = th.querySelector('r-icon');
-            if (!icon) {
-                return;
-            }
-            th.setAttribute('aria-sort', sorted === 'asc' ? 'ascending' : sorted === 'desc' ? 'descending' : 'none');
-            icon.hidden = !sorted;
-            icon.setAttribute('name', sorted === 'desc' ? 'arrow-down' : 'arrow-up');
-        });
     }
 
     private goToPage(page: number): void {
@@ -392,7 +327,7 @@ export class Table extends HTMLElement {
      * they settle with the newer load.
      */
     private load(): Promise<void> {
-        if (!this.tableProvider || !this.table || this.loadedPageSize === undefined) {
+        if (!this.tableProvider || !this.grid || this.loadedPageSize === undefined) {
             return Promise.resolve();
         }
         return new Promise<void>((resolve, reject) => {
@@ -417,8 +352,8 @@ export class Table extends HTMLElement {
                 return;
             }
             this.shownPage = this.page;
-            this.drawRows(result.rows);
-            drawPager(this.pager!, {
+            this.grid!.drawRows(result.rows);
+            drawPager(this.grid!.pager, {
                 page: this.shownPage,
                 pageCount: Math.max(1, Math.ceil(result.totalCount / pageSize)),
                 onSelect: (page) => this.goToPage(page),
@@ -428,7 +363,7 @@ export class Table extends HTMLElement {
             if (thisLoad.signal.aborted) {
                 return;
             }
-            console.error('r-table: the provider failed to load page', error);
+            reportProblem('r-table', 'the provider failed to load page', { error });
             this.page = this.shownPage;
             this.settleWaiting(error);
         } finally {
@@ -449,7 +384,7 @@ export class Table extends HTMLElement {
         }
     }
 
-    // A failure is already logged; the user paging or sorting has nobody to hand it to.
+    // A failure is already reported; the user paging or sorting has nobody to hand it to.
     private loadForUser(): void {
         this.load().catch(() => {});
     }
@@ -459,27 +394,6 @@ export class Table extends HTMLElement {
         this.setAttribute('aria-busy', String(loading));
     }
 
-    private drawRows(rows: TableRow[]): void {
-        const body = this.table!.tBodies[0];
-        if (rows.length === 0) {
-            const row = document.createElement('tr');
-            row.className = 'empty';
-            const cell = row.insertCell();
-            cell.colSpan = this.columns.length;
-            cell.textContent = text('noData');
-            body.replaceChildren(row);
-            return;
-        }
-        body.replaceChildren(
-            ...rows.map((data) => {
-                const row = document.createElement('tr');
-                for (const column of this.columns) {
-                    row.insertCell().textContent = formatValue(data[column.field]);
-                }
-                return row;
-            })
-        );
-    }
 }
 
 if (!customElements.get('r-table')) {

@@ -1,3 +1,4 @@
+import { captureProblems } from '../../captureProblems';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { mount } from '@relax.js/core/testing';
 import '../../../src/dashboard/kpi-meter/KpiMeter';
@@ -130,30 +131,30 @@ describe('r-kpi-meter', () => {
         expect(element.querySelector('.change')?.textContent).toBe('−3%');
     });
 
-    it('a_missing_or_invalid_attribute_logs_an_error_naming_the_meter_and_renders_nothing', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    it('a_missing_or_invalid_attribute_reports_an_error_naming_the_meter_and_renders_nothing', () => {
+        const reported = captureProblems();
         const cases: Record<string, string>[] = [{ label: 'x', previous: '1' }, { label: 'x', value: '1' }, { label: 'x', value: '1', previous: '1', better: 'up' }];
         for (const attributes of cases) {
             expect(mount(meter(attributes)).element.children).toHaveLength(0);
         }
-        expect(error).toHaveBeenCalledTimes(3);
-        expect(error.mock.calls.every(([message]) => String(message).startsWith('r-kpi-meter:'))).toBe(true);
+        expect(reported.messages()).toHaveLength(3);
+        expect(reported.messages().every((message) => String(message).startsWith('r-kpi-meter:'))).toBe(true);
     });
 
     it('a_value_that_is_not_a_number_literal_is_bad_input', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+        const reported = captureProblems();
         const element = mount(meter({ label: 'x', value: '1 285 400', previous: '1' })).element;
 
         expect(element.children).toHaveLength(0);
-        expect(error).toHaveBeenCalledOnce();
+        expect(reported.messages()).toHaveLength(1);
     });
 
     it('a_better_other_than_higher_or_lower_is_bad_input', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+        const reported = captureProblems();
         const element = mount(meter({ label: 'x', value: '1', previous: '1', better: 'bigger' })).element;
 
         expect(element.children).toHaveLength(0);
-        expect(error).toHaveBeenCalledOnce();
+        expect(reported.messages()).toHaveLength(1);
     });
 
     it('compare_years_returns_the_change_tone_fill_and_mark_the_meter_shows_for_the_same_figures', () => {
@@ -181,10 +182,10 @@ describe('r-kpi-meter', () => {
     });
 
     it('a_meter_without_a_label_is_bad_input', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+        const reported = captureProblems();
         const element = mount(meter({ value: '1', previous: '1' })).element;
 
         expect(element.children).toHaveLength(0);
-        expect(error).toHaveBeenCalledOnce();
+        expect(reported.messages()).toHaveLength(1);
     });
 });

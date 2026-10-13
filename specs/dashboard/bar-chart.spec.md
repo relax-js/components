@@ -10,10 +10,10 @@ authored: planned
 A reader compares amounts across categories as bars, side by side or stacked into totals, upright or laid sideways, and reads the exact values of any category on hover or, where the page asks for it, written beside each bar, while a screen reader user gets the same figures as a table.
 
 ## Drawing bars
-- **Bar chart data**: the page sets the `data` property with `labels`, `series` and a `summary` as for the line chart, and a series whose number of values differs from the number of labels logs an error naming that series and nothing is drawn (docs/manual/LineChart.md#Properties)
+- **Bar chart data**: the page sets the `data` property with `labels`, `series` and a `summary` as for the line chart, and a series whose number of values differs from the number of labels reports an error naming that series and nothing is drawn (docs/manual/LineChart.md#Properties)
 - **Shared chart rules**: the bar chart has the legend, series colours, read-out and value formats every chart has (specs/dashboard/chart-foundations.spec.md#Reading a chart)
 - **Vertical by default**: bars stand upright over their labels, and `orientation="horizontal"` lays them sideways with the labels down the side
-  - **Bad orientation**: an `orientation` other than `vertical` or `horizontal` logs an error naming the tag and draws nothing
+  - **Bad orientation**: an `orientation` other than `vertical` or `horizontal` reports an error naming the tag and draws nothing
   - **Attribute changed**: changing `orientation` or `stacked` on a drawn chart redraws it
 - **Even bands**: each label gets a band of equal width along the label axis, with its bars centred in it
 - **Grouped series**: with several series, each label's band holds one bar per series side by side, in series order

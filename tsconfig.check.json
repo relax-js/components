@@ -2,7 +2,11 @@
   "extends": "./tsconfig.json",
   "compilerOptions": {
     "noEmit": true,
-    "rootDir": "."
+    "rootDir": ".",
+    "types": [
+      "vitest/globals",
+      "vite/client"
+    ]
   },
   "include": [
     "src/**/*",

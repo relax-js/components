@@ -1,3 +1,4 @@
+import { captureProblems } from '../../captureProblems';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { flush } from '@relax.js/core/testing';
 import '../../../src/navigation/tabs/Tabs';
@@ -76,19 +77,19 @@ describe('r-tabs', () => {
         expect(tabs.tabs[0].hidden).toBe(true);
     });
 
-    it('an_out_of_range_selected_attribute_logs_an_error_and_shows_no_tab', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    it('an_out_of_range_selected_attribute_reports_an_error_and_shows_no_tab', () => {
+        const reported = captureProblems();
         const tabs = mountTabs(threeTabs.replace('<r-tabs>', '<r-tabs selected="7">'));
 
         expect(tabs.tabs.every((tab) => tab.hidden)).toBe(true);
-        expect(error).toHaveBeenCalledWith(expect.stringMatching(/^r-tabs: selected="7"/));
+        expect(reported.messages()).toContainEqual(expect.stringMatching(/^r-tabs: selected="7"/));
     });
 
-    it('a_selected_attribute_that_is_not_a_number_logs_an_error', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    it('a_selected_attribute_that_is_not_a_number_reports_an_error', () => {
+        const reported = captureProblems();
         mountTabs(threeTabs.replace('<r-tabs>', '<r-tabs selected="second">'));
 
-        expect(error).toHaveBeenCalledWith(expect.stringMatching(/^r-tabs: selected="second"/));
+        expect(reported.messages()).toContainEqual(expect.stringMatching(/^r-tabs: selected="second"/));
     });
 
     it('selecting_a_tab_that_does_not_exist_from_code_throws', () => {
@@ -124,11 +125,11 @@ describe('r-tabs', () => {
         expect(tabs.selectedIndex).toBe(2);
     });
 
-    it('a_tab_without_a_label_logs_an_error_and_gets_an_empty_header', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    it('a_tab_without_a_label_reports_an_error_and_gets_an_empty_header', () => {
+        const reported = captureProblems();
         const tabs = mountTabs('<r-tabs><r-tab>x</r-tab></r-tabs>');
 
-        expect(error).toHaveBeenCalled();
+        expect(reported.messages()).not.toEqual([]);
         expect(headers(tabs).map((header) => header.textContent)).toEqual(['']);
     });
 
@@ -160,7 +161,7 @@ describe('r-tabs', () => {
     });
 
     it('removing_the_shown_last_tab_shows_the_new_last_tab_without_an_event', async () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+        const reported = captureProblems();
         const tabs = mountTabs(threeTabs.replace('<r-tabs>', '<r-tabs selected="2">'));
         const listener = vi.fn();
         tabs.addEventListener('r-tab-change', listener);
@@ -170,11 +171,11 @@ describe('r-tabs', () => {
         expect(tabs.selectedIndex).toBe(1);
         expect(tabs.tabs.map((tab) => tab.hidden)).toEqual([true, false]);
         expect(listener).not.toHaveBeenCalled();
-        expect(error).not.toHaveBeenCalled();
+        expect(reported.messages()).toEqual([]);
     });
 
     it('an_invalid_selected_attribute_reads_minus_one_as_selected_index', () => {
-        vi.spyOn(console, 'error').mockImplementation(() => {});
+        captureProblems();
         const tabs = mountTabs(threeTabs.replace('<r-tabs>', '<r-tabs selected="7">'));
 
         expect(tabs.selectedIndex).toBe(-1);

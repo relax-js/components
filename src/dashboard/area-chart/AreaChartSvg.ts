@@ -1,13 +1,15 @@
 import { text } from '../../foundations/text/text';
+import { height, labelGap, labelStep, widestText } from '../bar-chart/chartSvg';
+import type { Pad } from '../bar-chart/chartSvg';
 import type { AreaChartData, AreaChartSeries } from './AreaChart';
 
-export const width = 640;
-export const height = 230;
-export const pad = { left: 72, right: 12, top: 12, bottom: 28 };
 const SVG = 'http://www.w3.org/2000/svg';
 
 /** Maps data positions and values to chart coordinates. */
 export interface Plot {
+    /** The width drawn at, in pixels. */
+    width: number;
+    pad: Pad;
     plotHeight: number;
     x: (i: number) => number;
     y: (v: number) => number;
@@ -25,13 +27,13 @@ export interface Edges {
     top: number[];
 }
 
-export function createPlot(count: number, scale: Scale): Plot {
+export function createPlot(count: number, scale: Scale, width: number, pad: Pad): Plot {
     const plotWidth = width - pad.left - pad.right;
     const plotHeight = height - pad.top - pad.bottom;
     const x = (i: number) => pad.left + (count <= 1 ? plotWidth / 2 : (plotWidth * i) / (count - 1));
     const y = (v: number) => pad.top + plotHeight * (1 - (v - scale.bottom) / (scale.top - scale.bottom));
     const line = (values: number[]) => values.map((v, i) => `${i === 0 ? 'M' : 'L'}${x(i)},${y(v)}`).join('');
-    return { plotHeight, x, y, line };
+    return { width, pad, plotHeight, x, y, line };
 }
 
 /** Cumulative bottom and top edge of each stacked band; the first sits on zero. */
@@ -46,7 +48,7 @@ export function stackEdges(stacked: AreaChartSeries[], count: number): Edges[] {
     return edges;
 }
 
-export function createSvg(): SVGSVGElement {
+export function createSvg(width: number): SVGSVGElement {
     const svg = document.createElementNS(SVG, 'svg');
     svg.setAttribute('viewBox', `0 0 ${width} ${height}`);
     svg.setAttribute('aria-hidden', 'true');
@@ -60,7 +62,7 @@ export function appendAxes(
     scale: Scale,
     axisFormatter: (value: number) => string
 ): void {
-    const { y, x } = plot;
+    const { y, x, width, pad } = plot;
     for (let value = scale.bottom; value <= scale.top + scale.step / 1000; value += scale.step) {
         const grid = document.createElementNS(SVG, 'line');
         grid.setAttribute('class', value === 0 ? 'zero' : 'grid');
@@ -70,14 +72,21 @@ export function appendAxes(
         grid.setAttribute('y2', String(y(value)));
         const label = document.createElementNS(SVG, 'text');
         label.setAttribute('class', 'axis-label');
-        label.setAttribute('x', String(pad.left - 8));
+        label.setAttribute('x', String(pad.left - labelGap));
         label.setAttribute('y', String(y(value) + 4));
         label.setAttribute('text-anchor', 'end');
         label.textContent = axisFormatter(value);
         svg.append(grid, label);
     }
+    // Every nth label is written when they do not all fit side by side.
+    const spacing = data.labels.length > 1 ? x(1) - x(0) : Infinity;
+    const step = labelStep(spacing, widestText(data.labels) + 2 * labelGap);
     data.labels.forEach((text, i) => {
+        if (i % step !== 0) {
+            return;
+        }
         const label = document.createElementNS(SVG, 'text');
+        label.setAttribute('class', 'axis-label label');
         label.setAttribute('x', String(x(i)));
         label.setAttribute('y', String(height - 8));
         label.setAttribute('text-anchor', 'middle');
@@ -177,6 +186,7 @@ export function attachReadout(
     valueFormatter: (value: number) => string
 ): HTMLElement {
     const count = data.labels.length;
+    const { width, pad } = plot;
     const crosshair = document.createElementNS(SVG, 'line');
     crosshair.setAttribute('class', 'crosshair');
     crosshair.setAttribute('y1', String(pad.top));

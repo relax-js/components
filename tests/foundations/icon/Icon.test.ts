@@ -1,3 +1,4 @@
+import { captureProblems } from '../../captureProblems';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { flush, mount } from '@relax.js/core/testing';
 import { Icon, registerIcons } from '../../../src/foundations/icon/Icon';
@@ -47,20 +48,20 @@ describe('r-icon', () => {
         expect(icon.querySelector('rect')).not.toBeNull();
     });
 
-    it('an_unbound_template_placeholder_never_draws_or_logs', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    it('an_unbound_template_placeholder_never_draws_or_reports', () => {
+        const reported = captureProblems();
         const { element } = mount(iconNamed('{{icon}}'));
 
         expect(element.childElementCount).toBe(0);
-        expect(error).not.toHaveBeenCalled();
+        expect(reported.messages()).toEqual([]);
     });
 
-    it('an_unknown_name_logs_an_error_and_draws_nothing', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    it('an_unknown_name_reports_an_error_and_draws_nothing', () => {
+        const reported = captureProblems();
         const { element } = mount(iconNamed('no-such-icon'));
 
         expect(element.childElementCount).toBe(0);
-        expect(error).toHaveBeenCalledWith('r-icon: no icon is registered as "no-such-icon"');
+        expect(reported.messages()).toContainEqual('r-icon: no icon is registered as "no-such-icon"');
     });
 
     it('the_icon_is_one_em_square_in_the_text_colour_with_round_thin_strokes', () => {
@@ -85,7 +86,7 @@ describe('r-icon', () => {
     });
 
     it('changing_a_drawn_icon_to_an_unknown_name_removes_its_shape', () => {
-        vi.spyOn(console, 'error').mockImplementation(() => {});
+        captureProblems();
         const { element } = mount(iconNamed('check'));
 
         element.setAttribute('name', 'no-such-icon');
@@ -93,15 +94,15 @@ describe('r-icon', () => {
         expect(element.childElementCount).toBe(0);
     });
 
-    it('a_missing_or_empty_name_logs_an_error_and_draws_nothing', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    it('a_missing_or_empty_name_reports_an_error_and_draws_nothing', () => {
+        const reported = captureProblems();
         const missing = mount(document.createElement('r-icon')).element;
         const empty = mount(iconNamed('')).element;
 
         expect(missing.childElementCount).toBe(0);
         expect(empty.childElementCount).toBe(0);
-        expect(error).toHaveBeenCalledTimes(2);
-        expect(error.mock.calls[0][0]).toMatch(/^r-icon:/);
+        expect(reported.messages()).toHaveLength(2);
+        expect(reported.messages()[0]).toMatch(/^r-icon:/);
     });
 
     it('registering_an_existing_name_replaces_its_shape', () => {
@@ -114,7 +115,7 @@ describe('r-icon', () => {
     });
 
     it('registering_a_name_redraws_connected_icons_that_showed_no_shape_or_the_replaced_one', () => {
-        vi.spyOn(console, 'error').mockImplementation(() => {});
+        captureProblems();
         const empty = mount(iconNamed('late')).element;
         registerIcons({ again: '<circle cx="1" cy="1" r="1"/>' });
         const replaced = mount(iconNamed('again')).element;

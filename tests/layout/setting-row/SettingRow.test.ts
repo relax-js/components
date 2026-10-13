@@ -1,3 +1,4 @@
+import { captureProblems } from '../../captureProblems';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { mount } from '@relax.js/core/testing';
 import '../../../src/layout/setting-row/SettingRow';
@@ -38,12 +39,12 @@ describe('r-setting-row', () => {
         expect(element.querySelectorAll('button')).toHaveLength(1);
     });
 
-    it('row_without_name_logs_an_error_naming_its_tag_and_renders_empty', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    it('row_without_name_reports_an_error_naming_its_tag_and_renders_empty', () => {
+        const reported = captureProblems();
 
         const { element } = mount(settingRow({ state: 'On' }));
 
-        expect(error).toHaveBeenCalledWith(expect.stringContaining('r-setting-row'));
+        expect(reported.messages()).toContainEqual(expect.stringContaining('r-setting-row'));
         expect(element.querySelector('.setting-text')).toBeNull();
         expect(element.querySelector('button')).toBeNull();
     });
@@ -58,12 +59,12 @@ describe('r-setting-row', () => {
         expect(element.querySelector('button')!.getAttribute('aria-label')).toBe('Edit Email notifications now');
     });
 
-    it('row_without_form_template_logs_an_error_and_shows_name_and_state_without_button', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    it('row_without_form_template_reports_an_error_and_shows_name_and_state_without_button', () => {
+        const reported = captureProblems();
 
         const { element } = mount(settingRow({ name: 'Email notifications', state: 'On' }, false));
 
-        expect(error).toHaveBeenCalledWith(expect.stringContaining('r-setting-row'));
+        expect(reported.messages()).toContainEqual(expect.stringContaining('r-setting-row'));
         expect(element.querySelector('.setting-name')!.textContent).toBe('Email notifications');
         expect(element.querySelector('.setting-state')!.textContent).toBe('On');
         expect(element.querySelector('button')).toBeNull();
@@ -144,15 +145,15 @@ describe('r-setting-row', () => {
         expect(save).not.toHaveBeenCalled();
     });
 
-    it('submitting_without_a_save_function_logs_an_error_naming_the_tag_and_keeps_the_dialog_open', async () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    it('submitting_without_a_save_function_reports_an_error_naming_the_tag_and_keeps_the_dialog_open', async () => {
+        const reported = captureProblems();
         const { element } = mount(settingRow({ name: 'Mail', state: 'On' }));
         const dialog = open(element);
 
         submit(dialog);
         await flush();
 
-        expect(error).toHaveBeenCalledWith(expect.stringContaining('r-setting-row'));
+        expect(reported.messages()).toContainEqual(expect.stringContaining('r-setting-row'));
         expect(element.querySelector('dialog')).toBe(dialog);
     });
 
@@ -218,7 +219,7 @@ describe('r-setting-row', () => {
     });
 
     it('failed_save_keeps_the_dialog_open_with_the_entries_and_shows_a_failure_message', async () => {
-        vi.spyOn(console, 'error').mockImplementation(() => {});
+        captureProblems();
         const { element } = mount(settingRow({ name: 'Mail', state: 'On' }));
         element.save = vi.fn().mockRejectedValue(new Error('boom'));
         const saved = vi.fn();

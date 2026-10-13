@@ -27,13 +27,13 @@ The header bar follows the tabs: adding, removing or relabelling an `r-tab` upda
 
 | Attribute | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `selected` | `number` | `0` | Zero-based index of the tab shown. Changing it switches tab. A value that is not the index of a tab logs an error and no tab is shown. |
+| `selected` | `number` | `0` | Zero-based index of the tab shown. Changing it switches tab. A value that is not the index of a tab reports an error and no tab is shown. |
 
 ### r-tab
 
 | Attribute | Type | Description |
 |-----------|------|-------------|
-| `label` | `string` | Text of the tab's header. A tab without one logs an error and gets an empty header. |
+| `label` | `string` | Text of the tab's header. A tab without one reports an error and gets an empty header. |
 | `selected` | `boolean` | Set by `r-tabs` on the tab shown, and removed from the others |
 
 ## Properties

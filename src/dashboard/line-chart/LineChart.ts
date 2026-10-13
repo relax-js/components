@@ -1,7 +1,9 @@
+import { reportProblem } from '../../foundations/problems/problems';
 import { formatAmount } from '../amount/Amount';
 import { installStyles } from '../../foundations/styles';
 import { text } from '../../foundations/text/text';
 import type { ChartData } from '../bar-chart/BarChart';
+import { ChartWidth } from '../bar-chart/chartSvg';
 import { drawPlot } from './LinePlot';
 
 const seriesColours = 5;
@@ -15,6 +17,7 @@ r-line-chart svg {
     display: block;
     width: 100%;
     height: auto;
+    overflow: visible;
     font-size: 11px;
 }
 r-line-chart .grid { stroke: currentColor; stroke-opacity: 0.15; }
@@ -60,6 +63,8 @@ r-line-chart .visually-hidden {
     overflow: hidden;
     clip-path: inset(50%);
     white-space: nowrap;
+    /* A table is never narrower than its cells otherwise, and would widen the page out of sight. */
+    table-layout: fixed;
 }
 r-line-chart .empty { padding: 1rem; text-align: center; }
 `;
@@ -82,6 +87,9 @@ export class LineChart extends HTMLElement {
     private chartData: ChartData | undefined;
     private axisFormatter: (value: number) => string = (value) => formatAmount(value, { withUnit: false });
     private valueFormatter: (value: number) => string = (value) => formatAmount(value);
+    private readonly width = new ChartWidth(this, () => {
+        this.draw();
+    });
 
     /** What to draw; setting it on a connected chart redraws it. */
     get data(): ChartData | undefined {
@@ -115,7 +123,12 @@ export class LineChart extends HTMLElement {
 
     connectedCallback(): void {
         installStyles(this, 'r-line-chart', css);
+        this.width.observe();
         this.draw();
+    }
+
+    disconnectedCallback(): void {
+        this.width.disconnect();
     }
 
     private redraw(): void {
@@ -151,8 +164,8 @@ export class LineChart extends HTMLElement {
             fillReadout: (target, shown, label) => {
                 this.fillReadout(target, shown, label);
             },
-        });
-        figure.append(plot,this.drawLegend(data), readout, this.drawTable(data));
+        }, this.width.take());
+        figure.append(plot, this.drawLegend(data), readout, this.drawTable(data));
     }
 
     /** The same figures as the drawing, for screen readers: a row per label and a column per series. */
@@ -197,22 +210,21 @@ export class LineChart extends HTMLElement {
 
     private isValid(data: ChartData): boolean {
         if (typeof data.summary !== 'string' || data.summary === '') {
-            console.error('r-line-chart: the data needs a summary');
+            reportProblem('r-line-chart', 'the data needs a summary');
             return false;
         }
         if (data.series.length > seriesColours) {
-            console.error(`r-line-chart: ${String(data.series.length)} series is more than the ${String(seriesColours)} the theme colours`);
+            reportProblem('r-line-chart', `${String(data.series.length)} series is more than the ${String(seriesColours)} the theme colours`);
             return false;
         }
         for (const series of data.series) {
             if (series.values.length !== data.labels.length) {
-                console.error(
-                    `r-line-chart: series "${series.name}" has ${String(series.values.length)} values for ${String(data.labels.length)} labels`,
+                reportProblem('r-line-chart', `series "${series.name}" has ${String(series.values.length)} values for ${String(data.labels.length)} labels`,
                 );
                 return false;
             }
             if (series.values.some((value) => value !== null && !Number.isFinite(value))) {
-                console.error(`r-line-chart: series "${series.name}" has a value that is not a number`);
+                reportProblem('r-line-chart', `series "${series.name}" has a value that is not a number`);
                 return false;
             }
         }

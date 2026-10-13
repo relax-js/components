@@ -1,6 +1,6 @@
 ---
 feature: Data table
-status: implemented
+status: verified
 authored: planned
 built: true
 ---
@@ -13,12 +13,12 @@ A developer shows a list of records as a table by declaring its columns in marku
 ## Defining columns
 - **Declarative columns**: each `r-column` in `r-table` becomes a column showing the record property its `field` names, with its text as the header (docs/manual/data-display/Table.md#r-column)
   - **Columns inside template** [removed]: an `r-columns` placed inside a `template` in `r-table` gives the same columns
-  - **Missing field**: an `r-column` without `field` logs an error and the table renders empty (docs/authoring/ComponentContract.md#Failing Loudly)
+  - **Missing field**: an `r-column` without `field` reports an error and the table renders empty (docs/authoring/ComponentContract.md#Failing Loudly)
 - **Programmatic columns**: setting `columns` redraws the table with one column per definition, its `title` as the header, and loads the first page again (docs/manual/data-display/Table.md#Columns from Code)
   - **Column without field**: a definition without `field` throws an error (docs/authoring/ComponentContract.md#Failing Loudly)
 - **Column width**: a column's width, such as `120px` or `20%`, sizes that column (docs/manual/data-display/Table.md#r-column)
 - **Initial sort order**: a column with `sort` set to `asc` or `desc` orders the rows by that column when the table first loads (docs/manual/data-display/Table.md#r-column)
-  - **Invalid initial sort**: a `sort` other than `asc` or `desc`, or `sort` set on more than one column, logs an error and the table renders empty
+  - **Invalid initial sort**: a `sort` other than `asc` or `desc`, or `sort` set on more than one column, reports an error and the table renders empty
 - **Columns read once**: the column markup is read once, when the table first draws (docs/manual/data-display/Table.md#r-column)
   - **Table moved**: a table moved elsewhere on the page keeps the columns it read
   - **Columns added later**: an `r-column` added after the first draw throws an error naming the table
@@ -34,6 +34,7 @@ A developer shows a list of records as a table by declaring its columns in marku
 
 ## Showing data
 - **Native table**: the table renders as a native table with the column titles in its header and one body row per record on the page (docs/manual/data-display/Table.md#Usage)
+- **Narrow space**: a table wider than the space it is given scrolls sideways within itself, so the page does not, and the pager stays in view (docs/manual/data-display/Table.md#Parts)
 - **Set data**: setting `rows` shows the first page, with the table sorting the records itself (docs/manual/data-display/Table.md#Usage)
   - **Data set again**: setting `rows` a second time replaces the rows rather than appending to them, keeps the sort the user chose and shows the first page
   - **Set before connecting**: records set before the table connects are drawn when it connects

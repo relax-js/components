@@ -1,6 +1,6 @@
 ---
 feature: Table pagination
-status: approved
+status: verified
 authored: planned
 built: true
 ---
@@ -12,7 +12,7 @@ A developer shows a large data set one page at a time, either paging records alr
 
 ## Paging through data
 - **Page size**: the `page-size` attribute sets the rows per page, 25 when absent (docs/manual/data-display/Table.md#r-table)
-  - **Invalid page size**: anything but a whole number above zero logs an error and the table renders empty
+  - **Invalid page size**: anything but a whole number above zero reports an error and the table renders empty
 - **Page count**: the number of pages is the provider's `totalCount`, or the number of records in memory, divided by the page size and rounded up (docs/manual/data-display/Table.md#Properties)
 - **Pager**: a pager under the table is a `nav` named by the `pages` text, with Previous and Next buttons and page buttons that move between pages (docs/manual/data-display/Table.md#Accessibility)
   - **One page**: the pager is hidden when one page holds every row
@@ -33,6 +33,6 @@ A developer shows a large data set one page at a time, either paging records alr
   - **Refresh overtaken**: when the user picks another page or sort before the refreshed page is drawn, the refresh is aborted and its promise resolves once the page the user picked is drawn, or rejects with that load's error
   - **Refresh with rows**: with records in memory, `refresh()` redraws the shown page and resolves
   - **Shown page gone**: when the refreshed `totalCount` no longer reaches the shown page, the last page is shown
-- **Failure while paging**: a provider failing while the user pages or sorts logs `r-table: the provider failed to load page` with the error, and the rows on screen stay (docs/manual/data-display/Table.md#Methods)
+- **Failure while paging**: a provider failing while the user pages or sorts reports `r-table: the provider failed to load page` with the error, and the rows on screen stay (docs/manual/data-display/Table.md#Methods)
   - **Pager stays**: the pager keeps marking the page still on screen, not the page that was asked for
-- **First load fails**: a provider failing when no rows are on screen yet logs the error and shows one row with the `loadFailed` text from the `r-components` namespace in the `danger` tone with its icon
+- **First load fails**: a provider failing when no rows are on screen yet reports the error and shows one row with the `loadFailed` text from the `r-components` namespace in the `danger` tone with its icon

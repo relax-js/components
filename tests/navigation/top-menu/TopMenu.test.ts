@@ -1,3 +1,4 @@
+import { captureProblems } from '../../captureProblems';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { mount } from '@relax.js/core/testing';
 import { defineRoutes, startRouting } from '@relax.js/core';
@@ -300,7 +301,8 @@ function selectionEventAndAlignmentTests() {
     });
 
     it('titles_are_shown_as_given_as_text_and_never_parsed_or_translated', async () => {
-        await rewordEnglish({ Help: 'Hjälp' });
+        // Help is not a word of the package; rewording it proves a title is never looked up.
+        await rewordEnglish({ Help: 'Hjälp' } as Parameters<typeof rewordEnglish>[0]);
         const { element } = mount<TopMenu>('r-top-menu');
         element.items = [
             { name: 'x', title: '<b>Bold</b>' },
@@ -313,26 +315,26 @@ function selectionEventAndAlignmentTests() {
     });
 
     it.each(['left', 'center', 'right'])('align_%s_is_accepted_and_renders_the_items', (align) => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+        const reported = captureProblems();
         const { element } = mount<TopMenu>('r-top-menu');
         element.setAttribute('align', align);
         element.items = items;
 
         expect(level(element, 'root').querySelectorAll('li')).toHaveLength(3);
-        expect(error).not.toHaveBeenCalled();
+        expect(reported.messages()).toEqual([]);
     });
 
     it('an_absent_alignment_renders_the_items_without_error', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+        const reported = captureProblems();
         const { element } = mount<TopMenu>('r-top-menu');
         element.items = items;
 
         expect(level(element, 'root').querySelectorAll('li')).toHaveLength(3);
-        expect(error).not.toHaveBeenCalled();
+        expect(reported.messages()).toEqual([]);
     });
 
-    it('an_unknown_alignment_logs_an_error_and_renders_empty', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    it('an_unknown_alignment_reports_an_error_and_renders_empty', () => {
+        const reported = captureProblems();
         const menu = document.createElement('r-top-menu');
         menu.setAttribute('align', 'middle');
         menu.items = items;
@@ -340,6 +342,6 @@ function selectionEventAndAlignmentTests() {
         mount(menu);
 
         expect(level(menu, 'root').childElementCount).toBe(0);
-        expect(error).toHaveBeenCalledWith(expect.stringMatching(/^r-top-menu: align="middle"/));
+        expect(reported.messages()).toContainEqual(expect.stringMatching(/^r-top-menu: align="middle"/));
     });
 }

@@ -1,3 +1,4 @@
+import { reportProblem } from '../../foundations/problems/problems';
 import { text, whenLanguageChanges } from '../../foundations/text/text';
 
 /** Dispatched by `<r-file-input>` once a chosen file has been read in the browser. */
@@ -108,13 +109,13 @@ export class FileInput extends HTMLElement {
         const maxSize = this.getAttribute('max-size');
 
         if (readAs !== 'text' && readAs !== 'bytes') {
-            return this.renderEmpty(`${this.tag}: read-as must be "text" or "bytes", not "${readAs}"`);
+            return this.renderEmpty(`read-as must be "text" or "bytes", not "${readAs}"`);
         }
         if (encoding !== null && !isKnownEncoding(encoding)) {
-            return this.renderEmpty(`${this.tag}: encoding "${encoding}" is not known to the browser`);
+            return this.renderEmpty(`encoding "${encoding}" is not known to the browser`);
         }
         if (maxSize !== null && !(Number(maxSize) >= 0)) {
-            return this.renderEmpty(`${this.tag}: max-size must be a number of bytes, not "${maxSize}"`);
+            return this.renderEmpty(`max-size must be a number of bytes, not "${maxSize}"`);
         }
 
         if (!this.input) {
@@ -158,8 +159,8 @@ export class FileInput extends HTMLElement {
         this.reflectWords();
     }
 
-    private renderEmpty(message: string): void {
-        console.error(message);
+    private renderEmpty(problem: string): void {
+        reportProblem(this.tag, problem);
         this.input = null;
         this.button = null;
         this.chosenName = null;
@@ -291,7 +292,7 @@ export class FileInput extends HTMLElement {
             this.dispatchEvent(new FileReadEvent(file.name, file.type, content));
         } catch (error) {
             const reason = error instanceof Error ? error.message : String(error);
-            console.error(`${this.tag}: ${file.name} could not be read: ${reason}`);
+            reportProblem(this.tag, `${file.name} could not be read: ${reason}`);
             this.dispatchEvent(new FileErrorEvent(file.name, reason));
         }
     }

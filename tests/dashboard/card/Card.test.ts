@@ -1,3 +1,4 @@
+import { captureProblems } from '../../captureProblems';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import '../../../src/dashboard/card/Card';
 import type { Card } from '../../../src/dashboard/card/Card';
@@ -50,10 +51,10 @@ describe('r-card', () => {
         expect(head.querySelector('a r-icon[name="arrow-right"]')).not.toBeNull();
     });
 
-    it('a_missing_heading_logs_and_leaves_out_the_heading_row_while_the_body_stays', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    it('a_missing_heading_reports_and_leaves_out_the_heading_row_while_the_body_stays', () => {
+        const reported = captureProblems();
         const card = cardWith('<r-card heading=""><p id="body">x</p></r-card>');
-        expect(error).toHaveBeenCalledWith('r-card: heading is missing');
+        expect(reported.messages()).toContainEqual('r-card: heading is missing');
         expect(card.querySelector('.card-head')).toBeNull();
         expect(card.querySelector('#body')).not.toBeNull();
     });
@@ -65,10 +66,10 @@ describe('r-card', () => {
         expect(card.querySelector('a')).toBeNull();
     });
 
-    it('a_link_text_without_href_logs_an_error_naming_r_card_and_leaves_the_link_out', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    it('a_link_text_without_href_reports_an_error_naming_r_card_and_leaves_the_link_out', () => {
+        const reported = captureProblems();
         const card = cardWith('<r-card heading="H" link-text="All"></r-card>');
-        expect(error.mock.calls[0][0]).toContain('r-card');
+        expect(reported.messages()[0]).toContain('r-card');
         expect(card.querySelector('a')).toBeNull();
     });
 
@@ -100,10 +101,10 @@ describe('r-card', () => {
         expect(card.querySelector('r-icon')).toBeNull();
     });
 
-    it('an_unknown_tone_logs_an_error_and_leaves_no_data_tone', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    it('an_unknown_tone_reports_an_error_and_leaves_no_data_tone', () => {
+        const reported = captureProblems();
         const card = cardWith('<r-card heading="H" tone="loud"></r-card>');
-        expect(error).toHaveBeenCalled();
+        expect(reported.messages()).not.toEqual([]);
         expect(card.hasAttribute('data-tone')).toBe(false);
         expect(card.querySelector('r-icon')).toBeNull();
     });

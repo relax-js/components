@@ -1,3 +1,4 @@
+import { captureProblems } from '../../captureProblems';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { mount } from '@relax.js/core/testing';
 import '../../../src/dashboard/status-grid/StatusGrid';
@@ -37,22 +38,22 @@ describe('r-status-grid', () => {
         expect(tiles(grid)[0].dataset.tone).toBe('muted');
     });
 
-    it('an_unknown_tone_logs_an_error_and_is_shown_as_muted', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    it('an_unknown_tone_reports_an_error_and_is_shown_as_muted', () => {
+        const reported = captureProblems();
         const grid = gridWith(
             [{ id: 'x', label: 'X', tone: 'purple' as never }],
             [{ label: 'Jan', state: 'x' }]
         );
 
-        expect(error).toHaveBeenCalled();
+        expect(reported.messages()).not.toEqual([]);
         expect(tiles(grid)[0].dataset.tone).toBe('muted');
     });
 
-    it('two_states_with_the_same_id_log_an_error_and_the_grid_renders_empty', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    it('two_states_with_the_same_id_report_an_error_and_the_grid_renders_empty', () => {
+        const reported = captureProblems();
         const grid = gridWith([paid, { ...open, id: 'paid' }], [{ label: 'Jan', state: 'paid' }]);
 
-        expect(error).toHaveBeenCalled();
+        expect(reported.messages()).not.toEqual([]);
         expect(grid.childElementCount).toBe(0);
     });
 
@@ -70,20 +71,20 @@ describe('r-status-grid', () => {
         expect(items.every((item) => item.querySelector('.tile') !== null)).toBe(true);
     });
 
-    it('an_item_whose_state_is_not_defined_logs_an_error_and_the_grid_renders_empty', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    it('an_item_whose_state_is_not_defined_reports_an_error_and_the_grid_renders_empty', () => {
+        const reported = captureProblems();
         const grid = gridWith([paid], [{ label: 'Jan', state: 'gone' }]);
 
-        expect(error).toHaveBeenCalled();
+        expect(reported.messages()).not.toEqual([]);
         expect(grid.childElementCount).toBe(0);
     });
 
-    it('an_empty_item_list_shows_no_tiles_and_logs_no_error', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => {});
+    it('an_empty_item_list_shows_no_tiles_and_reports_no_error', () => {
+        const reported = captureProblems();
         const grid = gridWith([paid], []);
 
         expect(tiles(grid)).toHaveLength(0);
-        expect(error).not.toHaveBeenCalled();
+        expect(reported.messages()).toEqual([]);
     });
 
     it('each_tile_shows_its_states_icon', () => {

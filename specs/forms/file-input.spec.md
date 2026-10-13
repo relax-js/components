@@ -1,6 +1,6 @@
 ---
 feature: File input
-status: implemented
+status: verified
 authored: planned
 ---
 
@@ -21,13 +21,13 @@ A user picks or drops a file, such as a bank statement to import, and the app ge
   - **Same file again**: choosing the file already chosen reads it again and fires the event again
   - **Picker cancelled**: closing the picker without choosing fires nothing and keeps the file already chosen
 - **Text or bytes**: the content is text by default, and the page can ask for the raw bytes instead
-  - **Unknown read mode**: a read mode other than text or bytes logs an error naming the tag and the input renders empty (docs/authoring/ComponentContract.md#Failing Loudly)
+  - **Unknown read mode**: a read mode other than text or bytes reports an error naming the tag and the input renders empty (docs/authoring/ComponentContract.md#Failing Loudly)
 - **Text encoding**: text is read as UTF-8 unless the page names another encoding, such as `windows-1252`
-  - **Unknown encoding**: an encoding the browser does not know logs an error naming the tag and the input renders empty (docs/authoring/ComponentContract.md#Failing Loudly)
+  - **Unknown encoding**: an encoding the browser does not know reports an error naming the tag and the input renders empty (docs/authoring/ComponentContract.md#Failing Loudly)
 - **Several files**: with `multiple` set the user can choose several files, and the input fires one content event per file
 - **Size limit**: with `max-size` set, a file larger than that many bytes fires the error event and is not read
   - **No limit**: without `max-size` any size is read
-- **Read failure**: a file that cannot be read fires an error event naming the file and logs the error
+- **Read failure**: a file that cannot be read fires an error event naming the file and reports the error
 
 ## Dropping a file
 - **Drop to read**: a file dropped on the input is handled exactly as if it had been chosen in the picker

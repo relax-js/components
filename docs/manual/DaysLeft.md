@@ -18,7 +18,7 @@ Reads "5 days", with the `days` text from the [`r-components` namespace](Formatt
 
 | Attribute | Type | Default | Description |
 |-----------|------|---------|-------------|
-| `days` | `number` | | Whole days left. Changing it updates the text and tone. A value that is not a whole number logs an error and clears the text. |
+| `days` | `number` | | Whole days left. Changing it updates the text and tone. A value that is not a whole number reports an error and clears the text. |
 | `urgent` | `number` | `7` | Days within which the deadline is `danger` |
 | `soon` | `number` | `14` | Days within which the deadline is `warn` |
 

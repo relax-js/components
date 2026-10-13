@@ -1,3 +1,4 @@
+import { captureProblems } from '../../captureProblems';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { setLocale } from '@relax.js/core/i18n';
 import { restoreWords } from '../../foundations/text/words';
@@ -147,10 +148,10 @@ describe('r-file-input', () => {
         expect(Array.from(new Uint8Array(content))).toEqual([1, 2, 3]);
     });
 
-    it('an_unknown_read_mode_logs_an_error_naming_the_tag_and_renders_empty', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    it('an_unknown_read_mode_reports_an_error_naming_the_tag_and_renders_empty', () => {
+        const reported = captureProblems();
         const { element } = mountInput('read-as="json"');
-        expect(error).toHaveBeenCalledWith(expect.stringContaining('r-file-input'));
+        expect(reported.messages()).toContainEqual(expect.stringContaining('r-file-input'));
         expect(element.querySelector('input')).toBeNull();
     });
 
@@ -168,10 +169,10 @@ describe('r-file-input', () => {
         expect(reads[0].content).toBe('å');
     });
 
-    it('an_unknown_encoding_logs_an_error_naming_the_tag_and_renders_empty', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    it('an_unknown_encoding_reports_an_error_naming_the_tag_and_renders_empty', () => {
+        const reported = captureProblems();
         const { element } = mountInput('encoding="nonsense-9"');
-        expect(error).toHaveBeenCalledWith(expect.stringContaining('r-file-input'));
+        expect(reported.messages()).toContainEqual(expect.stringContaining('r-file-input'));
         expect(element.querySelector('input')).toBeNull();
     });
 
@@ -199,8 +200,8 @@ describe('r-file-input', () => {
         expect(reads).toHaveLength(1);
     });
 
-    it('a_file_that_cannot_be_read_fires_an_error_event_naming_the_file_and_logs_it', async () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    it('a_file_that_cannot_be_read_fires_an_error_event_naming_the_file_and_reports_it', async () => {
+        const reported = captureProblems();
         vi.spyOn(FileReader.prototype, 'readAsArrayBuffer').mockImplementation(function (this: FileReader) {
             queueMicrotask(() => this.onerror?.(new ProgressEvent('error') as ProgressEvent<FileReader>));
         });
@@ -209,7 +210,7 @@ describe('r-file-input', () => {
         await choose(element, new File(['x'], 'broken.txt'));
         expect(reads).toHaveLength(0);
         expect(errors.map((e) => e.name)).toEqual(['broken.txt']);
-        expect(error).toHaveBeenCalledWith(expect.stringContaining('broken.txt'));
+        expect(reported.messages()).toContainEqual(expect.stringContaining('broken.txt'));
     });
 
     async function drop(element: FileInput, ...files: File[]): Promise<void> {

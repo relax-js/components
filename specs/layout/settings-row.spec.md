@@ -11,9 +11,9 @@ A user scans a list of settings, each with its current state, and changes one in
 
 ## Seeing a setting
 - **Name and state**: the row shows the setting's name and the text describing its current state, given as attributes, and changing either attribute updates the row (docs/authoring/ComponentContract.md#Data In, Events Out)
-  - **Missing name**: a row without a name logs an error naming its tag and renders empty (docs/authoring/ComponentContract.md#Failing Loudly)
+  - **Missing name**: a row without a name reports an error naming its tag and renders empty (docs/authoring/ComponentContract.md#Failing Loudly)
 - **Change button**: the row has a button that opens the setting's form, and its accessible name is one `r-components` message with the setting's name as a placeholder, such as "Change Email notifications" (docs/authoring/TextAndValues.md#Messages with Values)
-  - **No form**: a row without a form template logs an error naming its tag and shows its name and state without the button
+  - **No form**: a row without a form template reports an error naming its tag and shows its name and state without the button
 - **Rows in a list**: rows are dense items, separated from each other by a `1px` `--bd-muted` line (docs/authoring/DesignLanguage.md#Component Tiers)
   - **Row stays still**: hovering the row outside its button changes nothing, and only the button responds (docs/authoring/DesignLanguage.md#Hover)
 
@@ -23,7 +23,7 @@ A user scans a list of settings, each with its current state, and changes one in
   - **Input without a value**: an input the value has no field for keeps what the template gives it
 - **Save function**: submitting the form calls the page's save function with the form's values and an abort signal (docs/authoring/ComponentContract.md#Data In, Events Out)
   - **Invalid form**: a form that fails the browser's validation calls nothing and shows the validation messages (docs/authoring/DesignLanguage.md#Native First)
-  - **No save function**: submitting when the page has set no save function logs an error naming the tag and keeps the dialog open
+  - **No save function**: submitting when the page has set no save function reports an error naming the tag and keeps the dialog open
 - **Saved**: when the save function resolves with the new state text, the dialog closes, the row shows that text, and `value` holds the saved values
   - **Closed without saving**: closing the dialog by its close button or Escape calls nothing, fires nothing and leaves the row as it was
 - **Saved event**: after a save the row fires `r-setting-saved`, a typed event carrying the new state text and the saved values (docs/authoring/ComponentContract.md#Naming)

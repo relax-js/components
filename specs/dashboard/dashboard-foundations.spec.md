@@ -15,7 +15,7 @@ A developer builds an overview page from small dashboard elements that the theme
   - **Set before connecting**: data set before the element is connected is drawn when it connects
   - **Set while detached**: data set while the element is out of the page is drawn when it is put back
 - **Draw once**: a component that builds its own markup does not build it again, or duplicate what it added, when the element is moved in the DOM and reconnects (docs/authoring/ComponentContract.md#Drawing Once)
-- **Bad input reported**: a missing or invalid attribute logs `console.error("<tag>: <what is wrong>")` and the element renders empty, without throwing and without substituting a guessed value (docs/authoring/ComponentContract.md#Failing Loudly)
+- **Bad input reported**: a missing or invalid attribute is reported through the Relaxjs error channel as `<tag>: <what is wrong>` and the element renders empty, without throwing and without substituting a guessed value (docs/authoring/ComponentContract.md#Failing Loudly)
   - **Bad structured data**: data set as a property that the component cannot draw is reported and rendered empty the same way
   - **Fixed input redraws**: once the attribute or data is valid again, the element draws normally
 - **Invariant attribute values**: a number in an attribute is read as a JavaScript number literal and a date as ISO 8601, and a localized value such as `1 285 400` is bad input (docs/authoring/TextAndValues.md#Values in Attributes)
@@ -26,7 +26,7 @@ A developer builds an overview page from small dashboard elements that the theme
 
 ## Reading a tone
 - **Missing tone**: reading the `tone` attribute gives one of `ok`, `info`, `warn`, `danger` or `muted`, and the component's fallback tone when the attribute is absent (docs/authoring/CustomComponents.md#Tones)
-  - **Unknown tone**: an unknown value logs an error and gives the fallback tone
+  - **Unknown tone**: an unknown value reports an error and gives the fallback tone
 - **Default tone icons**: ok shows `check-circle`, info `clock`, warn `minus-circle`, danger `x-circle` and muted `info` (docs/authoring/DesignLanguage.md#Tones)
 
 ## Formatting for a locale

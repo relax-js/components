@@ -1,3 +1,4 @@
+import { captureProblems } from '../../captureProblems';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import '../../../src/dashboard/line-chart/LineChart';
 import type { LineChart } from '../../../src/dashboard/line-chart/LineChart';
@@ -40,19 +41,19 @@ describe('r-line-chart', () => {
         expect(element.data?.series).toHaveLength(2);
     });
 
-    it('a_series_with_the_wrong_number_of_values_logs_an_error_naming_it_and_draws_nothing', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    it('a_series_with_the_wrong_number_of_values_reports_an_error_naming_it_and_draws_nothing', () => {
+        const reported = captureProblems();
         const element = chart(data({ name: 'Cash', values: [1, 2] }));
 
-        expect(error).toHaveBeenCalledWith(expect.stringContaining('r-line-chart'));
-        expect(error).toHaveBeenCalledWith(expect.stringContaining('Cash'));
+        expect(reported.messages()).toContainEqual(expect.stringContaining('r-line-chart'));
+        expect(reported.messages()).toContainEqual(expect.stringContaining('Cash'));
         expect(element.querySelector('svg')).toBeNull();
     });
 
-    it('a_value_that_is_not_a_number_logs_an_error_and_a_missing_value_breaks_the_line', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    it('a_value_that_is_not_a_number_reports_an_error_and_a_missing_value_breaks_the_line', () => {
+        const reported = captureProblems();
         expect(chart(data({ name: 'Bad', values: [1, Number.NaN, 3] })).querySelector('svg')).toBeNull();
-        expect(error).toHaveBeenCalledWith(expect.stringContaining('Bad'));
+        expect(reported.messages()).toContainEqual(expect.stringContaining('Bad'));
 
         const element = chart(data({ name: 'Gap', values: [1, null, 3] }));
         expect(element.querySelectorAll('g.series-1 path.line')).toHaveLength(2);
@@ -68,12 +69,12 @@ describe('r-line-chart', () => {
         expect(element.querySelector('.readout')?.textContent).toContain('Gap: No data');
     });
 
-    it('more_series_than_the_theme_colours_logs_an_error_and_draws_nothing', () => {
-        const error = vi.spyOn(console, 'error').mockImplementation(() => undefined);
+    it('more_series_than_the_theme_colours_reports_an_error_and_draws_nothing', () => {
+        const reported = captureProblems();
         const many = Array.from({ length: 6 }, (_, i) => ({ name: `S${String(i)}`, values: [1, 2, 3] }));
 
         expect(chart(data(...many)).querySelector('svg')).toBeNull();
-        expect(error).toHaveBeenCalledWith(expect.stringContaining('r-line-chart'));
+        expect(reported.messages()).toContainEqual(expect.stringContaining('r-line-chart'));
     });
 
     it('the_svg_has_the_plot_layout_with_a_grid_line_and_axis_label_at_each_step', () => {
@@ -104,6 +105,16 @@ describe('r-line-chart', () => {
 
         const xs = [...element.querySelectorAll('text.label')].map((label) => num(label, 'x'));
         expect(xs).toEqual([72, 350, 628]);
+    });
+
+    it('x_labels_that_do_not_fit_side_by_side_are_thinned_to_every_nth', () => {
+        const labels = Array.from({ length: 60 }, (_, i) => `22:28:${String(i).padStart(2, '0')}`);
+        const element = chart({ labels, series: [{ name: 'Rps', values: labels.map(() => 1) }], summary: 'S' });
+
+        const shown = [...element.querySelectorAll('text.label')].map((label) => label.textContent);
+        expect(shown.length).toBeLessThan(labels.length);
+        expect(shown[0]).toBe(labels[0]);
+        expect(element.querySelectorAll('circle')).toHaveLength(60);
     });
 
     it('a_chart_with_one_label_puts_it_in_the_middle', () => {

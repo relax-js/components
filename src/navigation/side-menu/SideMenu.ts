@@ -1,3 +1,4 @@
+import { reportProblem } from '../../foundations/problems/problems';
 import type { MenuItem } from '../top-menu/TopMenu';
 
 /**
@@ -163,7 +164,7 @@ export class SideMenu extends HTMLElement {
             this.heading.hidden = false;
             this.nav.setAttribute('aria-labelledby', 'title');
         } else {
-            console.error('r-side-menu: the title attribute is missing');
+            reportProblem('r-side-menu', 'the title attribute is missing');
             this.heading.hidden = true;
             this.nav.removeAttribute('aria-labelledby');
         }
@@ -181,7 +182,7 @@ export class SideMenu extends HTMLElement {
         const sub = document.createElement('ul');
         for (const child of item.children ?? []) {
             if (child.children?.length) {
-                console.error(`r-side-menu: "${child.title}" is nested too deep, only one level of groups is supported`);
+                reportProblem('r-side-menu', `"${child.title}" is nested too deep, only one level of groups is supported`);
                 continue;
             }
             sub.append(this.createLink(child));

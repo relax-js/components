@@ -15,7 +15,7 @@ A developer shows hierarchical data, such as folders and files, as a tree the us
   - **Set before connecting**: nodes set before the tree connects are drawn when it connects
   - **Template and nodes**: a tree holding a `data` template whose `nodes` are also set shows the set nodes in place of the template's
 - **Inline JSON data**: a tree holding a `template` named `data` with a JSON list of nodes shows those nodes without any code (docs/manual/data-display/Treeview.md#Nodes in Markup)
-  - **Invalid JSON**: JSON that does not parse logs an error starting `r-treeview:` and the tree renders empty
+  - **Invalid JSON**: JSON that does not parse reports an error starting `r-treeview:` and the tree renders empty
   - **Not a node list**: JSON that parses but is not a list of nodes is handled as invalid JSON
 - **Initially expanded**: a node marked expanded shows its children when first drawn, and an unmarked node shows them collapsed (docs/manual/data-display/Treeview.md#Properties)
 - **Nodes left untouched**: the tree never changes the node objects or the data it is given (docs/manual/data-display/Treeview.md#Usage)
