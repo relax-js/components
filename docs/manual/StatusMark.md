@@ -1,0 +1,30 @@
+# Status Mark
+
+Where something stands, such as paid or overdue, with an icon for its tone and a date or reason under it.
+
+## Usage
+
+```html
+<r-status-mark tone="ok" note="2025-09-20">Paid</r-status-mark>
+```
+
+The element's own text becomes the label, and its content is replaced by the tone's icon, the label and the note. The mark draws once: moving it in the DOM keeps its label and does not draw it again.
+
+## Attributes
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `tone` | `ok \| info \| warn \| danger \| muted` | `muted` | How much the status asks of the reader |
+| `note` | `string` | | A date or reason under the label; left out when empty or missing |
+
+## Parts
+
+| Selector | What it is |
+|----------|------------|
+| `r-icon` | The tone's icon |
+| `.label` | The original text |
+| `.note` | The note |
+
+## Accessibility
+
+The label states the status in words beside its toned icon.

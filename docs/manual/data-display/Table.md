@@ -1,0 +1,155 @@
+# Table
+
+A data table with sortable headers and a pager, rendered as a native `<table>`. Reach for it when a screen lists records; it pages and sorts records you already hold, or asks your server for one page at a time.
+
+## Usage
+
+Declare the columns, then hand the table its records:
+
+```html
+<r-table page-size="20">
+    <r-column field="name" sortable>Name</r-column>
+    <r-column field="email" width="40%">Email</r-column>
+    <r-column field="joined" sortable sort="desc">Joined</r-column>
+</r-table>
+```
+
+```typescript
+const table = document.querySelector('r-table')!;
+table.rows = users;
+```
+
+With `rows`, the table sorts and pages the records itself.
+
+### Loading Pages from a Server
+
+Set a `provider` instead: an async function the table calls for each page and sort order.
+
+```typescript
+import type { TableProvider } from '@relax.js/components';
+
+const loadUsers: TableProvider = async ({ page, pageSize, sort, signal }) => {
+    const query = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
+    if (sort[0]) {
+        query.set('sort', `${sort[0].column} ${sort[0].direction}`);
+    }
+    const response = await fetch(`/api/users?${query}`, { signal });
+    return response.json(); // { rows: [...], totalCount: 123 }
+};
+
+table.provider = loadUsers;
+```
+
+- The table passes `signal` and aborts it when the page is no longer wanted, because the user picked another page or sort first. A response that arrives after that is never drawn.
+- The request has the same shape as `DataLoader.load()` in `@relax.js/core`, so an existing loader plugs in as `table.provider = (request) => loader.load(request)`.
+- Setting `rows` replaces the provider, and setting `provider` replaces the rows.
+
+### Columns from Code
+
+```typescript
+table.columns = [
+    { field: 'name', title: 'Name', sortable: true },
+    { field: 'email', title: 'Email', width: '40%' },
+];
+```
+
+Setting `columns` redraws the table and loads the first page again.
+
+### What a Cell Shows
+
+Each cell shows the record's value for its column's `field`, written for the locale in the [formatting configuration](../Formatting.md): numbers grouped as the locale groups them, dates in its short form, `null` and `undefined` as an empty cell. When there are no records, one row shows the `noData` text from the [`r-components` namespace](../Formatting.md#words).
+
+## Attributes
+
+### r-table
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `page-size` | `number` | `25` | Rows per page. Anything but a whole number above zero logs an error and the table renders empty. |
+| `loading` | `boolean` | | Set by the table while a page is loading |
+
+### r-column
+
+| Attribute | Type | Description |
+|-----------|------|-------------|
+| `field` | `string` | Property of each record shown in this column, and the sort key the provider receives. Required: a column without it logs an error and the table renders empty. |
+| `width` | `string` | CSS width of the column, such as `120px` or `20%` |
+| `sortable` | `boolean` | Lets the user sort by this column by clicking its header |
+| `sort` | `asc \| desc` | Sorts by this column when the table first loads |
+
+The text of `r-column` is the header. Columns are read once, when the table first draws; an `r-column` added after that throws an error naming the table. Set `columns` to change them.
+
+## Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `rows` | `TableRow[]` | Records already in memory. Setting them shows the first page. |
+| `provider` | `TableProvider` | Loads each page on demand. Setting it shows the first page. |
+| `columns` | `TableColumn[]` | The columns. Setting them redraws the table. A column without `field` throws. |
+| `pageSize` | `number` (read only) | Rows per page, from `page-size` |
+
+Data set before the table connects is drawn when it connects.
+
+```typescript
+type TableRow = Record<string, unknown>;
+
+interface TableColumn {
+    field: string;
+    title: string;
+    width?: string;
+    sortable?: boolean;
+    sort?: 'asc' | 'desc';
+}
+
+type TableProvider = (request: TablePageRequest) => Promise<TablePage>;
+
+interface TablePageRequest {
+    page: number;                                            // 1-based
+    pageSize: number;
+    sort: { column: string; direction: 'asc' | 'desc' }[];   // empty for the provider's own order
+    signal: AbortSignal;
+}
+
+interface TablePage {
+    rows: TableRow[];
+    totalCount: number;   // rows on all pages together
+}
+```
+
+## Methods
+
+### refresh(): Promise\<void\>
+
+Loads the shown page again, for example after a record was saved. Resolves once the page is drawn and rejects with the provider's error.
+
+```typescript
+await saveUser(user);
+await table.refresh();
+```
+
+A provider that fails while the user pages or sorts logs `r-table: the provider failed to load page` with the error, and the rows on screen stay as they were.
+
+## Parts
+
+The table renders into the light DOM, so style it with ordinary selectors:
+
+| Selector | What it is |
+|----------|------------|
+| `r-table table` | The native table |
+| `r-table th` | A header cell; `aria-sort` says how it is sorted |
+| `r-table th .sort` | The button in the header of a sortable column |
+| `r-table tr.empty` | The row shown when there are no records |
+| `r-table .pager` | The pager under the table, hidden when one page holds every row |
+| `r-table .pager [aria-current="page"]` | The button of the page shown |
+| `r-table[loading]` | The table while a page loads |
+
+## Variables
+
+Cells take `--item-padding` and `--item-separator`; header, sort and pager buttons the control variables; hover `--surface-hover` and the current page `--surface-selected`. See [Theming](../../authoring/Theming.md#variables).
+
+## Accessibility
+
+- Sortable headers are buttons, and each sortable header carries `aria-sort` (`ascending`, `descending` or `none`).
+- The table carries `aria-busy` while a page loads.
+- The pager is a `nav` named by the `pages` text, and the current page carries `aria-current="page"`.
+- The sort arrow is an [icon](../Icon.md), hidden from assistive technology; `aria-sort` carries the meaning.

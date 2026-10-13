@@ -1,36 +1,20 @@
 const esbuild = require('esbuild');
+const fs = require('fs');
 
-const entryPoints = [
-    { entry: 'src/index.ts', out: 'index' },
-];
-
-const commonOptions = {
-    bundle: true,
-    minify: true,
-    target: 'es2022',
-    sourcemap: true,
-    preserveSymlinks: true,
-    external: ['relaxjs', 'relaxjs/*'],
-};
-
-async function build() {
-    const builds = entryPoints.flatMap(({ entry, out }) => [
-        esbuild.build({
-            ...commonOptions,
-            entryPoints: [entry],
-            outfile: `dist/${out}.mjs`,
-            format: 'esm',
-        }),
-        esbuild.build({
-            ...commonOptions,
-            entryPoints: [entry],
-            outfile: `dist/${out}.js`,
-            format: 'cjs',
-        }),
-    ]);
-
-    await Promise.all(builds);
-    console.log('Build complete');
-}
-
-build().catch(() => process.exit(1));
+esbuild
+    .build({
+        entryPoints: ['src/index.ts'],
+        outfile: 'dist/index.mjs',
+        format: 'esm',
+        bundle: true,
+        minify: true,
+        target: 'es2022',
+        sourcemap: true,
+        external: ['@relax.js/core', '@relax.js/core/*'],
+    })
+    .then(() => fs.copyFileSync('src/theme.css', 'dist/theme.css'))
+    .then(() => console.log('Build complete'))
+    .catch((error) => {
+        console.error(error);
+        process.exit(1);
+    });

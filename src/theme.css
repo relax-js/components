@@ -1,0 +1,118 @@
+:root {
+    color-scheme: light dark;
+
+    /* Surfaces */
+    /* Light is linen and birch, dark is a cool Nordic night */
+    --surface-bg:       light-dark(#f7f5f1, #1b1d1f);
+    --surface-raised:   light-dark(#fdfcfa, #232628);
+    --surface-sunken:   light-dark(#efebe4, #151719);
+    --surface-hover:    light-dark(#ebe6de, #2c3033);
+    --surface-selected: light-dark(#e9f1df, #24301b);
+
+    /* Text */
+    --text-primary:     light-dark(#2b2a27, #ece9e4);
+    --text-muted:       light-dark(#6b665e, #a8a49d);
+    --text-subtle:      light-dark(#75706a, #8f8b85);
+    --text-on-accent:   light-dark(#ffffff, #1b1d1f);
+
+    /* Borders */
+    --bd-muted:         light-dark(#e3ddd3, #2f3336);
+    --bd-strong:        light-dark(#c9c1b4, #454a4e);
+
+    /* Accent: kiwi */
+    --accent-primary:   light-dark(#3f7a0d, #8fd14f);
+    --accent-hover:     light-dark(#33640a, #a6df6e);
+    --focus-ring:       var(--accent-primary);
+
+    /* Status: one per tone, each with a quiet background */
+    --status-ok:           light-dark(#3d7346, #86c08f);
+    --status-ok-soft:      light-dark(#e6efe2, #1f2b22);
+    --status-info:         light-dark(#4a6680, #93b1cc);
+    --status-info-soft:    light-dark(#e5ebf0, #1f2731);
+    --status-warning:      light-dark(#8a5d0c, #e0b45c);
+    --status-warning-soft: light-dark(#f3eadb, #2d2719);
+    --status-danger:       light-dark(#b3402f, #e27a6a);
+    --status-danger-soft:  light-dark(#f5e4df, #33221f);
+    --status-muted:        light-dark(#77716a, #8f8b85);
+    --status-muted-soft:   light-dark(#ece8e1, #2a2d30);
+
+    /* Series: kiwi first; the order keeps neighbours apart for colour-blind readers */
+    --series-1: light-dark(#3f7a0d, #5e9a2c);
+    --series-2: light-dark(#3465a8, #4f86d0);
+    --series-3: light-dark(#b84f6c, #c4607e);
+    --series-4: light-dark(#b07a1c, #b4832a);
+    --series-5: light-dark(#008a7b, #1f9a8c);
+
+    /* Heatmap scales: sequential runs low to high, diverging runs from one hue through a neutral middle to another */
+    --scale-low:            light-dark(#eef3e6, #232b1d);
+    --scale-high:           light-dark(#2f6a0a, #8fd14f);
+    --scale-diverging-low:  light-dark(#3465a8, #4f86d0);
+    --scale-diverging-mid:  light-dark(#f2efe9, #2a2d30);
+    --scale-diverging-high: light-dark(#b3402f, #e27a6a);
+
+    /* Depth */
+    --shadow-raised:    0 4px 12px light-dark(rgb(43 42 39 / .08), rgb(0 0 0 / .5));
+    --overlay-dim:      light-dark(rgb(247 245 241 / .7), rgb(27 29 31 / .7));
+
+    /* Shape, spacing, motion */
+    --radius-small: 4px;
+    --radius:       8px;
+    --radius-large: 12px;
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 1rem;
+    --space-4: 1.5rem;
+    --motion-fast: 150ms;
+    --motion-base: 300ms;
+
+    /* Controls: button, input, select, tab header, menu item, chip */
+    --control-radius:  var(--radius-small);
+    --control-padding: var(--space-1) var(--space-2);
+    --control-gap:     var(--space-2);
+
+    /* Dense items: table cell, tree node, list row */
+    --item-padding:    var(--space-1) var(--space-2);
+    --item-separator:  1px solid var(--bd-muted);
+
+    /* Content containers: form section, fieldset, accordion item, tab panel, article */
+    --content-radius:      var(--radius);
+    --content-padding:     var(--space-3);
+    --content-heading-gap: var(--space-2);
+    --content-gap:         var(--space-3);
+    --content-section-gap: var(--space-4);
+    --content-measure:     70ch;
+
+    /* Cards: one self-contained unit, in the layout */
+    --card-radius:  var(--radius);
+    --card-padding: var(--space-3);
+    --card-gap:     var(--space-3);
+    --card-border:  1px solid var(--bd-muted);
+
+    /* Floating: popover, menu dropdown, tooltip */
+    --floating-radius:  var(--radius);
+    --floating-padding: var(--space-2);
+    --floating-shadow:  var(--shadow-raised);
+
+    /* Dialogs and sheets */
+    --dialog-radius:  var(--radius-large);
+    --dialog-padding: var(--space-4);
+    --dialog-gap:     var(--space-3);
+    --dialog-shadow:  var(--shadow-raised);
+
+    /* Panels: sidebar, header bar, page region */
+    --panel-padding: var(--space-4);
+    --panel-gap:     var(--space-4);
+
+    /* Wells: code block, read-only value */
+    --well-bg:     var(--surface-sunken);
+    --well-radius: var(--radius-small);
+}
+
+[data-tone="ok"]     { --tone: var(--status-ok);      --tone-soft: var(--status-ok-soft); }
+[data-tone="info"]   { --tone: var(--status-info);    --tone-soft: var(--status-info-soft); }
+[data-tone="warn"]   { --tone: var(--status-warning); --tone-soft: var(--status-warning-soft); }
+[data-tone="danger"] { --tone: var(--status-danger);  --tone-soft: var(--status-danger-soft); }
+[data-tone="muted"]  { --tone: var(--status-muted);   --tone-soft: var(--status-muted-soft); }
+
+.dark-theme  { color-scheme: dark; }
+.light-theme { color-scheme: light; }

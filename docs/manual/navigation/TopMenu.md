@@ -1,0 +1,99 @@
+# TopMenu
+
+A horizontal menu bar for an application's header. An item with children slides its submenu in over the bar, with a back button to return.
+
+## Usage
+
+```html
+<r-top-menu align="left"></r-top-menu>
+```
+
+```typescript
+const menu = document.querySelector('r-top-menu')!;
+menu.items = [
+    { name: 'home', title: 'Home', href: '/' },
+    {
+        name: 'file',
+        title: 'File',
+        children: [
+            { name: 'file.new', title: 'New' },
+            { name: 'file.open', title: 'Open' },
+        ],
+    },
+    { name: 'help', title: 'Help', href: '/help' },
+];
+
+menu.addEventListener('r-menu-selected', (event) => {
+    if (event.item.name === 'file.new') {
+        createDocument();
+    }
+});
+```
+
+- An item with `href` is a link, so the browser navigates; with `startRouting()` from `@relax.js/core/routing`, a link to a defined route navigates client side.
+- An item with `children` opens its submenu and is never reported as selected. Submenus nest to any depth.
+- Every other item is a button that dispatches `r-menu-selected`.
+
+## Attributes
+
+| Attribute | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `align` | `left \| center \| right` | `center` | Placement of the items in the bar. Any other value logs an error and the menu renders empty. |
+
+## Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `items` | `MenuItem[]` | The menu's items. Setting them shows the top level with the new items. Items set before the menu connects are drawn when it does. |
+
+```typescript
+interface MenuItem {
+    name: string;          // identifies the item in r-menu-selected; unique within the menu
+    title: string;
+    href?: string;         // renders the item as a link
+    children?: MenuItem[]; // the submenu this item opens
+}
+```
+
+## Methods
+
+### showTopLevel()
+
+Closes every open submenu and shows the top level, for example after the user picked an item.
+
+## Events
+
+### r-menu-selected
+
+Dispatched as `MenuSelectedEvent` when an item without children is chosen, including a link item, before the browser follows it. Bubbles and crosses shadow roots.
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `item` | `MenuItem` | The item chosen |
+
+## Parts
+
+| Part | What it is |
+|------|------------|
+| `bar` | The strip holding the items |
+| `item` | Each item's button or link |
+| `back` | The back button in a submenu |
+
+```css
+r-top-menu::part(item) {
+    font-weight: 600;
+}
+```
+
+## Variables
+
+The bar is a panel on `--surface-raised` with a `--bd-muted` line under it; items take the control variables and `--surface-hover`. Submenus slide in over `--motion-base`. See [Theming](../../authoring/Theming.md#variables).
+
+## Accessibility
+
+- Items are native buttons and links, reachable with Tab.
+- An item that opens a submenu carries `aria-haspopup="menu"` and shows a [chevron icon](../Icon.md).
+- The hidden level is `inert`, so focus never lands on items that are off screen.
+- Escape goes back one submenu level.
+- The back button's text is the `back` text from the [`r-components` namespace](../Formatting.md#words).
+- The slide is dropped when the user prefers reduced motion.
