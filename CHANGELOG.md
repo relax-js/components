@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.4
+
+### Fixed
+
+- An element imported on its own, such as `import '@relax.js/components/dialog'`, registers the elements it draws, such as `r-icon`, `r-badge` and `r-sparkline`. In 2.0.3 the build dropped those imports, so their tags stayed unregistered unless the app imported them too.
+
 ## 2.0.3
 
 ### Added

@@ -1,6 +1,6 @@
 {
   "name": "@relax.js/components",
-  "version": "2.0.3",
+  "version": "2.0.4",
   "description": "Native Web Components for business apps: tables, tree views, menus, tabs, dialogs, forms, banners, and dashboard figures, meters and charts.",
   "main": "./dist/index.mjs",
   "module": "./dist/index.mjs",
@@ -75,6 +75,7 @@
   "customElements": "dist/custom-elements.json",
   "sideEffects": [
     "*.css",
+    "./src/**/*.ts",
     "./dist/chunks/*.mjs",
     "./dist/index.mjs",
     "./dist/icon.mjs",
