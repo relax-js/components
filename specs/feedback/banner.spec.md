@@ -12,6 +12,8 @@ A user sees a notice that concerns the whole page, such as a maintenance window 
 ## Showing a notice
 - **Message as given**: the banner's own children are its message and stay as the page wrote them, so a message may hold markup such as a link (docs/authoring/TextAndValues.md#Data Is Shown as Given)
   - **Moved banner**: moving the banner in the DOM never adds a second icon or close button (specs/dashboard/dashboard-foundations.spec.md#Putting a component on a page)
+  - **Message set from code**: replacing the children of a drawn banner, as setting `textContent` does, keeps the tone's icon first and the close button last (docs/manual/feedback/Banner.md#Usage)
+  - **Action added later**: a direct child with `slot="action"` added to a drawn banner is moved to the end of the strip
 - **Banner surface**: the banner takes the panel tier's role variables, is filled with `--tone-soft` and edged with `--tone`, and casts no shadow (docs/authoring/DesignLanguage.md#Shape and Elevation)
 - **Banner tone**: the banner carries its `tone` as `data-tone` and shows that tone's icon before the message (docs/authoring/DesignLanguage.md#Tones)
   - **Tone changed**: changing `tone` on a drawn banner updates its `data-tone`, icon and role in place

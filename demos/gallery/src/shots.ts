@@ -1,4 +1,5 @@
 import {
+    defaultIcons,
     Dialog,
     type AreaChartData,
     type ChartData,
@@ -173,12 +174,9 @@ export const shots: Shot[] = [
         name: 'set',
         tag: 'r-icon',
         title: 'Every icon in the default set',
+        width: 720,
         render(stage) {
-            const names = [
-                'arrow-down', 'arrow-up', 'arrow-right', 'check', 'check-circle', 'chevron-left', 'chevron-right',
-                'clock', 'file', 'info', 'lock', 'minus-circle', 'x-circle',
-            ];
-            stage.innerHTML = `<ul class="icon-set">${names
+            stage.innerHTML = `<ul class="icon-set">${Object.keys(defaultIcons)
                 .map((name) => `<li><r-icon name="${name}"></r-icon><code>${name}</code></li>`)
                 .join('')}</ul>`;
         },

@@ -2,6 +2,7 @@ import { captureProblems } from '../../captureProblems';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { flush, mount } from '@relax.js/core/testing';
 import { Icon, registerIcons } from '../../../src/foundations/icon/Icon';
+import { defaultIcons } from '../../../src/index';
 
 function iconNamed(name: string): Icon {
     const icon = document.createElement('r-icon');
@@ -68,8 +69,8 @@ describe('r-icon', () => {
         const { element } = mount(iconNamed('check'));
 
         const svg = element.querySelector('svg')!;
-        expect(svg.getAttribute('width')).toBe('1em');
-        expect(svg.getAttribute('height')).toBe('1em');
+        const css = document.head.querySelector('style[data-r-styles="r-icon"]')!.textContent!;
+        expect(css).toMatch(/width: 1em;\s*height: 1em;/);
         expect(svg.getAttribute('stroke-width')).toBe('1.75');
         expect(svg.getAttribute('stroke-linecap')).toBe('round');
         expect(svg.getAttribute('stroke-linejoin')).toBe('round');
@@ -94,15 +95,27 @@ describe('r-icon', () => {
         expect(element.childElementCount).toBe(0);
     });
 
-    it('a_missing_or_empty_name_reports_an_error_and_draws_nothing', () => {
+    it('a_missing_or_empty_name_reports_an_error_and_draws_nothing', async () => {
         const reported = captureProblems();
         const missing = mount(document.createElement('r-icon')).element;
         const empty = mount(iconNamed('')).element;
+        await flush();
 
         expect(missing.childElementCount).toBe(0);
         expect(empty.childElementCount).toBe(0);
         expect(reported.messages()).toHaveLength(2);
         expect(reported.messages()[0]).toMatch(/^r-icon:/);
+    });
+
+    it('an_icon_named_right_after_it_is_put_on_the_page_reports_nothing', async () => {
+        const reported = captureProblems();
+        const icon = document.createElement('r-icon');
+        document.body.append(icon);
+        icon.setAttribute('name', 'check');
+        await flush();
+
+        expect(icon.querySelector('svg')).not.toBeNull();
+        expect(reported.messages()).toEqual([]);
     });
 
     it('registering_an_existing_name_replaces_its_shape', () => {
@@ -130,6 +143,16 @@ describe('r-icon', () => {
 
     it('the_default_set_and_tone_icons_draw_without_registering', () => {
         for (const name of ['check-circle', 'clock', 'minus-circle', 'x-circle', 'info', 'check', 'lock']) {
+            const { element } = mount(iconNamed(name));
+            expect(element.querySelector('svg')).not.toBeNull();
+        }
+    });
+
+    it('the_default_set_can_be_listed_and_holds_common_app_icons', () => {
+        const names = Object.keys(defaultIcons);
+
+        expect(names).toEqual(expect.arrayContaining(['user', 'home', 'search', 'settings', 'mail', 'calendar']));
+        for (const name of names) {
             const { element } = mount(iconNamed(name));
             expect(element.querySelector('svg')).not.toBeNull();
         }

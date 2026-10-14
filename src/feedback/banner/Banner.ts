@@ -67,14 +67,20 @@ export class Banner extends HTMLElement {
 
     private stopListening?: () => void;
 
+    // Setting the message from code, as with `textContent`, replaces every child, the icon and
+    // close button with them, so a change to the children draws the strip again.
+    private readonly childWatcher = new MutationObserver(() => this.render());
+
     connectedCallback(): void {
         installStyles(this, 'r-banner', styles);
         this.render();
         this.stopListening = whenLanguageChanges(() => this.render());
+        this.childWatcher.observe(this, { childList: true });
     }
 
     disconnectedCallback(): void {
         this.stopListening?.();
+        this.childWatcher.disconnect();
     }
 
     attributeChangedCallback(): void {
@@ -84,6 +90,12 @@ export class Banner extends HTMLElement {
     }
 
     private render(): void {
+        this.drawStrip();
+        // What drawing moved or added is not a change from the page, so it must not draw again.
+        this.childWatcher.takeRecords();
+    }
+
+    private drawStrip(): void {
         const tone = readTone(this, 'muted');
         this.dataset.tone = tone;
         this.setAttribute('role', tone === 'warn' || tone === 'danger' ? 'alert' : 'status');

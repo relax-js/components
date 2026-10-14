@@ -59,12 +59,30 @@ describe('formatting', () => {
         expect(formatValue(date)).toBe(new Intl.DateTimeFormat('en-GB').format(date));
     });
 
-    it.each(['sv-SE', 'en-SE', 'de-DE'])('unconfigured_amounts_are_euros_whatever_the_region_%s', (language) => {
+    it.each([
+        ['sv-SE', 'SEK'],
+        ['en-SE', 'SEK'],
+        ['sv', 'SEK'],
+        ['en-GB', 'GBP'],
+        ['de-DE', 'EUR'],
+    ])('unconfigured_amounts_are_in_the_currency_of_the_locale_region_%s', (language, currency) => {
         vi.spyOn(navigator, 'language', 'get').mockReturnValue(language);
         const amount = draw('r-amount', { value: '1000' });
 
-        expect(formatting().currency).toBe('EUR');
-        expect(amount.textContent).toContain('€');
+        expect(formatting().currency).toBe(currency);
+        expect(amount.textContent).toBe(
+            new Intl.NumberFormat(language, { style: 'currency', currency, currencyDisplay: 'narrowSymbol', maximumFractionDigits: 0 })
+                .format(1000)
+                .replace(/ /g, ' ')
+        );
+    });
+
+    it('an_unconfigured_amount_in_a_region_without_one_currency_has_no_unit', () => {
+        vi.spyOn(navigator, 'language', 'get').mockReturnValue('es-419');
+        const amount = draw('r-amount', { value: '1000' });
+
+        expect(formatting().currency).toBeUndefined();
+        expect(amount.textContent).toBe(new Intl.NumberFormat('es-419').format(1000).replace(/ /g, ' '));
     });
 
     it('configuring_after_drawing_changes_nothing_until_the_element_draws_again', () => {

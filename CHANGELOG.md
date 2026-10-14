@@ -1,5 +1,22 @@
 # Changelog
 
+## 2.0.2
+
+### Changed
+
+- An amount with no configured currency is written in the currency of the locale's region (`sv-SE` gives `SEK`, `en-GB` gives `GBP`), as the manual said, instead of in euros. Where the region has no single currency, such as `es-419`, it is written without a unit. `Formatting.currency` is `undefined` in that case. An app that wants euros everywhere calls `configureFormatting({ currency: 'EUR' })`.
+- `r-icon` is sized by CSS on the element (one `em` square by default) instead of `width` and `height` attributes on its SVG, so setting the element's width and height sizes the icon.
+
+### Added
+
+- `defaultIcons` is exported, so code can list the names in the default set.
+- The default icon set holds the icons most business apps need, such as `user`, `users`, `home`, `search`, `settings`, `mail`, `calendar`, `bell`, `menu`, `edit`, `trash-2`, `download` and `upload`: 96 in all, from Feather Icons.
+
+### Fixed
+
+- `r-banner` lost its icon and close button when the page set its message from code, such as with `textContent`. An action added later is now also moved to the end.
+- `r-icon` reported a missing name when code put it on the page before naming it.
+
 ## 2.0.1
 
 ### Breaking

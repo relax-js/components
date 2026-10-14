@@ -21,7 +21,36 @@ A small line icon, placed by name next to the text it belongs to.
 
 The named shape is drawn as inline SVG on a 24-unit grid, stroked with `currentColor` at width 1.75 with round caps and joins and no fill, so the icon takes its size from the font and its colour from the surrounding text.
 
+The element is one `em` square and the shape fills it, so setting the element's `width` and `height` sizes the icon. It never shrinks inside a flex row.
+
+```css
+.empty-state r-icon {
+    width: 3rem;
+    height: 3rem;
+}
+```
+
 Changing `name` on a connected icon draws the new shape. A name changed while the icon is disconnected is drawn when it connects. The unbound placeholder a template carries before it binds the real name never triggers a draw.
+
+An icon created from code may be put on the page before it is named:
+
+```typescript
+const icon = document.createElement('r-icon');
+toolbar.append(icon);
+icon.setAttribute('name', 'search');
+```
+
+A missing name is reported only when the icon is still on the page without one once the code that connected it has finished.
+
+### The Default Set
+
+```typescript
+import { defaultIcons } from '@relax.js/components';
+
+const names = Object.keys(defaultIcons);
+```
+
+The default set draws without registering anything. It holds every icon the components in this library draw, plus the icons most business apps need: `user`, `users`, `home`, `search`, `settings`, `mail`, `calendar`, `bell`, `menu`, `edit`, `trash-2`, `download`, `upload` and the rest shown in the screenshot. The shapes are [Feather Icons](https://feathericons.com) (MIT licence), under Feather's names. `defaultIcons` maps each name to its shape and cannot be changed; use `registerIcons` to add or replace one.
 
 ### Adding Shapes
 
@@ -33,13 +62,13 @@ registerIcons({
 });
 ```
 
-`registerIcons` adds shapes by name, each the SVG content of one 24-unit icon, and every `r-icon` can use them from then on. Registering a name that exists replaces its shape. The default set, available without registering anything, holds every icon the components in this library draw.
+`registerIcons` adds shapes by name, each the SVG content of one 24-unit icon, and every `r-icon` can use them from then on. Registering a name that exists replaces its shape, including one from the default set.
 
 ## Attributes
 
 | Attribute | Type | Description |
 |-----------|------|-------------|
-| `name` | `string` | The shape to draw. A name with no registered shape reports an error and draws nothing. |
+| `name` | `string` | The shape to draw. A name with no registered shape reports an error and draws nothing, as does a missing name (see [Usage](#usage)). |
 
 ## Accessibility
 

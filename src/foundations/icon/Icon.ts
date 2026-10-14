@@ -1,5 +1,29 @@
 import { reportProblem } from '../problems/problems';
+import { installStyles } from '../styles';
 import { defaultIcons } from './icons';
+
+export { defaultIcons } from './icons';
+
+// The SVG fills the element, so sizing `r-icon` sizes the shape; the element defaults to one em.
+const styles = /* css */ `
+    r-icon {
+        display: inline-block;
+        width: 1em;
+        height: 1em;
+        flex-shrink: 0;
+        vertical-align: -0.125em;
+
+        > svg {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+    }
+
+    r-icon[hidden] {
+        display: none;
+    }
+`;
 
 const shapes = new Map<string, string>(Object.entries(defaultIcons));
 const svgNamespace = 'http://www.w3.org/2000/svg';
@@ -45,7 +69,10 @@ export class Icon extends HTMLElement {
         return ['name'];
     }
 
+    private missingNameCheckQueued = false;
+
     connectedCallback(): void {
+        installStyles(this, 'r-icon', styles);
         this.setAttribute('aria-hidden', 'true');
         connectedIcons.add(this);
         this.draw();
@@ -72,8 +99,8 @@ export class Icon extends HTMLElement {
             return;
         }
         if (name === '') {
-            reportProblem('r-icon', 'the name attribute is missing or empty');
             this.replaceChildren();
+            this.reportMissingNameLater();
             return;
         }
         const shape = shapes.get(name);
@@ -84,16 +111,28 @@ export class Icon extends HTMLElement {
         }
         const svg = document.createElementNS(svgNamespace, 'svg');
         svg.setAttribute('viewBox', '0 0 24 24');
-        svg.setAttribute('width', '1em');
-        svg.setAttribute('height', '1em');
         svg.setAttribute('fill', 'none');
         svg.setAttribute('stroke', 'currentColor');
         svg.setAttribute('stroke-width', '1.75');
         svg.setAttribute('stroke-linecap', 'round');
         svg.setAttribute('stroke-linejoin', 'round');
-        svg.style.verticalAlign = '-0.125em';
         svg.innerHTML = shape;
         this.replaceChildren(svg);
+    }
+
+    // Code that creates an icon usually puts it on the page before naming it, so a missing name is
+    // reported only if the icon is still connected without one once that code has finished.
+    private reportMissingNameLater(): void {
+        if (this.missingNameCheckQueued) {
+            return;
+        }
+        this.missingNameCheckQueued = true;
+        queueMicrotask(() => {
+            this.missingNameCheckQueued = false;
+            if (this.isConnected && (this.getAttribute('name') ?? '') === '') {
+                reportProblem('r-icon', 'the name attribute is missing or empty');
+            }
+        });
     }
 }
 

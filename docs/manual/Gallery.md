@@ -10,7 +10,7 @@ Every component in the states the screenshot script captures, in the light theme
 
 ![Every icon in the default set](https://raw.githubusercontent.com/relax-js/components/main/docs/manual/images/foundations/icon/set.png)
 
-## `<r-badge>`
+## `<r-badge>` · [manual](dashboard/Badge.md)
 
 **Tones and counts**
 
@@ -44,19 +44,19 @@ Every component in the states the screenshot script captures, in the light theme
 
 ![Better, worse and lower-is-better](https://raw.githubusercontent.com/relax-js/components/main/docs/manual/images/dashboard/kpi-meter/directions.png)
 
-## `<r-stat-tile>`
+## `<r-stat-tile>` · [manual](dashboard/StatTile.md)
 
 **With change, trend and without a comparison**
 
 ![With change, trend and without a comparison](https://raw.githubusercontent.com/relax-js/components/main/docs/manual/images/dashboard/stat-tile/variants.png)
 
-## `<r-meter>`
+## `<r-meter>` · [manual](dashboard/Meter.md)
 
 **Within limits, near the limit, at and over it**
 
 ![Within limits, near the limit, at and over it](https://raw.githubusercontent.com/relax-js/components/main/docs/manual/images/dashboard/meter/levels.png)
 
-## `<r-sparkline>`
+## `<r-sparkline>` · [manual](dashboard/Sparkline.md)
 
 **A trend with its latest value marked**
 
@@ -80,7 +80,7 @@ Every component in the states the screenshot script captures, in the light theme
 
 ![No data](https://raw.githubusercontent.com/relax-js/components/main/docs/manual/images/dashboard/line-chart/empty.png)
 
-## `<r-area-chart>`
+## `<r-area-chart>` · [manual](dashboard/AreaChart.md)
 
 **Stacked bands**
 
@@ -94,7 +94,7 @@ Every component in the states the screenshot script captures, in the light theme
 
 ![One series](https://raw.githubusercontent.com/relax-js/components/main/docs/manual/images/dashboard/area-chart/single.png)
 
-## `<r-bar-chart>`
+## `<r-bar-chart>` · [manual](dashboard/BarChart.md)
 
 **Series side by side**
 
@@ -112,7 +112,7 @@ Every component in the states the screenshot script captures, in the light theme
 
 ![Read-out under the pointer](https://raw.githubusercontent.com/relax-js/components/main/docs/manual/images/dashboard/bar-chart/readout.png)
 
-## `<r-heatmap>`
+## `<r-heatmap>` · [manual](dashboard/Heatmap.md)
 
 **Sequential scale, a missing value**
 
@@ -122,7 +122,7 @@ Every component in the states the screenshot script captures, in the light theme
 
 ![Diverging scale, values in the cells](https://raw.githubusercontent.com/relax-js/components/main/docs/manual/images/dashboard/heatmap/diverging.png)
 
-## `<r-status-grid>`
+## `<r-status-grid>` · [manual](dashboard/StatusGrid.md)
 
 **Items in their states, with the legend**
 
@@ -162,7 +162,7 @@ Every component in the states the screenshot script captures, in the light theme
 
 ![Collapsed](https://raw.githubusercontent.com/relax-js/components/main/docs/manual/images/data-display/treeview/collapsed.png)
 
-## `<r-banner>`
+## `<r-banner>` · [manual](feedback/Banner.md)
 
 **One banner per tone**
 
@@ -182,13 +182,13 @@ Every component in the states the screenshot script captures, in the light theme
 
 ![Not loading](https://raw.githubusercontent.com/relax-js/components/main/docs/manual/images/feedback/spinner/idle.png)
 
-## `<r-file-input>`
+## `<r-file-input>` · [manual](forms/FileInput.md)
 
 **Empty, chosen, multiple and disabled**
 
 ![Empty, chosen, multiple and disabled](https://raw.githubusercontent.com/relax-js/components/main/docs/manual/images/forms/file-input/states.png)
 
-## `<r-dialog>`
+## `<r-dialog>` · [manual](layout/Dialog.md)
 
 **Open, with a form**
 
@@ -198,7 +198,7 @@ Every component in the states the screenshot script captures, in the light theme
 
 ![Dialog.confirm() with the danger tone](https://raw.githubusercontent.com/relax-js/components/main/docs/manual/images/layout/dialog/confirm.png)
 
-## `<r-setting-row>`
+## `<r-setting-row>` · [manual](layout/SettingRow.md)
 
 **Settings in a list**
 
@@ -228,7 +228,7 @@ Every component in the states the screenshot script captures, in the light theme
 
 ![A submenu opened, with the back button](https://raw.githubusercontent.com/relax-js/components/main/docs/manual/images/navigation/top-menu/submenu.png)
 
-## `<r-dropdown-menu>`
+## `<r-dropdown-menu>` · [manual](navigation/DropdownMenu.md)
 
 **Closed**
 
@@ -238,13 +238,13 @@ Every component in the states the screenshot script captures, in the light theme
 
 ![Open](https://raw.githubusercontent.com/relax-js/components/main/docs/manual/images/navigation/dropdown-menu/open.png)
 
-## `<r-section-nav>`
+## `<r-section-nav>` · [manual](navigation/SectionNav.md)
 
 **The current section marked**
 
 ![The current section marked](https://raw.githubusercontent.com/relax-js/components/main/docs/manual/images/navigation/section-nav/current.png)
 
-## `<r-side-menu>`
+## `<r-side-menu>` · [manual](navigation/SideMenu.md)
 
 **The current page marked**
 

@@ -1,6 +1,6 @@
 ---
 feature: Dashboard foundations
-status: approved
+status: verified
 authored: planned
 ---
 

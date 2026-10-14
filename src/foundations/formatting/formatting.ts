@@ -1,8 +1,10 @@
+import { regionCurrency } from './regionCurrency';
+
 export interface Formatting {
     /** BCP 47 tag, such as `sv-SE`, used for every number, amount and date. */
     locale: string;
-    /** ISO 4217 code, such as `SEK`, for amounts. */
-    currency: string;
+    /** ISO 4217 code, such as `SEK`, for amounts. Undefined when the locale's region has no single currency. */
+    currency: string | undefined;
 }
 
 /** What `configureFormatting()` accepts: any part of the configuration. */
@@ -33,11 +35,16 @@ export function configureFormatting(changes: FormattingChanges): void {
     };
 }
 
-/** The configuration as it stands now: the configured values, else the browser's language and euros. */
+/**
+ * The configuration as it stands now: the configured values, else the browser's language and the
+ * currency of that locale's region. `currency` is undefined when nothing is configured and the
+ * region has no single currency, and amounts are then written without a unit.
+ */
 export function formatting(): Readonly<Formatting> {
+    const locale = configured.locale ?? (typeof navigator === 'undefined' ? 'en-US' : navigator.language);
     return {
-        locale: configured.locale ?? (typeof navigator === 'undefined' ? 'en-US' : navigator.language),
-        currency: configured.currency ?? 'EUR',
+        locale,
+        currency: configured.currency ?? regionCurrency(locale),
     };
 }
 

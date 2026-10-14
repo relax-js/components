@@ -39,9 +39,14 @@ function writeAmount(value: number, options: AmountOptions): { text: string; neg
     const locale = options.locale ?? formatting().locale;
     const currency = options.currency ?? formatting().currency;
     const digits = { minimumFractionDigits: decimals, maximumFractionDigits: decimals };
-    // Built even without a unit, so a currency that cannot be used is reported either way.
-    const withCurrency = new Intl.NumberFormat(locale, { ...digits, style: 'currency', currency, currencyDisplay: 'narrowSymbol' });
-    const formatter = options.withUnit === false ? new Intl.NumberFormat(locale, digits) : withCurrency;
+    const plain = new Intl.NumberFormat(locale, digits);
+    // Built even without a unit, so a currency that cannot be used is reported either way. With no
+    // currency at all (a region without a single one), the amount is written without a unit.
+    const withCurrency =
+        currency === undefined
+            ? plain
+            : new Intl.NumberFormat(locale, { ...digits, style: 'currency', currency, currencyDisplay: 'narrowSymbol' });
+    const formatter = options.withUnit === false ? plain : withCurrency;
 
     const magnitude = Math.abs(value);
     const parts = formatter.formatToParts(magnitude);

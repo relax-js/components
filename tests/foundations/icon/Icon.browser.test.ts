@@ -14,4 +14,22 @@ describe('r-icon layout', () => {
         expect(Math.round(icon.height)).toBe(parseInt(size, 10));
         expect(icon.bottom).toBeLessThanOrEqual(line.getBoundingClientRect().bottom);
     });
+
+    it('sizing_the_element_sizes_the_shape', async () => {
+        const line = document.createElement('p');
+        line.innerHTML = '<r-icon name="user" style="width: 40px; height: 40px"></r-icon>';
+        await mount(line, 280);
+
+        const icon = line.querySelector('r-icon svg')!.getBoundingClientRect();
+        expect(Math.round(icon.width)).toBe(40);
+        expect(Math.round(icon.height)).toBe(40);
+    });
+
+    it('a_hidden_icon_takes_no_space', async () => {
+        const line = document.createElement('p');
+        line.innerHTML = '<r-icon name="user" hidden></r-icon>';
+        await mount(line, 280);
+
+        expect(line.querySelector('r-icon')!.getBoundingClientRect().width).toBe(0);
+    });
 });

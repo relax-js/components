@@ -52,6 +52,30 @@ describe('r-banner', () => {
         expect(banner.getAttribute('role')).toBe('alert');
     });
 
+    it('setting_the_message_from_code_keeps_the_icon_and_close_button', async () => {
+        const banner = bannerWith('<r-banner tone="warn" dismissible>Old</r-banner>');
+
+        banner.textContent = 'New message';
+        await Promise.resolve();
+
+        expect(banner.firstElementChild!.localName).toBe('r-icon');
+        expect(banner.firstElementChild!.getAttribute('name')).toBe('minus-circle');
+        expect(banner.querySelectorAll('r-icon').length).toBe(1);
+        expect(banner.querySelectorAll('button.banner-close').length).toBe(1);
+        expect(banner.textContent).toContain('New message');
+    });
+
+    it('an_action_added_after_the_banner_is_on_the_page_moves_to_the_end', async () => {
+        const banner = bannerWith('<r-banner tone="info" dismissible>Hi</r-banner>');
+        const action = document.createElement('a');
+        action.slot = 'action';
+        banner.prepend(action);
+        await Promise.resolve();
+
+        expect(banner.lastElementChild!.className).toBe('banner-close');
+        expect(banner.lastElementChild!.previousElementSibling).toBe(action);
+    });
+
     it('a_banner_without_tone_is_muted', () => {
         const banner = bannerWith('<r-banner>Hi</r-banner>');
         expect(banner.dataset.tone).toBe('muted');
