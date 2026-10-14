@@ -1,5 +1,11 @@
 # Changelog
 
+## 2.0.3
+
+### Added
+
+- `package.json` declares `sideEffects`: the main entry, every element entry, `icon`, `pipes`, `text`, the shared chunks and the CSS keep their side effects, so a bare import still registers its tags in a production bundle. `formatting` and `tone` are declared free of them and can be dropped when unused.
+
 ## 2.0.2
 
 ### Changed

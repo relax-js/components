@@ -159,3 +159,7 @@
 ### The sparkline has no legend
 - decided: The sparkline draws a single series that the text beside it names, so it shows no legend, and the rule that a chart shows a legend naming its series holds for every chart except the sparkline.
 - affects: Sparkline, Chart foundations
+
+### Importing an element registers it, in development and production alike
+- decided: Importing the package, or an element's own entry, registers its tags even as a bare import, so the package declares those entries as having side effects; only the formatting and tone entries are declared free of them, and an app that wants to pay only for what it uses imports per-element entries rather than relying on tree-shaking of the main entry.
+- affects: docs/manual/Components.md, every component
